@@ -46,7 +46,7 @@ user_sessions[user_id].append({"role": "user", "content": user_text})
 response = client.messages.create(
 model="claude-haiku-4-5",
 max_tokens=1000,
-system=PROMPTS[lang],
+system=PROMPTS[lang] + f" Today is {datetime.datetime.now().strftime(chr(37)+chr(100)+chr(46)+chr(37)+chr(109)+chr(46)+chr(37)+chr(89))}.",
 messages=user_sessions[user_id]
 )
 reply = response.content[0].text
