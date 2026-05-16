@@ -1,16 +1,16 @@
-import sys, traceback
-print("Bot starting", file=sys.stderr, flush=True)
-import os
+import sys, traceback, os
 import anthropic
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
+
+print("Bot starting", flush=True)
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY")
 
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 
-SYSTEM_PROMPT = """Ты — AI-ассистент системы «Внутренний Компас». Твоя задача — анализировать текуий жизненный период человека на основе ведической нумерологии. Веди диалог спокойно, тепло, интеллектуально. Задавай вопросы по одному. Начни с тёплого приветствия, спроси как к пользователю обращаться, затем попроси дату рождения."""
+SYSTEM_PROMPT = "Ty asistent Vnutrenniy Kompas. Analziruay period na osnove nomerologii. Vedi dialog teplo. Zadavay voprosy po odnomu. Nachni s privetstviya, spros imya, zatem datu rozhdeniya."
 
 user_sessions = {}
 
@@ -31,11 +31,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(reply)
 
 if __name__ == "__main__":
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     try:
-    app.run_polling()
-except Exception as e:
-    traceback.print_exc()
-    sys.exit(1)
-
+        app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        app.run_polling()
+    except Exception as e:
+        traceback.print_exc()
+        sys.exit(1)
