@@ -1,3 +1,5 @@
+import sys
+print("Bot starting", file=sys.stderr, flush=True)
 import os
 import anthropic
 from telegram import Update
