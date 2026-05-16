@@ -6,6 +6,7 @@ print("Bot starting", flush=True)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY")
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
+user_sessions = {}
 user_languages = {}
 def get_prompt(lang):
     today = datetime.datetime.now().strftime("%d.%m.%Y")
