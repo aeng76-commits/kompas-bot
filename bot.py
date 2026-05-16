@@ -8,7 +8,7 @@ CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY")
 
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 
-SYSTEM_PROMPT = """Ты — AI-ассистент системы «Внутренний Компас». Твоя задача — анализировать текущий жизненный период человека на основе ведической нумерологии. Веди диалог спокойно, тепло, интеллектуально. Задавай вопросы по одному. Начни с тёплого приветствия, спроси как к пользователю обращаться, затем попроси дату рождения."""
+SYSTEM_PROMPT = """Ты — AI-ассистент системы «Внутренний Компас». Твоя задача — анализировать текуий жизненный период человека на основе ведической нумерологии. Веди диалог спокойно, тепло, интеллектуально. Задавай вопросы по одному. Начни с тёплого приветствия, спроси как к пользователю обращаться, затем попроси дату рождения."""
 
 user_sessions = {}
 
@@ -31,5 +31,5 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()щ
+    app.run_polling()
 
