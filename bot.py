@@ -1,4 +1,4 @@
-import sys, os, asyncio
+import os
 import anthropic
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
@@ -30,11 +30,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_sessions[user_id].append({"role": "assistant", "content": reply})
     await update.message.reply_text(reply)
 
-async def main():
+if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    await app.run_polling()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-# update Sa. 16 Mai 2026 15:20:04 CEST
+    app.run_polling(stop_signals=None)
