@@ -23,8 +23,7 @@ def get_system_prompt(lang, birth_day=None, birth_month=None, birth_year=None):
         py=D.get_year(birth_day,birth_month,birth_year)
         pm=D.get_month(py,datetime.datetime.now().month)
         pd=D.get_day(pm,datetime.datetime.now().day)
-        mi=D.MODELS.get(m,{})
-        model_info=str(mi)
+       model_info=f"Тип личности: {mi.get('name','')}. Сильные стороны: {mi.get('strengths','')}. Риски: {mi.get('risks','')}. В трудных ситуациях: {mi.get('chaos','')}. Формула роста: {mi.get('formula','')}."
         year_info=D.YEARS.get(py,"")
         month_info=D.MONTHS.get(pm,"")
         day_info=D.DAYS.get(pd,"")
