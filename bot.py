@@ -1,5 +1,8 @@
 import os, datetime
 import anthropic
+import sys
+sys.path.insert(0, "/Users/alexandraengel")
+import data as D
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, CallbackQueryHandler, ContextTypes, filters
 print("Bot starting", flush=True)
@@ -8,11 +11,25 @@ CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY")
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 user_sessions = {}
 user_languages = {}
-def get_system_prompt(lang):
+user_birthdata = {}
+def get_system_prompt(lang, birth_day=None, birth_month=None, birth_year=None):
+    model_info=""
+    year_info=""
+    month_info=""
+    day_info=""
+    if birth_day and birth_month and birth_year:
+        m=D.get_model(birth_day)
+        py=D.get_year(birth_day,birth_month,birth_year)
+        pm=D.get_month(py,datetime.datetime.now().month)
+        pd=D.get_day(pm,datetime.datetime.now().day)
+        model_info=D.MODELS.get(m,{})
+        year_info=D.YEARS.get(py,"")
+        month_info=D.MONTHS.get(pm,"")
+        day_info=D.DAYS.get(pd,"")
     today = datetime.datetime.now().strftime("%d.%m.%Y")
     year = datetime.datetime.now().year
     month = datetime.datetime.now().month
-    ru_prompt = f"Ты ассистент системы Внутренний Компас. Сегодня {today}. Говори только по-русски. Обращайся на ТЫ всегда. Живой разговорный русский без слов: вызовы силы трансформация ресурс энергия вибрация хаос. Никаких звёздочек и жирного текста. Определи пол по имени и используй правильные окончания во всех сообщениях без исключения. КРИТИЧЕСКИ ВАЖНО: история диалога содержит все предыдущие сообщения. Смотри в историю — если имя уже есть используй его всегда. Если дата рождения уже есть сделай расчёт и никогда не спрашивай снова. Никогда не представляйся заново. Дисклеймер один раз в самом начале что не заменяет мед психол юр консультацию. ДИАЛОГ: спроси имя. Получив имя в том же ответе спроси дату рождения один раз и больше никогда не спрашивай. РАСЧЁТ только внутренний никогда не показывай: модель = день рождения 1-9 как есть 10-31 сложи цифры; личный год = день+месяц+{year} всё до однозначного; личный месяц = личный год+{month} до однозначного; личный день = личный месяц+текущий день только по запросу. НИКОГДА не называй числа цифры модели годы месяцы пользователю. ВОПРОСЫ: задавай строго по одному вопросу. После каждого ответа дай короткий живой отклик что понял и только потом следующий вопрос. Максимум 5-6 вопросов точечных чтобы понять ситуацию человека. АНАЛИЗ после вопросов: что происходит сейчас с учётом внутренней модели человека; почему так складывается учитывая его период; сильные стороны где может вырасти; слабые стороны где риск пойти назад; вектор года что важно сделать; тактика месяца как двигаться прямо сейчас; конкретные шаги на 7-14 дней с учётом личного дня."
+    ru_prompt = f"Ты ассистент системы Внутренний Компас. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (если есть): Модель мышления: {model_info}. Годовой цикл: {year_info}. Месячный этап: {month_info}. Дневной этап: {day_info}. Используй эти данные для персонального анализа. Если данных нет - сначала узнай имя и дату рождения. Сегодня {today}. Говори только по-русски. Обращайся на ТЫ всегда. Живой разговорный русский без слов: вызовы силы трансформация ресурс энергия вибрация хаос. Никаких звёздочек и жирного текста. Определи пол по имени и используй правильные окончания во всех сообщениях без исключения. КРИТИЧЕСКИ ВАЖНО: история диалога содержит все предыдущие сообщения. Смотри в историю — если имя уже есть используй его всегда. Если дата рождения уже есть сделай расчёт и никогда не спрашивай снова. Никогда не представляйся заново. Дисклеймер один раз в самом начале что не заменяет мед психол юр консультацию. ДИАЛОГ: спроси имя. Получив имя в том же ответе спроси дату рождения один раз и больше никогда не спрашивай. РАСЧЁТ только внутренний никогда не показывай: модель = день рождения 1-9 как есть 10-31 сложи цифры; личный год = день+месяц+{year} всё до однозначного; личный месяц = личный год+{month} до однозначного; личный день = личный месяц+текущий день только по запросу. НИКОГДА не называй числа цифры модели годы месяцы пользователю. ВОПРОСЫ: задавай строго по одному вопросу. После каждого ответа дай короткий живой отклик что понял и только потом следующий вопрос. Максимум 5-6 вопросов точечных чтобы понять ситуацию человека. АНАЛИЗ после вопросов: что происходит сейчас с учётом внутренней модели человека; почему так складывается учитывая его период; сильные стороны где может вырасти; слабые стороны где риск пойти назад; вектор года что важно сделать; тактика месяца как двигаться прямо сейчас; конкретные шаги на 7-14 дней с учётом личного дня."
     de_prompt = f"Du bist der Assistent des Inneren Kompass Systems. Heute ist {today}. Sprich nur Deutsch. Sage immer DU nie Sie. Lebendiges umgangssprachliches Deutsch. Kein Fettdruck keine Sternchen. Bestimme das Geschlecht am Namen und verwende immer die richtigen Endungen. Einmal Disclaimer dass kein Arzt oder Anwalt ersetzt wird. DIALOG: Frage nach dem Namen. Mit dem Namen zusammen frage nach dem Geburtsdatum einmal nie wieder. BERECHNUNG nur intern nie zeigen: Modell = Geburtstag 1-9 wie ist 10-31 Ziffern addieren; Persoenliches Jahr = Tag+Monat+{year} alles einstellig; Persoenlicher Monat = Jahr+{month} einstellig. NIEMALS Zahlen oder Ziffern nennen. FRAGEN: immer nur eine Frage. Nach jeder Antwort kurze lebendige Reaktion dann naechste Frage. Maximal 5-6 Fragen. ANALYSE: aktuelle Situation mit innerer Struktur; Staerken und Risiken; Jahresvektor; Monatstaktik; konkrete Schritte 7-14 Tage."
     en_prompt = f"You are the Inner Compass assistant. Today is {today}. Speak English only. Always use YOU never formal. Natural conversational English. No bold no asterisks. Determine gender from name and use correct pronouns always. Once add disclaimer not replacing medical legal psychological advice. DIALOG: ask name. With name in same message ask birthdate once never again. CALCULATION internal never show: model = birth day 1-9 as is 10-31 sum digits; personal year = day+month+{year} all reduced; personal month = year+{month} reduced. NEVER mention numbers or digits. QUESTIONS: strictly one question at a time. After each answer give short warm response showing understanding then next question. Max 5-6 questions. ANALYSIS: current situation with inner model; strengths and risks; year vector; month tactics; concrete steps 7-14 days."
     if lang == "de": return de_prompt
@@ -39,7 +56,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_sessions:
         user_sessions[user_id] = []
     user_sessions[user_id].append({"role": "user", "content": user_text})
-    response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=get_system_prompt(lang), messages=user_sessions[user_id])
+    import re
+    bd = user_birthdata.get(user_id, {})
+    if not bd:
+        m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
+        if m:
+            user_birthdata[user_id] = {"day": int(m.group(1)), "month": int(m.group(2)), "year": int(m.group(3))}
+            bd = user_birthdata[user_id]
+    sys_prompt = get_system_prompt(lang, bd.get("day"), bd.get("month"), bd.get("year"))
+    response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = response.content[0].text
     user_sessions[user_id].append({"role": "assistant", "content": reply})
     await update.message.reply_text(reply)
