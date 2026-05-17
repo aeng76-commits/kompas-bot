@@ -8,21 +8,20 @@ CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY")
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 user_sessions = {}
 user_languages = {}
-def get_prompt(lang):
+def get_system_prompt(lang):
     today = datetime.datetime.now().strftime("%d.%m.%Y")
-    prompts = {
-        "ru": f"Ты ассистент Внутренний Компас. Сегодня {today}. Говори по-русски. Спроси имя. Когда получишь имя — в ТОМ ЖЕ ответе спроси дату рождения. Это должно быть ОДНО сообщение: отклик на имя плюс вопрос про дату. Никогда не задавай дату рождения отдельным сообщением после имени. РАСЧЁТ ТОЛЬКО ВНУТРЕННИЙ: внутренняя модель = только цифры дня рождения (1-9 как есть, 10-31 сложи цифры). Личный год = день рождения + месяц рождения + текущий год, каждый до однозначного. НЕ называй числа пользователю НИКОГДА. НЕ упоминай год месяц или цифры расчёта. НЕ говори про четвёрку пятёрку или любое другое число. Спрашивай дату рождения ТОЛЬКО ОДИН РАЗ — когда получил запомни и не спрашивай снова. Задавай ТОЛЬКО ОДИН вопрос за раз. Обращайся на ТЫ с первого сообщения. После получения имени сразу определи род (мужской или женский) и используй правильные окончания всегда. Простые живые слова — настоящий разговорный русский без кальки с английского. Никаких слов: вызовы силы трансформация ресурс энергия вибрация хаос. Говори как живой человек в разговоре а не как переводчик. Никаких звёздочек и жирного текста. ВАЖНО: после каждого ответа пользователя сначала дай короткий живой отклик или инсайт на то что он сказал — покажи что слышишь и понимаешь — потом задай следующий вопрос. Диалог должен давать ценность на каждом шаге, не просто собирать данные. МОДЕЛИ: 1-инициатор риск жёсткости баланс через цели; 2-координатор риск нерешительности баланс через внутреннюю опору; 3-стратег риск самоуверенности баланс через дисциплину; 4-реформатор риск нестабильности баланс через физическую активность; 5-переговорщик риск распыления баланс через фокус; 6-гармонизатор риск откладывания баланс через фиксацию результатов; 7-глубинный стратег риск паралича анализа баланс через режим; 8-архитектор результата риск трудоголизма баланс через делегирование; 9-деятель риск выгорания баланс через физическую разрядку. ГОДЫ: 1-запуск определить вектор; 2-партнёрство устойчивые связи; 3-реализация планы в результаты; 4-трезвая оценка слабые места; 5-расширение нетворкинг фильтр возможностей; 6-закрепление удержать достигнутое; 7-перестройка переосмыслить курс; 8-прорыв максимальный результат делегирование; 9-завершение закрыть незавершённое.",
-        "de": f"Du bist Inner Compass. Heute ist {today}. Sprich Deutsch. Frage Name dann Geburtsdatum. Berechnung: Tag+Monat+Jahr einstellig. Keine Berechnungen zeigen. 3-5 Fragen. Keine Mystik. Kein Arztersatz.",
-        "en": f"You are Inner Compass. Today is {today}. Speak English. Ask name then birthdate. Calculate: day+month+year to single digit. Do not show calculations. Ask 3-5 questions. No mysticism. Not medical advice."
-    }
-    return prompts[lang]
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    if lang == "de":
+        return f"Du bist Inner Compass Assistent. Heute {today}. Sage DU. Kein Fettdruck. Frage Name dann Geburtsdatum einmal. Berechne intern. Zeige keine Zahlen. 3-4 Fragen dann Analyse."
+    elif lang == "en":
+        return f"You are Inner Compass. Today {today}. Use YOU. No bold. Ask name then birthdate once. Calculate internally. Never show numbers. 3-4 questions then analysis."
+    else:
+        return f"Ты ассистент Внутреннего Компаса. Сегодня {today}. Обращайся на ТЫ всегда. Живой разговорный русский без терминов вызовы силы трансформация. Никаких звёздочек жирного текста. Определи пол по имени и не меняй окончания никогда. Спроси имя. Получив имя в том же ответе спроси дату рождения один раз и больше не спрашивай. Получив дату рождения рассчитай внутренне: модель = день 1-9 как есть 10-31 сложи цифры; личный год = день+месяц+{year} всё до однозначного; личный месяц = личный год+{month} до однозначного. Никогда не называй числа и цифры пользователю. После каждого ответа дай живой отклик что понял и потом один вопрос. Задай 3-4 вопроса о ситуации. Потом анализ: что происходит почему так складывается на что обратить внимание шаги на 7-14 дней. Дисклеймер один раз в начале что не заменяет мед психол юр консультацию."
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_sessions[user_id] = []
-    keyboard = [[InlineKeyboardButton("🇷🇺 Русский", 
-callback_data="lang_ru")],[InlineKeyboardButton("🇩🇪 Deutsch",
-callback_data="lang_de")],[InlineKeyboardButton("🇬🇧 English", 
-callback_data="lang_en")]]
+    keyboard = [[InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],[InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],[InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]]
     await update.message.reply_text("Выберите язык / Sprache / Language:", reply_markup=InlineKeyboardMarkup(keyboard))
 async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -31,7 +30,7 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = query.data.replace("lang_", "")
     user_languages[user_id] = lang
     user_sessions[user_id] = []
-    greet = {"ru": "Добро пожаловать! Как вас зовут?", "de": "Willkommen! Wie heissen Sie?", "en": "Welcome! What is your name?"}
+    greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Innerer Kompass. Wie heisst du?", "en": "Hi! Inner Compass. What is your name?"}
     await query.edit_message_text(greet[lang])
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -40,7 +39,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_sessions:
         user_sessions[user_id] = []
     user_sessions[user_id].append({"role": "user", "content": user_text})
-    response = client.messages.create(model="claude-haiku-4-5", max_tokens=1000, system=get_prompt(lang), messages=user_sessions[user_id])
+    response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=get_system_prompt(lang), messages=user_sessions[user_id])
     reply = response.content[0].text
     user_sessions[user_id].append({"role": "assistant", "content": reply})
     await update.message.reply_text(reply)
