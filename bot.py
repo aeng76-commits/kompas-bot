@@ -53,7 +53,9 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_languages[user_id] = lang
     user_sessions[user_id] = []
     greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Das ist der Innere Kompass. Wie heisst du?", "en": "Hi! This is Inner Compass. What is your name?"}
-    await query.edit_message_text(greet[lang])
+    first_msg = greet[lang]
+    user_sessions[user_id] = [{"role": "assistant", "content": first_msg}]
+    await query.edit_message_text(first_msg)
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
