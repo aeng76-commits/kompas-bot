@@ -1,7 +1,8 @@
 import os, datetime
 import anthropic
 import sys
-sys.path.insert(0, "/Users/alexandraengel")
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import data as D
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, CallbackQueryHandler, ContextTypes, filters
