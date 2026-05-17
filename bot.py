@@ -39,6 +39,7 @@ def get_system_prompt(lang, birth_day=None, birth_month=None, birth_year=None):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_sessions[user_id] = []
+    user_birthdata[user_id] = {}
     keyboard = [[InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],[InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],[InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]]
     await update.message.reply_text("Выберите язык / Sprache / Language:", reply_markup=InlineKeyboardMarkup(keyboard))
 async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
