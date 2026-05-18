@@ -1,7 +1,7 @@
 import os, datetime
 import anthropic
 import sys
-import os
+import re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import data as D
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -14,36 +14,68 @@ user_sessions = {}
 user_languages = {}
 user_birthdata = {}
 def get_system_prompt(lang, birth_day=None, birth_month=None, birth_year=None):
-    model_info=""
-    year_info=""
-    month_info=""
-    day_info=""
-    if birth_day and birth_month and birth_year:
-        m=D.get_model(birth_day)
-        py=D.get_year(birth_day,birth_month,birth_year)
-        pm=D.get_month(py,datetime.datetime.now().month)
-        pd=D.get_day(pm,datetime.datetime.now().day)
-        mi=D.MODELS.get(m,{})
-        model_info="Тип: "+mi.get("name","")+". Сильные стороны: "+mi.get("strengths","")+". Риски: "+mi.get("risks","")+". В трудных ситуациях: "+mi.get("chaos","")+". Формула: "+mi.get("formula","")
-        year_info=D.YEARS.get(py,"")
-        month_info=D.MONTHS.get(pm,"")
-        day_info=D.DAYS.get(pd,"")
     today = datetime.datetime.now().strftime("%d.%m.%Y")
     year = datetime.datetime.now().year
     month = datetime.datetime.now().month
-
-    ru_prompt = f"Ты ассистент системы Внутренний Компас. Сегодня {today}. === ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ (ОБЯЗАТЕЛЬНО использовать в анализе) === МОДЕЛЬ МЫШЛЕНИЯ: {model_info} ||| ГОДОВОЙ ПЕРИОД СЕЙЧАС: {year_info} ||| МЕСЯЧНЫЙ ПЕРИОД СЕЙЧАС: {month_info} ||| ДНЕВНОЙ ПЕРИОД СЕЙЧАС: {day_info} ||| Анализ ДОЛЖЕН опираться на эти данные. Если годовой период говорит о закреплении — говори о закреплении. Если о завершении — говори о завершении. Не придумывай периоды сам. === Говори только по-русски. Обращайся на ТЫ всегда. Используй имя ТОЧНО как человек написал — никаких сокращений и уменьшительных. Если написал Александра — всегда Александра, не Саша. Определи пол по имени и используй правильные окончания. Если человек задаёт вопрос или уходит в сторону — сначала ответь на его вопрос искренне и тепло, потом мягко вернись к разговору. Никогда не обрывай и не игнорируй вопросы человека. Будь гибким — это живой разговор а не анкета. Живой тёплый разговорный стиль как умный друг который разбирается в людях. Только чистый текст без звёздочек решёток жирного markdown. Нельзя использовать слова: вызовы силы трансформация ресурс энергия вибрация нумерология. Нельзя называть числа номера и названия этапов пользователю. Если пользователь называет числа просто продолжай диалог. Диалог: тёплое приветствие плюс дисклеймер одной фразой что не заменяет врача психолога юриста. Спроси имя. Получив имя в том же ответе спроси дату рождения один раз и никогда больше не спрашивай. Задай 4-5 вопросов о ситуации строго по одному. После каждого ответа живой отклик что услышал и понял потом следующий вопрос. Анализ: что происходит именно с этим человеком с учётом его модели мышления и текущего периода года и месяца. Сильные стороны где вырастет. Риски где пойдёт назад. Конкретные шаги на 7-14 дней. Заканчивай вопросом чтобы человек хотел продолжить. ВАЖНО: рекомендации уникальны для каждого человека. Используй конкретные сильные стороны и риски из модели мышления. Для года завершения фокус на закрытии и итогах. Для года запуска фокус на новых целях. Для модели с риском выгорания физическая разрядка и границы. Для модели с риском нерешительности конкретные решения и сроки. Никогда не давай одинаковые советы разным людям. ПРИМЕРЫ ХОРОШЕГО СТИЛЯ: 1) Пользователь написал имя Александра бот отвечает: Александра привет! Расскажи что сейчас происходит в твоей жизни с чем хочешь разобраться? 2) Пользователь спрашивает что за система бот отвечает: Внутренний Компас помогает разобраться что происходит прямо сейчас и куда двигаться. Работаю на основе твоей даты рождения это даёт точную картину твоего периода. Кстати ты говорила про работу расскажи подробнее что именно не так? 3) Пользователь говорит устала от всего не знаю что делать бот отвечает: Слышу тебя. Когда усталость такая что даже направление непонятно это сигнал что что-то важное давно требует внимания. Скажи это больше про работу или про отношения или вообще ощущение что жизнь идёт не так?"
-
-    de_prompt = f"Du bist der Assistent des Inneren Kompass Systems. Heute ist {today}. Sprich nur Deutsch. Sage immer DU nie Sie. Lebendiges umgangssprachliches Deutsch. Kein Fettdruck keine Sternchen. Bestimme das Geschlecht am Namen und verwende immer die richtigen Endungen. Einmal Disclaimer dass kein Arzt oder Anwalt ersetzt wird. DIALOG: Frage nach dem Namen. Mit dem Namen zusammen frage nach dem Geburtsdatum einmal nie wieder. BERECHNUNG nur intern nie zeigen: Modell = Geburtstag 1-9 wie ist 10-31 Ziffern addieren; Persoenliches Jahr = Tag+Monat+{year} alles einstellig; Persoenlicher Monat = Jahr+{month} einstellig. NIEMALS Zahlen oder Ziffern nennen. FRAGEN: immer nur eine Frage. Nach jeder Antwort kurze lebendige Reaktion dann naechste Frage. Maximal 5-6 Fragen. ANALYSE: aktuelle Situation mit innerer Struktur; Staerken und Risiken; Jahresvektor; Monatstaktik; konkrete Schritte 7-14 Tage."
-    en_prompt = f"You are the Inner Compass assistant. Today is {today}. Speak English only. Always use YOU never formal. Natural conversational English. No bold no asterisks. Determine gender from name and use correct pronouns always. Once add disclaimer not replacing medical legal psychological advice. DIALOG: ask name. With name in same message ask birthdate once never again. CALCULATION internal never show: model = birth day 1-9 as is 10-31 sum digits; personal year = day+month+{year} all reduced; personal month = year+{month} reduced. NEVER mention numbers or digits. QUESTIONS: strictly one question at a time. After each answer give short warm response showing understanding then next question. Max 5-6 questions. ANALYSIS: current situation with inner model; strengths and risks; year vector; month tactics; concrete steps 7-14 days."
-    if lang == "de": return de_prompt
-    elif lang == "en": return en_prompt
-    else: return ru_prompt
+    day = datetime.datetime.now().day
+    profile_block = ""
+    if birth_day and birth_month and birth_year:
+        m = D.get_model(birth_day)
+        py = D.get_year(birth_day, birth_month, birth_year)
+        pm = D.get_month(py, month)
+        pd = D.get_day(pm, day)
+        mi = D.MODELS.get(m, {})
+        year_text = D.YEARS.get(py, "")
+        month_text = D.MONTHS.get(pm, "")
+        day_text = D.DAYS.get(pd, "")
+        profile_block = f"""
+=== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ — ДАННЫЕ ТОЛЬКО ОТСЮДА ===
+МОДЕЛЬ МЫШЛЕНИЯ: {mi.get("name", "")}
+Сильные стороны: {mi.get("strengths", "")}
+Риски: {mi.get("risks", "")}
+В трудных ситуациях: {mi.get("chaos", "")}
+Формула роста: {mi.get("formula", "")}
+ГОДОВОЙ ПЕРИОД — ТОЧНЫЙ ТЕКСТ (используй только это, не перефразируй суть):
+{year_text}
+МЕСЯЧНЫЙ ПЕРИОД — ТОЧНЫЙ ТЕКСТ:
+{month_text}
+ДНЕВНОЙ ПЕРИОД — ТОЧНЫЙ ТЕКСТ:
+{day_text}
+КРИТИЧЕСКИ ВАЖНО:
+1. Описание периодов выше — это ТОЧНЫЕ данные системы. Не заменяй их своими словами с другим смыслом.
+2. Если в годовом периоде написано "закрепление" — говори про закрепление, не про "новые начинания".
+3. Если написано "завершение" — говори про завершение, не про "переосмысление".
+4. Рекомендации строй ТОЛЬКО на основе данных выше — никаких общих советов.
+5. Советы уникальны для каждого человека — опирайся на конкретные сильные стороны и риски.
+=== КОНЕЦ ПРОФИЛЯ ===
+"""
+    ru_prompt = f"""Ты ассистент системы Внутренний Компас. Сегодня {today}.
+{profile_block}
+Говори только по-русски. Обращайся на ТЫ всегда.
+Используй имя ТОЧНО как человек написал. Определи пол по имени.
+Живой тёплый разговорный стиль. Только чистый текст без markdown.
+Нельзя использовать слова: вызовы, силы, трансформация, ресурс, энергия, вибрация, нумерология.
+Нельзя называть числа, номера и названия этапов пользователю.
+Диалог: тёплое приветствие + дисклеймер одной фразой. Спроси имя.
+Получив имя — спроси дату рождения один раз и никогда больше.
+Задай 4-5 вопросов строго по одному. После каждого ответа живой отклик потом следующий вопрос.
+Анализ: модель мышления + текущий период года и месяца. Сильные стороны. Риски. Шаги на 7-14 дней.
+Заканчивай вопросом чтобы человек хотел продолжить."""
+    if lang == "de":
+        return f"Du bist der Assistent des Inneren Kompass Systems. Heute ist {today}.\n{profile_block}\nSprich nur Deutsch. DU nie Sie. Kein Markdown. Frage nach Namen dann Geburtsdatum einmal. Eine Frage nach der anderen. Analyse mit Modell und Perioden."
+    elif lang == "en":
+        return f"You are the Inner Compass assistant. Today is {today}.\n{profile_block}\nEnglish only. No markdown. Ask name then birthdate once. One question at a time. Analysis with model and periods."
+    else:
+        return ru_prompt
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_sessions[user_id] = []
     user_birthdata[user_id] = {}
-    keyboard = [[InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],[InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],[InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]]
+    keyboard = [
+        [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
+        [InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],
+        [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]
+    ]
     await update.message.reply_text("Выберите язык / Sprache / Language:", reply_markup=InlineKeyboardMarkup(keyboard))
 async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -52,7 +84,7 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = query.data.replace("lang_", "")
     user_languages[user_id] = lang
     user_sessions[user_id] = []
-    greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Das ist der Innere Kompass. Wie heisst du?", "en": "Hi! This is Inner Compass. What is your name?"}
+    greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Das ist der Innere Kompass. Wie heißt du?", "en": "Hi! This is Inner Compass. What is your name?"}
     first_msg = greet[lang]
     user_sessions[user_id] = [{"role": "assistant", "content": first_msg}]
     await query.edit_message_text(first_msg)
@@ -63,21 +95,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_sessions:
         user_sessions[user_id] = []
     user_sessions[user_id].append({"role": "user", "content": user_text})
-    import re
     bd = user_birthdata.get(user_id, {})
     if not bd:
         m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
         if m:
             user_birthdata[user_id] = {"day": int(m.group(1)), "month": int(m.group(2)), "year": int(m.group(3))}
             bd = user_birthdata[user_id]
-            import sys, os
-            sys.path.insert(0, os.path.dirname(os.path.abspath("bot.py")))
-            day=bd["day"]; month=bd["month"]; year=bd["year"]
-            import data as DD
-            mod=DD.get_model(day); py=DD.get_year(day,month,year); pm=DD.get_month(py,__import__("datetime").datetime.now().month)
-            mi=DD.MODELS.get(mod,{})
-            data_msg=f"[ВНУТРЕННИЕ ДАННЫЕ] Модель: {mi.get(chr(110)+chr(97)+chr(109)+chr(101),str(mod))}. Сильные стороны: {mi.get(chr(115)+chr(116)+chr(114)+chr(101)+chr(110)+chr(103)+chr(116)+chr(104)+chr(115),"")}. Риски: {mi.get(chr(114)+chr(105)+chr(115)+chr(107)+chr(115),"")}. Год: {DD.YEARS.get(py,"")}. Месяц: {DD.MONTHS.get(pm,"")}"
-            user_sessions[user_id].insert(0, {"role": "assistant", "content": data_msg})
     sys_prompt = get_system_prompt(lang, bd.get("day"), bd.get("month"), bd.get("year"))
     response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = response.content[0].text
