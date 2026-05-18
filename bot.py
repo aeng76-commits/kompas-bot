@@ -13,7 +13,7 @@ print("Bot starting", flush=True)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY")
 DATABASE_URL = os.environ.get("DATABASE_URL")
-ADMIN_ID = 284968583
+ADMIN_ID = 1509977932
 
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 user_sessions = {}
