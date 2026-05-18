@@ -114,9 +114,9 @@ RULES = {
 }
 
 PAYPAL_LINKS = {
-    "1m": "https://paypal.me/твойаккаунт/15EUR",
-    "6m": "https://paypal.me/твойаккаунт/69EUR",
-    "12m": "https://paypal.me/твойаккаунт/159EUR"
+    "1m": "https://www.paypal.me/AlexandraEngel42/15EUR",
+    "6m": "https://www.paypal.me/AlexandraEngel42/69EUR",
+    "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"
 }
 
 def get_profile_prompt(lang, user, section):
@@ -464,7 +464,7 @@ async def pay_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     lang = user.get("lang", "ru") if user else "ru"
     plan = query.data.replace("pay_", "")
-    links = {"1m": "https://paypal.me/твойаккаунт/15EUR", "6m": "https://paypal.me/твойаккаунт/69EUR", "12m": "https://paypal.me/твойаккаунт/159EUR"}
+    links = {"1m": "https://www.paypal.me/AlexandraEngel42/15EUR", "6m": "https://www.paypal.me/AlexandraEngel42/69EUR", "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"}
     descriptions = {
         "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 69€", "12m": "12 месяцев — 159€"},
         "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 69€", "12m": "12 Monate — 159€"},
