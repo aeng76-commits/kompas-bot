@@ -21,7 +21,7 @@ def get_system_prompt(lang, birth_day=None, birth_month=None, birth_year=None):
     profile_block = ""
     if birth_day and birth_month and birth_year:
         m = D.get_model(birth_day)
-        py = D.get_year(birth_day, birth_month, birth_year)
+        py = D.get_year(birth_day, birth_month, datetime.datetime.now().year)
         pm = D.get_month(py, month)
         pd = D.get_day(pm, day)
         mi = D.MODELS.get(m, {})
