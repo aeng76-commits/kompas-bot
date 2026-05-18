@@ -70,6 +70,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if m:
             user_birthdata[user_id] = {"day": int(m.group(1)), "month": int(m.group(2)), "year": int(m.group(3))}
             bd = user_birthdata[user_id]
+            import sys, os
+            sys.path.insert(0, os.path.dirname(os.path.abspath("bot.py")))
+            day=bd["day"]; month=bd["month"]; year=bd["year"]
+            import data as DD
+            mod=DD.get_model(day); py=DD.get_year(day,month,year); pm=DD.get_month(py,__import__("datetime").datetime.now().month)
+            mi=DD.MODELS.get(mod,{})
+            data_msg=f"[ВНУТРЕННИЕ ДАННЫЕ] Модель: {mi.get(chr(110)+chr(97)+chr(109)+chr(101),str(mod))}. Сильные стороны: {mi.get(chr(115)+chr(116)+chr(114)+chr(101)+chr(110)+chr(103)+chr(116)+chr(104)+chr(115),"")}. Риски: {mi.get(chr(114)+chr(105)+chr(115)+chr(107)+chr(115),"")}. Год: {DD.YEARS.get(py,"")}. Месяц: {DD.MONTHS.get(pm,"")}"
+            user_sessions[user_id].insert(0, {"role": "assistant", "content": data_msg})
     sys_prompt = get_system_prompt(lang, bd.get("day"), bd.get("month"), bd.get("year"))
     response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = response.content[0].text
