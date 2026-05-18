@@ -115,7 +115,7 @@ RULES = {
 
 PAYPAL_LINKS = {
     "1m": "https://www.paypal.me/AlexandraEngel42/15EUR",
-    "6m": "https://www.paypal.me/AlexandraEngel42/69EUR",
+    "6m": "https://www.paypal.me/AlexandraEngel42/78EUR",
     "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"
 }
 
@@ -303,9 +303,9 @@ async def cmd_pay(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "en": "Choose your plan:"
     }
     labels = {
-        "ru": ["1 месяц — 15€", "6 месяцев — 69€", "12 месяцев — 159€"],
-        "de": ["1 Monat — 15€", "6 Monate — 69€", "12 Monate — 159€"],
-        "en": ["1 month — 15€", "6 months — 69€", "12 months — 159€"]
+        "ru": ["1 месяц — 15€", "6 месяцев — 78€", "12 месяцев — 159€"],
+        "de": ["1 Monat — 15€", "6 Monate — 78€", "12 Monate — 159€"],
+        "en": ["1 month — 15€", "6 months — 78€", "12 months — 159€"]
     }
     keyboard = [
         [InlineKeyboardButton(labels[lang][0], callback_data="pay_1m")],
@@ -464,11 +464,11 @@ async def pay_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     lang = user.get("lang", "ru") if user else "ru"
     plan = query.data.replace("pay_", "")
-    links = {"1m": "https://www.paypal.me/AlexandraEngel42/15EUR", "6m": "https://www.paypal.me/AlexandraEngel42/69EUR", "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"}
+    links = {"1m": "https://www.paypal.me/AlexandraEngel42/15EUR", "6m": "https://www.paypal.me/AlexandraEngel42/78EUR", "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"}
     descriptions = {
-        "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 69€", "12m": "12 месяцев — 159€"},
-        "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 69€", "12m": "12 Monate — 159€"},
-        "en": {"1m": "1 month — 15€", "6m": "6 months — 69€", "12m": "12 months — 159€"}
+        "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
+        "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
+        "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
     }
     texts = {
         "ru": f"Для оплаты тарифа {descriptions['ru'][plan]} перейди по ссылке:\n{links[plan]}\n\nПосле оплаты напиши @твой_username для активации доступа.",
