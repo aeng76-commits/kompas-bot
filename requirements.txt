@@ -1,4 +1,4 @@
-python-telegram-bot==21.9
+python-telegram-bot[job-queue]==21.9
 anthropic==0.102.0
 httpx==0.28.1
 psycopg2-binary
