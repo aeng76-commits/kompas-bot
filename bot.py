@@ -652,4 +652,4 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(pay_cb, pattern="^pay_"))
     app.add_handler(CallbackQueryHandler(cancel_cb, pattern="^(cancel_confirm|cancel_abort)$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling(stop_signals=None)
+    app.run_polling(stop_signals=None, drop_pending_updates=True)
