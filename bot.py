@@ -409,7 +409,7 @@ async def cmd_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "me")
-    response = client.messages.create(model="claude-sonnet-4-20250514", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     await update.message.reply_text(response.content[0].text)
 
 async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -423,7 +423,7 @@ async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "year")
-    response = client.messages.create(model="claude-sonnet-4-20250514", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     await update.message.reply_text(response.content[0].text)
 
 async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -437,7 +437,7 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "month")
-    response = client.messages.create(model="claude-sonnet-4-20250514", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     await update.message.reply_text(response.content[0].text)
 
 async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -451,7 +451,7 @@ async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "day")
-    response = client.messages.create(model="claude-sonnet-4-20250514", max_tokens=1000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     await update.message.reply_text(response.content[0].text)
 
 async def cmd_compass(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -483,7 +483,7 @@ async def send_daily_messages(context: ContextTypes.DEFAULT_TYPE):
         user = {"day": day, "month": month, "year": year, "name": name, "lang": lang}
         prompt = get_profile_prompt(lang or "ru", user, "day_auto")
         try:
-            response = client.messages.create(model="claude-sonnet-4-20250514", max_tokens=500, system=prompt, messages=[{"role": "user", "content": "Утреннее сообщение"}])
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=500, system=prompt, messages=[{"role": "user", "content": "Утреннее сообщение"}])
             await context.bot.send_message(chat_id=user_id, text=response.content[0].text)
         except Exception as e:
             print(f"Error sending to {user_id}: {e}", flush=True)
@@ -609,7 +609,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user = get_user(user_id)
     paid = is_paid(user)
     sys_prompt = get_system_prompt(lang, user.get("name"), user.get("day"), user.get("month"), user.get("year"), paid=paid)
-    response = client.messages.create(model="claude-sonnet-4-20250514", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = response.content[0].text
     user_sessions[user_id].append({"role": "assistant", "content": reply})
     await update.message.reply_text(reply)
