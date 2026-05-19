@@ -322,18 +322,28 @@ async def send_rules(update_or_query, lang, edit=False):
 
 
 def split_message(text, max_length=4000):
-    if len(text) <= max_length:
-        return [text]
+    # Разбиваем по разделителю блоков
+    blocks = text.split("・・・・・・・・・・")
     parts = []
-    while text:
-        if len(text) <= max_length:
-            parts.append(text)
-            break
-        split_at = text.rfind("\n", 0, max_length)
-        if split_at == -1:
-            split_at = max_length
-        parts.append(text[:split_at])
-        text = text[split_at:].lstrip("\n")
+    for block in blocks:
+        block = block.strip()
+        if not block:
+            continue
+        if len(block) <= max_length:
+            parts.append(block)
+        else:
+            # Если блок слишком длинный — режем по абзацам
+            while block:
+                if len(block) <= max_length:
+                    parts.append(block)
+                    break
+                split_at = block.rfind("\n\n", 0, max_length)
+                if split_at == -1:
+                    split_at = block.rfind("\n", 0, max_length)
+                if split_at == -1:
+                    split_at = max_length
+                parts.append(block[:split_at].strip())
+                block = block[split_at:].strip()
     return parts
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
