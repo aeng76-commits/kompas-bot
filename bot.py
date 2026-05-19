@@ -320,6 +320,22 @@ async def send_rules(update_or_query, lang, edit=False):
     else:
         await update_or_query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
+
+def split_message(text, max_length=4000):
+    if len(text) <= max_length:
+        return [text]
+    parts = []
+    while text:
+        if len(text) <= max_length:
+            parts.append(text)
+            break
+        split_at = text.rfind("\n", 0, max_length)
+        if split_at == -1:
+            split_at = max_length
+        parts.append(text[:split_at])
+        text = text[split_at:].lstrip("\n")
+    return parts
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     keyboard = [
@@ -410,7 +426,8 @@ async def cmd_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "me")
     response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-    await update.message.reply_text(response.content[0].text)
+    for part in split_message(response.content[0].text):
+        await update.message.reply_text(part)
 
 async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -424,7 +441,8 @@ async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "year")
     response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-    await update.message.reply_text(response.content[0].text)
+    for part in split_message(response.content[0].text):
+        await update.message.reply_text(part)
 
 async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -438,7 +456,8 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "month")
     response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-    await update.message.reply_text(response.content[0].text)
+    for part in split_message(response.content[0].text):
+        await update.message.reply_text(part)
 
 async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -452,7 +471,8 @@ async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "day")
     response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-    await update.message.reply_text(response.content[0].text)
+    for part in split_message(response.content[0].text):
+        await update.message.reply_text(part)
 
 async def cmd_compass(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
