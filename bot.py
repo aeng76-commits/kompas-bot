@@ -17,6 +17,7 @@ ADMIN_ID = 1509977932
 
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 user_sessions = {}
+compass_state = {}  # user_id: {step, answers, clarify_count}
 
 def get_db():
     return psycopg2.connect(DATABASE_URL)
@@ -714,14 +715,35 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not has_access(user):
             await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
             return
+        compass_state[user_id] = {"step": "q1", "answers": {}, "clarify_count": 0}
+        user_sessions[user_id] = []
+        q = {
+            "ru": "Расскажи — что сейчас занимает мысли больше всего?",
+            "de": "Erzähl mir — was beschäftigt dich gerade am meisten?",
+            "en": "Tell me — what's on your mind the most right now?"
+        }
+        msg = q.get(lang, q["ru"])
+        user_sessions[user_id] = [{"role": "assistant", "content": msg}]
+        await query.edit_message_text(msg)
+
+    elif data == "compass_yes":
+        compass_state.pop(user_id, None)
+        user_sessions[user_id] = []
+        await show_main_menu(query, lang, edit=True)
+
+    elif data == "compass_no":
+        state = compass_state.get(user_id, {})
+        state["step"] = "clarify"
+        state["clarify_count"] = 0
+        compass_state[user_id] = state
         user_sessions[user_id] = []
         texts = {
-            "ru": "💬 Расскажи что сейчас происходит — что беспокоит больше всего?",
-            "de": "💬 Erzähl mir, was gerade passiert — was beschäftigt dich am meisten?",
-            "en": "💬 Tell me what's happening — what concerns you the most?"
+            "ru": "Хорошо. Что именно осталось непонятным?",
+            "de": "Okay. Was genau ist unklar geblieben?",
+            "en": "Okay. What exactly is still unclear?"
         }
         msg = texts.get(lang, texts["ru"])
-        user_sessions[user_id] = [{"role": "assistant", "content": msg}]
+        user_sessions[user_id].append({"role": "assistant", "content": msg})
         await query.edit_message_text(msg)
 
     elif data == "btn_settings":
@@ -887,6 +909,105 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_sessions:
         user_sessions[user_id] = []
     user_sessions[user_id].append({"role": "user", "content": user_text})
+    # Compass диалог
+    if user_id in compass_state:
+        state = compass_state[user_id]
+        step = state.get("step", "q1")
+        answers = state.get("answers", {})
+        user_sessions[user_id].append({"role": "user", "content": user_text})
+
+        QUESTIONS = {
+            "ru": {
+                "q1": "Как давно это происходит? Это новое или тянется давно?",
+                "q2": "Что ты уже пробовала делать? Что помогло, а что нет?",
+                "q3": "Что мешает больше всего — внешние обстоятельства или что-то внутри?",
+                "q4": "Как выглядит идеальный результат для тебя?"
+            }
+        }
+        NEXT = {"q1": "q2", "q2": "q3", "q3": "q4", "q4": "analysis"}
+
+        def get_compass_prompt(user, answers, extra_q=None, extra_answers=None):
+            m_model = D.get_model(user.get("day"))
+            py = D.get_year(user.get("day"), user.get("month"), datetime.datetime.now().year)
+            pm = D.get_month(py, datetime.datetime.now().month)
+            pd = D.get_day(pm, datetime.datetime.now().day)
+            mi = D.MODELS.get(m_model, {})
+            answers_text = chr(10).join([f"- {v}" for v in answers.values()])
+            extra = ""
+            if extra_q and extra_answers:
+                extra = f"\nУточняющий вопрос: {extra_q}\n" + chr(10).join([f"- {v}" for v in extra_answers.values()])
+            gender_word = "женский" if user.get("gender","f") == "f" else "мужской"
+            return f"""Анализируй ситуацию {user.get("name")}.
+Модель мышления: {mi.get("full_name", mi.get("name",""))}
+Суть: {mi.get("profile","")}
+Риски: {mi.get("risks","")}
+Личный год: {D.YEARS.get(py,"")}
+Личный месяц: {D.MONTHS.get(pm,"")}
+Личный день: {D.DAYS.get(pd,"")}
+Пол: {gender_word}
+
+Ответы человека:
+{answers_text}{extra}
+
+Дай анализ ситуации через призму модели мышления и текущего периода.
+2-3 абзаца — что происходит на самом деле и почему.
+・・・・・・・・・・
+2-3 конкретные рекомендации что делать прямо сейчас.
+Только чистый текст. Никакого markdown. Живой стиль."""
+
+        if step == "clarify":
+            state["clarify_count"] = state.get("clarify_count", 0) + 1
+            clarify_prompt = f"""Человек не понял анализ и написал: "{user_text}"
+Задай ОДИН уточняющий вопрос. Только вопрос, без вступления. Коротко."""
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=200,
+                system=clarify_prompt, messages=[{"role": "user", "content": user_text}])
+            q_text = clean_text(response.content[0].text)
+            state["clarify_q"] = q_text
+            state["step"] = "clarify_answer"
+            compass_state[user_id] = state
+            user_sessions[user_id].append({"role": "assistant", "content": q_text})
+            await update.message.reply_text(q_text)
+            return
+
+        if step == "clarify_answer":
+            extra_answers = {"clarify": user_text}
+            prompt = get_compass_prompt(user, answers, state.get("clarify_q",""), extra_answers)
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500,
+                system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+            reply = clean_text(response.content[0].text)
+            for part in split_message(reply):
+                await update.message.reply_text(part)
+            compass_state.pop(user_id, None)
+            user_sessions[user_id] = []
+            await show_main_menu_msg(context, user_id, lang)
+            return
+
+        if NEXT.get(step) == "analysis" or step == "q4":
+            answers[step] = user_text
+            state["answers"] = answers
+            prompt = get_compass_prompt(user, answers)
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000,
+                system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+            reply = clean_text(response.content[0].text)
+            for part in split_message(reply):
+                await update.message.reply_text(part)
+            state["step"] = "done"
+            compass_state[user_id] = state
+            understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
+            btns = [[InlineKeyboardButton("✅ Да", callback_data="compass_yes"), InlineKeyboardButton("❓ Нет", callback_data="compass_no")]]
+            await update.message.reply_text(understood.get(lang, understood["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+            return
+
+        answers[step] = user_text
+        state["answers"] = answers
+        next_step = NEXT.get(step, "q2")
+        state["step"] = next_step
+        compass_state[user_id] = state
+        next_q = QUESTIONS.get(lang, QUESTIONS["ru"]).get(next_step, "")
+        user_sessions[user_id].append({"role": "assistant", "content": next_q})
+        await update.message.reply_text(next_q)
+        return
+
     if not user.get("name"):
         name = user_text.strip()
         save_user(user_id, name=name)
@@ -972,7 +1093,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(agree_cb, pattern="^(agree|disagree)$"))
     app.add_handler(CallbackQueryHandler(gender_cb, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
-    app.add_handler(CallbackQueryHandler(menu_btn_cb, pattern="^btn_"))
+    app.add_handler(CallbackQueryHandler(menu_btn_cb, pattern="^btn_|^compass_"))
     app.add_handler(CallbackQueryHandler(pay_cb, pattern="^pay_"))
     app.add_handler(CallbackQueryHandler(cancel_cb, pattern="^(cancel_confirm|cancel_abort)$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
