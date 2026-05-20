@@ -17,7 +17,7 @@ ADMIN_ID = 1509977932
 
 client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 user_sessions = {}
-compass_state = {}  # user_id: {step, answers, clarify_count}
+compass_state = {}  # user_id: {q_count, clarify_mode}
 
 def get_db():
     return psycopg2.connect(DATABASE_URL)
@@ -715,14 +715,14 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not has_access(user):
             await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
             return
-        compass_state[user_id] = {"step": "q1", "answers": {}, "clarify_count": 0}
+        compass_state[user_id] = {"q_count": 0, "clarify_mode": False}
         user_sessions[user_id] = []
-        q = {
+        first_q = {
             "ru": "Расскажи — что сейчас занимает мысли больше всего?",
             "de": "Erzähl mir — was beschäftigt dich gerade am meisten?",
             "en": "Tell me — what's on your mind the most right now?"
         }
-        msg = q.get(lang, q["ru"])
+        msg = first_q.get(lang, first_q["ru"])
         user_sessions[user_id] = [{"role": "assistant", "content": msg}]
         await query.edit_message_text(msg)
 
@@ -732,11 +732,9 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu(query, lang, edit=True)
 
     elif data == "compass_no":
-        state = compass_state.get(user_id, {})
-        state["step"] = "clarify"
-        state["clarify_count"] = 0
-        compass_state[user_id] = state
-        user_sessions[user_id] = []
+        compass_state[user_id] = compass_state.get(user_id, {})
+        compass_state[user_id]["clarify_mode"] = True
+        compass_state[user_id]["clarify_count"] = 0
         texts = {
             "ru": "Хорошо. Что именно осталось непонятным?",
             "de": "Okay. Was genau ist unklar geblieben?",
@@ -912,98 +910,139 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Compass диалог
     if user_id in compass_state:
         state = compass_state[user_id]
-        step = state.get("step", "q1")
-        answers = state.get("answers", {})
+        q_count = state.get("q_count", 0)
+        clarify_mode = state.get("clarify_mode", False)
+        clarify_count = state.get("clarify_count", 0)
+
         user_sessions[user_id].append({"role": "user", "content": user_text})
 
-        QUESTIONS = {
-            "ru": {
-                "q1": "Как давно это происходит? Это новое или тянется давно?",
-                "q2": "Что ты уже пробовала делать? Что помогло, а что нет?",
-                "q3": "Что мешает больше всего — внешние обстоятельства или что-то внутри?",
-                "q4": "Как выглядит идеальный результат для тебя?"
-            }
-        }
-        NEXT = {"q1": "q2", "q2": "q3", "q3": "q4", "q4": "analysis"}
+        m_model = D.get_model(user.get("day"))
+        py = D.get_year(user.get("day"), user.get("month"), datetime.datetime.now().year)
+        pm = D.get_month(py, datetime.datetime.now().month)
+        pd = D.get_day(pm, datetime.datetime.now().day)
+        mi = D.MODELS.get(m_model, {})
+        gender_word = "женский" if user.get("gender","f") == "f" else "мужской"
+        name = user.get("name", "")
 
-        def get_compass_prompt(user, answers, extra_q=None, extra_answers=None):
-            m_model = D.get_model(user.get("day"))
-            py = D.get_year(user.get("day"), user.get("month"), datetime.datetime.now().year)
-            pm = D.get_month(py, datetime.datetime.now().month)
-            pd = D.get_day(pm, datetime.datetime.now().day)
-            mi = D.MODELS.get(m_model, {})
-            answers_text = chr(10).join([f"- {v}" for v in answers.values()])
-            extra = ""
-            if extra_q and extra_answers:
-                extra = f"\nУточняющий вопрос: {extra_q}\n" + chr(10).join([f"- {v}" for v in extra_answers.values()])
-            gender_word = "женский" if user.get("gender","f") == "f" else "мужской"
-            return f"""Анализируй ситуацию {user.get("name")}.
+        profile_context = f"""Профиль человека:
+Имя: {name}, пол: {gender_word}
 Модель мышления: {mi.get("full_name", mi.get("name",""))}
 Суть: {mi.get("profile","")}
+Сильные стороны: {mi.get("strengths","")}
 Риски: {mi.get("risks","")}
 Личный год: {D.YEARS.get(py,"")}
 Личный месяц: {D.MONTHS.get(pm,"")}
-Личный день: {D.DAYS.get(pd,"")}
-Пол: {gender_word}
+Личный день: {D.DAYS.get(pd,"")}"""
 
-Ответы человека:
-{answers_text}{extra}
+        if clarify_mode:
+            # Режим уточнения после анализа
+            if clarify_count < 3:
+                clarify_sys = f"""{profile_context}
 
-Дай анализ ситуации через призму модели мышления и текущего периода.
-2-3 абзаца — что происходит на самом деле и почему.
-・・・・・・・・・・
-2-3 конкретные рекомендации что делать прямо сейчас.
-Только чистый текст. Никакого markdown. Живой стиль."""
+Человек сказал что ему что-то непонятно в анализе. Его сообщение: "{user_text}"
 
-        if step == "clarify":
-            state["clarify_count"] = state.get("clarify_count", 0) + 1
-            clarify_prompt = f"""Человек не понял анализ и написал: "{user_text}"
-Задай ОДИН уточняющий вопрос. Только вопрос, без вступления. Коротко."""
-            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=200,
-                system=clarify_prompt, messages=[{"role": "user", "content": user_text}])
-            q_text = clean_text(response.content[0].text)
-            state["clarify_q"] = q_text
-            state["step"] = "clarify_answer"
-            compass_state[user_id] = state
-            user_sessions[user_id].append({"role": "assistant", "content": q_text})
-            await update.message.reply_text(q_text)
+Задай ОДИН мягкий уточняющий вопрос чтобы понять что именно требует пояснения.
+Только вопрос. Коротко. Без вступления. Дипломатично."""
+                response = client.messages.create(
+                    model="claude-sonnet-4-5", max_tokens=200,
+                    system=clarify_sys,
+                    messages=[{"role": "user", "content": user_text}]
+                )
+                q_text = clean_text(response.content[0].text)
+                state["clarify_count"] = clarify_count + 1
+                state["clarify_mode"] = False
+                state["need_clarify_answer"] = True
+                compass_state[user_id] = state
+                user_sessions[user_id].append({"role": "assistant", "content": q_text})
+                await update.message.reply_text(q_text)
+            else:
+                compass_state.pop(user_id, None)
+                user_sessions[user_id] = []
+                await show_main_menu_msg(context, user_id, lang)
             return
 
-        if step == "clarify_answer":
-            extra_answers = {"clarify": user_text}
-            prompt = get_compass_prompt(user, answers, state.get("clarify_q",""), extra_answers)
-            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500,
-                system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        if state.get("need_clarify_answer"):
+            # Получили ответ на уточняющий вопрос — даём пояснение и меню
+            clarify_answer_sys = f"""{profile_context}
+
+Выше история диалога с человеком. Он попросил пояснить что-то из анализа.
+Дай короткое тёплое пояснение — 2-3 абзаца. Без новых вопросов.
+Простым языком. Без давления. Только чистый текст."""
+            response = client.messages.create(
+                model="claude-sonnet-4-5", max_tokens=800,
+                system=clarify_answer_sys,
+                messages=user_sessions[user_id]
+            )
             reply = clean_text(response.content[0].text)
-            for part in split_message(reply):
-                await update.message.reply_text(part)
+            await update.message.reply_text(reply)
             compass_state.pop(user_id, None)
             user_sessions[user_id] = []
             await show_main_menu_msg(context, user_id, lang)
             return
 
-        if NEXT.get(step) == "analysis" or step == "q4":
-            answers[step] = user_text
-            state["answers"] = answers
-            prompt = get_compass_prompt(user, answers)
-            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000,
-                system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        if q_count >= 4:
+            # Достаточно информации — даём анализ
+            analysis_sys = f"""{profile_context}
+
+Выше диалог с {name}. Человек рассказал о своей ситуации.
+
+Дай мягкий анализ ситуации через призму модели мышления и текущего периода.
+Говори тепло и с пониманием — как умный близкий человек, который видит ситуацию со стороны.
+Не ставь диагнозы. Не давай директивных указаний. Не используй слова "должна", "надо", "необходимо".
+
+СТРУКТУРА:
+2-3 абзаца — что происходит и почему, через призму личности и периода. Мягко и точно.
+・・・・・・・・・・
+2-3 конкретных шага — не приказы, а мягкие предложения что можно попробовать.
+
+Только чистый текст. Никакого markdown. Живой тёплый стиль."""
+            response = client.messages.create(
+                model="claude-sonnet-4-5", max_tokens=2000,
+                system=analysis_sys,
+                messages=user_sessions[user_id]
+            )
             reply = clean_text(response.content[0].text)
             for part in split_message(reply):
                 await update.message.reply_text(part)
-            state["step"] = "done"
+            state["q_count"] = 99
             compass_state[user_id] = state
-            understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
-            btns = [[InlineKeyboardButton("✅ Да", callback_data="compass_yes"), InlineKeyboardButton("❓ Нет", callback_data="compass_no")]]
-            await update.message.reply_text(understood.get(lang, understood["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+            understood = {
+                "ru": "Всё понятно?",
+                "de": "Ist alles klar?",
+                "en": "Is everything clear?"
+            }
+            btns = [[
+                InlineKeyboardButton("✅ Да", callback_data="compass_yes"),
+                InlineKeyboardButton("❓ Нет", callback_data="compass_no")
+            ]]
+            await update.message.reply_text(
+                understood.get(lang, understood["ru"]),
+                reply_markup=InlineKeyboardMarkup(btns)
+            )
             return
 
-        answers[step] = user_text
-        state["answers"] = answers
-        next_step = NEXT.get(step, "q2")
-        state["step"] = next_step
+        # Задаём следующий вопрос через Claude
+        q_sys = f"""{profile_context}
+
+Ты ведёшь мягкий диалог с {name} чтобы понять её ситуацию.
+Выше история разговора. Это вопрос номер {q_count + 1} из 4.
+
+Задай ОДИН следующий вопрос. Вопрос должен:
+- Логично вытекать из предыдущего ответа
+- Помогать человеку самому прийти к пониманию — не анкета, а живой разговор
+- Быть простым, мягким, без давления
+- Предполагать развёрнутый ответ
+- Не содержать сложных слов или психологических терминов
+
+Только вопрос. Без вступления типа "Понятно" или "Хорошо". Коротко."""
+        response = client.messages.create(
+            model="claude-sonnet-4-5", max_tokens=150,
+            system=q_sys,
+            messages=user_sessions[user_id]
+        )
+        next_q = clean_text(response.content[0].text)
+        state["q_count"] = q_count + 1
         compass_state[user_id] = state
-        next_q = QUESTIONS.get(lang, QUESTIONS["ru"]).get(next_step, "")
         user_sessions[user_id].append({"role": "assistant", "content": next_q})
         await update.message.reply_text(next_q)
         return
