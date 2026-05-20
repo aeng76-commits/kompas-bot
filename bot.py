@@ -346,8 +346,77 @@ def split_message(text, max_length=4000):
                 block = block[split_at:].strip()
     return parts
 
+MENU_BUTTONS = {
+    "ru": [
+        [InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")],
+        [InlineKeyboardButton("🧭 Личный год", callback_data="btn_year")],
+        [InlineKeyboardButton("📍 Личный месяц", callback_data="btn_month")],
+        [InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")],
+        [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
+        [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
+    ],
+    "de": [
+        [InlineKeyboardButton("🌟 Mein Fundament", callback_data="btn_me")],
+        [InlineKeyboardButton("🧭 Persönliches Jahr", callback_data="btn_year")],
+        [InlineKeyboardButton("📍 Persönlicher Monat", callback_data="btn_month")],
+        [InlineKeyboardButton("☀️ Persönlicher Tag", callback_data="btn_day")],
+        [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
+        [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
+    ],
+    "en": [
+        [InlineKeyboardButton("🌟 My Foundation", callback_data="btn_me")],
+        [InlineKeyboardButton("🧭 Personal Year", callback_data="btn_year")],
+        [InlineKeyboardButton("📍 Personal Month", callback_data="btn_month")],
+        [InlineKeyboardButton("☀️ Personal Day", callback_data="btn_day")],
+        [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
+        [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
+    ],
+}
+
+SETTINGS_BUTTONS = {
+    "ru": [
+        [InlineKeyboardButton("🌐 Сменить язык", callback_data="btn_language")],
+        [InlineKeyboardButton("👤 Мои данные", callback_data="btn_profile")],
+        [InlineKeyboardButton("💳 Полный доступ", callback_data="btn_pay")],
+        [InlineKeyboardButton("📋 Правила", callback_data="btn_rules")],
+        [InlineKeyboardButton("◀️ Назад", callback_data="btn_back")],
+    ],
+    "de": [
+        [InlineKeyboardButton("🌐 Sprache ändern", callback_data="btn_language")],
+        [InlineKeyboardButton("👤 Meine Daten", callback_data="btn_profile")],
+        [InlineKeyboardButton("💳 Vollzugang", callback_data="btn_pay")],
+        [InlineKeyboardButton("📋 Regeln", callback_data="btn_rules")],
+        [InlineKeyboardButton("◀️ Zurück", callback_data="btn_back")],
+    ],
+    "en": [
+        [InlineKeyboardButton("🌐 Change language", callback_data="btn_language")],
+        [InlineKeyboardButton("👤 My data", callback_data="btn_profile")],
+        [InlineKeyboardButton("💳 Full access", callback_data="btn_pay")],
+        [InlineKeyboardButton("📋 Rules", callback_data="btn_rules")],
+        [InlineKeyboardButton("◀️ Back", callback_data="btn_back")],
+    ],
+}
+
+async def show_main_menu(update_or_query, lang, edit=False):
+    texts = {
+        "ru": "Выбери раздел:",
+        "de": "Wähle einen Bereich:",
+        "en": "Choose a section:"
+    }
+    text = texts.get(lang, texts["ru"])
+    keyboard = InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"]))
+    if edit:
+        await update_or_query.edit_message_text(text, reply_markup=keyboard)
+    else:
+        await update_or_query.message.reply_text(text, reply_markup=keyboard)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("name") and user.get("day"):
+        lang = user.get("lang", "ru")
+        await show_main_menu(update, lang)
+        return
     keyboard = [
         [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
         [InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],
@@ -527,8 +596,7 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     if user and user.get("agreed"):
         if user.get("name") and user.get("day"):
-            texts = {"ru": f"Язык изменён 🌿", "de": "Sprache geändert 🌿", "en": "Language changed 🌿"}
-            await query.edit_message_text(texts.get(lang, texts["ru"]))
+            await show_main_menu(query, lang, edit=True)
         else:
             greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Das ist der Innere Kompass. Wie heißt du?", "en": "Hi! This is Inner Compass. What is your name?"}
             msg = greet.get(lang, greet["ru"])
@@ -536,6 +604,144 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(msg)
     else:
         await send_rules(query, lang, edit=True)
+
+async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+    user = get_user(user_id)
+    lang = user.get("lang", "ru") if user else "ru"
+    data = query.data
+
+    if data == "btn_me":
+        await query.edit_message_text("🌟 Загружаю твой профиль...")
+        if not user or not user.get("day"):
+            await context.bot.send_message(user_id, "Сначала введи дату рождения. Начни с /start")
+            return
+        if not has_access(user):
+            await context.bot.send_message(user_id, "Для доступа к этому разделу нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
+            return
+        prompt = get_profile_prompt(lang, user, "me")
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        for part in split_message(response.content[0].text):
+            await context.bot.send_message(user_id, part)
+        await show_main_menu_msg(context, user_id, lang)
+
+    elif data == "btn_year":
+        await query.edit_message_text("🧭 Анализирую твой год...")
+        if not user or not user.get("day"):
+            await context.bot.send_message(user_id, "Сначала введи дату рождения.")
+            return
+        if not has_access(user):
+            await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
+            return
+        prompt = get_profile_prompt(lang, user, "year")
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        for part in split_message(response.content[0].text):
+            await context.bot.send_message(user_id, part)
+        await show_main_menu_msg(context, user_id, lang)
+
+    elif data == "btn_month":
+        await query.edit_message_text("📍 Анализирую твой месяц...")
+        if not user or not user.get("day"):
+            await context.bot.send_message(user_id, "Сначала введи дату рождения.")
+            return
+        if not has_access(user):
+            await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
+            return
+        prompt = get_profile_prompt(lang, user, "month")
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        for part in split_message(response.content[0].text):
+            await context.bot.send_message(user_id, part)
+        await show_main_menu_msg(context, user_id, lang)
+
+    elif data == "btn_day":
+        await query.edit_message_text("☀️ Анализирую твой день...")
+        if not user or not user.get("day"):
+            await context.bot.send_message(user_id, "Сначала введи дату рождения.")
+            return
+        if not has_access(user):
+            await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
+            return
+        prompt = get_profile_prompt(lang, user, "day")
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        for part in split_message(response.content[0].text):
+            await context.bot.send_message(user_id, part)
+        await show_main_menu_msg(context, user_id, lang)
+
+    elif data == "btn_compass":
+        if not user or not user.get("day"):
+            await context.bot.send_message(user_id, "Сначала введи дату рождения.")
+            return
+        if not has_access(user):
+            await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
+            return
+        user_sessions[user_id] = []
+        texts = {
+            "ru": "💬 Расскажи что сейчас происходит — что беспокоит больше всего?",
+            "de": "💬 Erzähl mir, was gerade passiert — was beschäftigt dich am meisten?",
+            "en": "💬 Tell me what's happening — what concerns you the most?"
+        }
+        msg = texts.get(lang, texts["ru"])
+        user_sessions[user_id] = [{"role": "assistant", "content": msg}]
+        await query.edit_message_text(msg)
+
+    elif data == "btn_settings":
+        texts = {"ru": "⚙️ Настройки", "de": "⚙️ Einstellungen", "en": "⚙️ Settings"}
+        await query.edit_message_text(texts.get(lang, texts["ru"]), reply_markup=InlineKeyboardMarkup(SETTINGS_BUTTONS.get(lang, SETTINGS_BUTTONS["ru"])))
+
+    elif data == "btn_back":
+        await show_main_menu(query, lang, edit=True)
+
+    elif data == "btn_language":
+        keyboard = [
+            [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
+            [InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],
+            [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]
+        ]
+        await query.edit_message_text("Выберите язык / Sprache / Language:", reply_markup=InlineKeyboardMarkup(keyboard))
+
+    elif data == "btn_profile":
+        if not user:
+            await context.bot.send_message(user_id, "Данные не найдены.")
+            return
+        status = "Полный доступ ✅" if is_paid(user) else ("Пробный период 🌿" if is_trial_active(user) else "Доступ завершён 🔺")
+        texts = {
+            "ru": f"Имя: {user.get('name','—')}
+Дата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}
+Статус: {status}",
+            "de": f"Name: {user.get('name','—')}
+Geburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}
+Status: {status}",
+            "en": f"Name: {user.get('name','—')}
+Date of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}
+Status: {status}"
+        }
+        await context.bot.send_message(user_id, texts.get(lang, texts["ru"]))
+        await show_main_menu_msg(context, user_id, lang)
+
+    elif data == "btn_pay":
+        labels = {
+            "ru": ["1 месяц — 15€", "6 месяцев — 78€", "12 месяцев — 159€"],
+            "de": ["1 Monat — 15€", "6 Monate — 78€", "12 Monate — 159€"],
+            "en": ["1 month — 15€", "6 months — 78€", "12 months — 159€"]
+        }
+        keyboard = [
+            [InlineKeyboardButton(labels[lang][0], callback_data="pay_1m")],
+            [InlineKeyboardButton(f"⭐ {labels[lang][1]}", callback_data="pay_6m")],
+            [InlineKeyboardButton(labels[lang][2], callback_data="pay_12m")],
+            [InlineKeyboardButton("◀️ Назад" if lang == "ru" else ("◀️ Zurück" if lang == "de" else "◀️ Back"), callback_data="btn_back")]
+        ]
+        texts = {"ru": "Выбери тариф:", "de": "Wähle deinen Tarif:", "en": "Choose your plan:"}
+        await query.edit_message_text(texts.get(lang, texts["ru"]), reply_markup=InlineKeyboardMarkup(keyboard))
+
+    elif data == "btn_rules":
+        await context.bot.send_message(user_id, RULES.get(lang, RULES["ru"]))
+        await show_main_menu_msg(context, user_id, lang)
+
+async def show_main_menu_msg(context, user_id, lang):
+    texts = {"ru": "Выбери раздел:", "de": "Wähle einen Bereich:", "en": "Choose a section:"}
+    await context.bot.send_message(user_id, texts.get(lang, texts["ru"]), reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"])))
 
 async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -679,6 +885,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("grant_access", admin_grant))
     app.add_handler(CallbackQueryHandler(agree_cb, pattern="^(agree|disagree)$"))
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
+    app.add_handler(CallbackQueryHandler(menu_btn_cb, pattern="^btn_"))
     app.add_handler(CallbackQueryHandler(pay_cb, pattern="^pay_"))
     app.add_handler(CallbackQueryHandler(cancel_cb, pattern="^(cancel_confirm|cancel_abort)$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
