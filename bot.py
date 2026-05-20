@@ -322,29 +322,31 @@ async def send_rules(update_or_query, lang, edit=False):
 
 
 def split_message(text, max_length=4000):
-    # Разбиваем по разделителю блоков
-    blocks = text.split("・・・・・・・・・・")
+    # Сначала пробуем разбить по разделителю блоков
+    if "・・・・・・・・・・" in text:
+        blocks = text.split("・・・・・・・・・・")
+    else:
+        # Если разделителя нет — разбиваем по заголовкам (эмодзи в начале строки)
+        import re
+        blocks = re.split(r'(?=\n[🧭✨🌿🔺🌱💬])', text)
+        if len(blocks) == 1:
+            # Совсем нет структуры — режем по двойным переносам
+            blocks = text.split("\n\n")
     parts = []
+    current = ""
     for block in blocks:
         block = block.strip()
         if not block:
             continue
-        if len(block) <= max_length:
-            parts.append(block)
+        if len(current) + len(block) + 2 <= max_length:
+            current = (current + "\n\n" + block).strip() if current else block
         else:
-            # Если блок слишком длинный — режем по абзацам
-            while block:
-                if len(block) <= max_length:
-                    parts.append(block)
-                    break
-                split_at = block.rfind("\n\n", 0, max_length)
-                if split_at == -1:
-                    split_at = block.rfind("\n", 0, max_length)
-                if split_at == -1:
-                    split_at = max_length
-                parts.append(block[:split_at].strip())
-                block = block[split_at:].strip()
-    return parts
+            if current:
+                parts.append(current)
+            current = block
+    if current:
+        parts.append(current)
+    return parts if parts else [text]
 
 MENU_BUTTONS = {
     "ru": [
