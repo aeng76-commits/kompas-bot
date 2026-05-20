@@ -91,9 +91,9 @@ def is_paid(user):
 
 def is_trial_active(user):
     if not user or not user.get("trial_started_at"):
-        return True
+        return False
     delta = datetime.datetime.now() - user["trial_started_at"].replace(tzinfo=None)
-    return delta.total_seconds() < 86400
+    return delta.total_seconds() < 259200  # 3 дня
 
 def get_daily_usage(user_id):
     """Возвращает счётчики использования за сегодня"""
