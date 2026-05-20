@@ -439,9 +439,9 @@ async def cmd_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user.get("lang", "ru")
     status = "Полный доступ ✅" if is_paid(user) else ("Пробный период 🌿" if is_trial_active(user) else "Доступ завершён 🔺")
     texts = {
-        "ru": f"Имя: {user.get('name','—')}\nДата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}\nЯзык: {lang}\nСтатус: {status}",
-        "de": f"Name: {user.get('name','—')}\nGeburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}\nSprache: {lang}\nStatus: {status}",
-        "en": f"Name: {user.get('name','—')}\nDate of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}\nLanguage: {lang}\nStatus: {status}"
+        "ru": f"Имя: {user.get('name','-')}\nДата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}\nЯзык: {lang}\nСтатус: {status}",
+        "de": f"Name: {user.get('name','-')}\nGeburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}\nSprache: {lang}\nStatus: {status}",
+        "en": f"Name: {user.get('name','-')}\nDate of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}\nLanguage: {lang}\nStatus: {status}"
     }
     await update.message.reply_text(texts.get(lang, texts["ru"]))
 
@@ -707,13 +707,13 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         status = "Полный доступ ✅" if is_paid(user) else ("Пробный период 🌿" if is_trial_active(user) else "Доступ завершён 🔺")
         texts = {
-            "ru": f"Имя: {user.get('name','—')}
+            "ru": f"Имя: {user.get('name','-')}
 Дата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}
 Статус: {status}",
-            "de": f"Name: {user.get('name','—')}
+            "de": f"Name: {user.get('name','-')}
 Geburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}
 Status: {status}",
-            "en": f"Name: {user.get('name','—')}
+            "en": f"Name: {user.get('name','-')}
 Date of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}
 Status: {status}"
         }
