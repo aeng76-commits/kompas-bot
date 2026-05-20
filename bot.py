@@ -40,9 +40,10 @@ def init_db():
             gender TEXT DEFAULT 'f'
         )
     """)
-    # Добавляем колонку если не существует
+    # Добавляем колонки если не существуют
     try:
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender TEXT DEFAULT 'f'")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_usage JSONB DEFAULT '{}'")
         conn.commit()
     except:
         pass
@@ -94,6 +95,47 @@ def is_trial_active(user):
     delta = datetime.datetime.now() - user["trial_started_at"].replace(tzinfo=None)
     return delta.total_seconds() < 86400
 
+def get_daily_usage(user_id):
+    """Возвращает счётчики использования за сегодня"""
+    import json
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT daily_usage FROM users WHERE user_id = %s", (user_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row or not row[0]:
+        return {}
+    usage = row[0]
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    return usage.get(today, {})
+
+def increment_usage(user_id, section):
+    """Увеличивает счётчик использования раздела"""
+    import json
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT daily_usage FROM users WHERE user_id = %s", (user_id,))
+    row = cur.fetchone()
+    usage = row[0] if row and row[0] else {}
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    if today not in usage:
+        usage = {today: {}}
+    usage[today][section] = usage[today].get(section, 0) + 1
+    cur.execute("UPDATE users SET daily_usage = %s WHERE user_id = %s",
+                (json.dumps(usage), user_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def check_free_limit(user_id, section):
+    """Проверяет не превышен ли лимит для бесплатной версии. Возвращает True если можно."""
+    usage = get_daily_usage(user_id)
+    limits = {"me": 1, "year": 1, "month": 1, "day": 1, "compass": 2}
+    limit = limits.get(section, 1)
+    used = usage.get(section, 0)
+    return used < limit
+
 def has_access(user):
     return is_paid(user) or is_trial_active(user)
 
@@ -126,6 +168,55 @@ PAYPAL_LINKS = {
     "6m": "https://www.paypal.me/AlexandraEngel42/78EUR",
     "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"
 }
+
+def get_free_profile_prompt(lang, user, section):
+    """Короткий цепляющий промпт для бесплатной версии"""
+    today = datetime.datetime.now().strftime("%d.%m.%Y")
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    day = datetime.datetime.now().day
+    m = D.get_model(user["day"])
+    py = D.get_year(user["day"], user["month"], year)
+    pm = D.get_month(py, month)
+    pd = D.get_day(pm, day)
+    mi = D.MODELS.get(m, {})
+    name = user.get("name", "")
+    gender = user.get("gender", "f")
+
+    context = f"""Имя: {name}, модель мышления: {mi.get("name","")}
+Суть: {mi.get("profile","")}
+Личный год: {D.YEARS.get(py,"")}
+Личный месяц: {D.MONTHS.get(pm,"")}
+Личный день: {D.DAYS.get(pd,"")}"""
+
+    section_prompts = {
+        "me": f"""Напиши короткий цепляющий анализ личности {name} — 3-4 абзаца максимум.
+Самое важное и точное про эту модель мышления. То что человек узнает себя и скажет "это про меня".
+Без списков. Живой текст. Заканчивай на интересном месте.""",
+        "year": f"""Напиши короткий цепляющий анализ личного года для {name} — 2-3 абзаца.
+Главная суть этого периода и как она проявляется именно у этого человека.
+Заканчивай на интересном месте.""",
+        "month": f"""Напиши короткий цепляющий анализ личного месяца для {name} — 2-3 абзаца.
+Главная тактика этого месяца с учётом модели мышления.
+Заканчивай на интересном месте.""",
+        "day": f"""Напиши короткий цепляющий анализ дня для {name} — 1-2 абзаца.
+Главный фокус сегодня с учётом модели мышления.
+Заканчивай на интересном месте."""
+    }
+
+    instruction = section_prompts.get(section, section_prompts["me"])
+
+    return f"""Ты ассистент системы Внутренний Компас. Сегодня {today}.
+{context}
+
+{instruction}
+
+ПРАВИЛА:
+- Язык: {'русский' if lang == 'ru' else ('немецкий' if lang == 'de' else 'английский')}
+- Обращение: ТЫ, имя точно: {name}
+- Пол: {"женский — женские окончания" if gender == "f" else "мужской — мужские окончания"}
+- Только чистый текст, никакого markdown
+- Запрещено: нумерология, вибрация, трансформация, вызовы"""
 
 def get_profile_prompt(lang, user, section):
     today = datetime.datetime.now().strftime("%d.%m.%Y")
@@ -384,6 +475,19 @@ def split_message(text, max_length=4000):
             if current:
                 parts.append(current)
     return parts if parts else [text]
+
+
+def get_upgrade_keyboard(lang):
+    labels = {
+        "ru": ("✨ Да, хочу", "Позже"),
+        "de": ("✨ Ja, ich möchte", "Später"),
+        "en": ("✨ Yes, I want", "Later")
+    }
+    yes, no = labels.get(lang, labels["ru"])
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(yes, callback_data="btn_pay")],
+        [InlineKeyboardButton(no, callback_data="btn_back")]
+    ])
 
 MENU_BUTTONS = {
     "ru": [
