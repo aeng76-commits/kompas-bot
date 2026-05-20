@@ -1099,6 +1099,45 @@ async def pay_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     await query.edit_message_text(texts.get(lang, texts["ru"]))
 
+async def paypal_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+    user = get_user(user_id)
+    lang = user.get("lang", "ru") if user else "ru"
+    plan = query.data.replace("paypal_", "")
+    links = {"1m": "https://www.paypal.me/AlexandraEngel42/15EUR", "6m": "https://www.paypal.me/AlexandraEngel42/78EUR", "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"}
+    descriptions = {
+        "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
+        "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
+        "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
+    }
+    texts = {
+        "ru": f"💳 PayPal\n\nТариф: {descriptions['ru'][plan]}\n\n{links[plan]}\n\nПосле оплаты напиши @aeng0 — активирую доступ в течение 24 часов.",
+        "de": f"💳 PayPal\n\nTarif: {descriptions['de'][plan]}\n\n{links[plan]}\n\nNach der Zahlung schreibe @aeng0 — ich aktiviere den Zugang innerhalb von 24 Stunden.",
+        "en": f"💳 PayPal\n\nPlan: {descriptions['en'][plan]}\n\n{links[plan]}\n\nAfter payment write @aeng0 — I will activate access within 24 hours."
+    }
+    await query.edit_message_text(texts.get(lang, texts["ru"]))
+
+async def sepa_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+    user = get_user(user_id)
+    lang = user.get("lang", "ru") if user else "ru"
+    plan = query.data.replace("sepa_", "")
+    descriptions = {
+        "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
+        "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
+        "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
+    }
+    texts = {
+        "ru": f"🏦 Банковский перевод (SEPA)\n\nТариф: {descriptions['ru'][plan]}\n\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nПолучатель: Alexandra Engel\nНазначение: {descriptions['ru'][plan]}\n\nПосле перевода напиши @aeng0 — активирую доступ в течение 24 часов.",
+        "de": f"🏦 Banküberweisung (SEPA)\n\nTarif: {descriptions['de'][plan]}\n\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra Engel\nVerwendungszweck: {descriptions['de'][plan]}\n\nNach der Überweisung schreibe @aeng0 — ich aktiviere den Zugang innerhalb von 24 Stunden.",
+        "en": f"🏦 Bank transfer (SEPA)\n\nPlan: {descriptions['en'][plan]}\n\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: {descriptions['en'][plan]}\n\nAfter transfer write @aeng0 — I will activate access within 24 hours."
+    }
+    await query.edit_message_text(texts.get(lang, texts["ru"]))
+
 async def cancel_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -1384,6 +1423,8 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(menu_btn_cb, pattern="^btn_|^compass_"))
     app.add_handler(CallbackQueryHandler(pay_cb, pattern="^pay_"))
+    app.add_handler(CallbackQueryHandler(paypal_cb, pattern="^paypal_"))
+    app.add_handler(CallbackQueryHandler(sepa_cb, pattern="^sepa_"))
     app.add_handler(CallbackQueryHandler(cancel_cb, pattern="^(cancel_confirm|cancel_abort)$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.run_polling(stop_signals=None, drop_pending_updates=True)
