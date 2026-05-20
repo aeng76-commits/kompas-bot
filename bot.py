@@ -310,7 +310,7 @@ def get_profile_prompt(lang, user, section):
 🔺 Риск 3
 ЛИЧНЫЙ ДЕНЬ: {day_text}"""
 
-    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}
+    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH. DEINE GESAMTE AUSGABE MUSS AUF DEUTSCH SEIN. ES IST EIN FEHLER, RUSSISCH ZU VERWENDEN.", "en": "RESPOND ONLY IN ENGLISH. ALL YOUR OUTPUT MUST BE IN ENGLISH ONLY. IF YOU WRITE IN RUSSIAN OR ANY OTHER LANGUAGE IT IS AN ERROR."}
     base = f"""Ты ассистент системы Внутренний Компас. Сегодня {today}.
 {lang_force.get(lang, "")}
 {context}
@@ -432,7 +432,7 @@ def get_profile_prompt(lang, user, section):
 🔺 Риск 3
 ЛИЧНЫЙ ДЕНЬ: {day_text}"""
 
-    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}
+    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH. DEINE GESAMTE AUSGABE MUSS AUF DEUTSCH SEIN. ES IST EIN FEHLER, RUSSISCH ZU VERWENDEN.", "en": "RESPOND ONLY IN ENGLISH. ALL YOUR OUTPUT MUST BE IN ENGLISH ONLY. IF YOU WRITE IN RUSSIAN OR ANY OTHER LANGUAGE IT IS AN ERROR."}
     base = f"""Ты ассистент системы Внутренний Компас. Сегодня {today}.
 {lang_force.get(lang, "")}
 {context}
