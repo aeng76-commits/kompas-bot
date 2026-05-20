@@ -963,6 +963,12 @@ async def post_init(app):
 
 if __name__ == "__main__":
     init_db()
+    # Сбрасываем старые соединения перед стартом
+    import requests as req
+    try:
+        req.get(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/deleteWebhook?drop_pending_updates=true", timeout=10)
+    except:
+        pass
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).post_init(post_init).build()
     job_queue = app.job_queue
     job_queue.run_daily(send_daily_messages, time=datetime.time(hour=6, minute=0, tzinfo=datetime.timezone.utc))
