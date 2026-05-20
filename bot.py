@@ -707,15 +707,9 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         status = "Полный доступ ✅" if is_paid(user) else ("Пробный период 🌿" if is_trial_active(user) else "Доступ завершён 🔺")
         texts = {
-            "ru": f"Имя: {user.get('name','-')}
-Дата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}
-Статус: {status}",
-            "de": f"Name: {user.get('name','-')}
-Geburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}
-Status: {status}",
-            "en": f"Name: {user.get('name','-')}
-Date of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}
-Status: {status}"
+            "ru": f"Имя: {user.get('name','-')}\nДата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}\nСтатус: {status}",
+            "de": f"Name: {user.get('name','-')}\nGeburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}\nStatus: {status}",
+            "en": f"Name: {user.get('name','-')}\nDate of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}\nStatus: {status}"
         }
         await context.bot.send_message(user_id, texts.get(lang, texts["ru"]))
         await show_main_menu_msg(context, user_id, lang)
