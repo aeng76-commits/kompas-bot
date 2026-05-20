@@ -321,7 +321,17 @@ async def send_rules(update_or_query, lang, edit=False):
         await update_or_query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
+def clean_text(text):
+    import re
+    # Убираем markdown символы
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
+    text = re.sub(r'#{1,6}\s', '', text)
+    text = re.sub(r'__(.+?)__', r'\1', text)
+    return text
+
 def split_message(text, max_length=4000):
+    text = clean_text(text)
     import re
     # Разбиваем по разделителю или по заголовкам с эмодзи
     if "・・・・・・・・・・" in text:
@@ -512,7 +522,7 @@ async def cmd_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "me")
-    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     for part in split_message(response.content[0].text):
         await update.message.reply_text(part)
 
@@ -527,7 +537,7 @@ async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "year")
-    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     for part in split_message(response.content[0].text):
         await update.message.reply_text(part)
 
@@ -542,7 +552,7 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "month")
-    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     for part in split_message(response.content[0].text):
         await update.message.reply_text(part)
 
@@ -557,7 +567,7 @@ async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = user.get("lang", "ru")
     prompt = get_profile_prompt(lang, user, "day")
-    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+    response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
     for part in split_message(response.content[0].text):
         await update.message.reply_text(part)
 
@@ -630,7 +640,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, "Для доступа к этому разделу нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
             return
         prompt = get_profile_prompt(lang, user, "me")
-        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
         for part in split_message(response.content[0].text):
             await context.bot.send_message(user_id, part)
         await show_main_menu_msg(context, user_id, lang)
@@ -644,7 +654,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
             return
         prompt = get_profile_prompt(lang, user, "year")
-        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
         for part in split_message(response.content[0].text):
             await context.bot.send_message(user_id, part)
         await show_main_menu_msg(context, user_id, lang)
@@ -658,7 +668,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
             return
         prompt = get_profile_prompt(lang, user, "month")
-        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=2000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
         for part in split_message(response.content[0].text):
             await context.bot.send_message(user_id, part)
         await show_main_menu_msg(context, user_id, lang)
@@ -672,7 +682,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
             return
         prompt = get_profile_prompt(lang, user, "day")
-        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
         for part in split_message(response.content[0].text):
             await context.bot.send_message(user_id, part)
         await show_main_menu_msg(context, user_id, lang)
