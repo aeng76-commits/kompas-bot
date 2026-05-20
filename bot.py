@@ -663,7 +663,9 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
         for part in split_message(response.content[0].text):
             await context.bot.send_message(user_id, part)
+        print(f"DEBUG: sending menu to {user_id}, lang={lang}", flush=True)
         await show_main_menu_msg(context, user_id, lang)
+        print(f"DEBUG: menu sent", flush=True)
 
     elif data == "btn_year":
         await query.edit_message_text("🧭 Анализирую твой год...")
