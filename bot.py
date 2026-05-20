@@ -813,14 +813,17 @@ async def gender_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user.get("lang", "ru") if user else "ru"
     gender = "f" if query.data == "gender_f" else "m"
     save_user(user_id, gender=gender)
-    user = get_user(user_id)
+    # Сбрасываем сессию
+    user_sessions[user_id] = []
     # Просим дату рождения
     date_q = {
-        "ru": "Напиши свою дату рождения в формате ДД.ММ.ГГГГ",
-        "de": "Schreib dein Geburtsdatum im Format TT.MM.JJJJ",
-        "en": "Write your date of birth in format DD.MM.YYYY"
+        "ru": "Отлично! Теперь напиши дату рождения в формате ДД.ММ.ГГГГ",
+        "de": "Super! Schreib jetzt dein Geburtsdatum im Format TT.MM.JJJJ",
+        "en": "Great! Now write your date of birth in format DD.MM.YYYY"
     }
-    await query.edit_message_text(date_q.get(lang, date_q["ru"]))
+    msg = date_q.get(lang, date_q["ru"])
+    user_sessions[user_id] = [{"role": "assistant", "content": msg}]
+    await query.edit_message_text(msg)
 
 async def pay_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -924,6 +927,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if m:
             save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now())
             user = get_user(user_id)
+            # Показываем меню после ввода даты
+            welcome = {
+                "ru": "Готово! Теперь выбери с чего начнём:",
+                "de": "Fertig! Wähle, womit wir beginnen:",
+                "en": "Done! Choose where to start:"
+            }
+            await update.message.reply_text(
+                welcome.get(lang, welcome["ru"]),
+                reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"]))
+            )
+            return
     paid = is_paid(user)
     sys_prompt = get_system_prompt(lang, user.get("name"), user.get("day"), user.get("month"), user.get("year"), paid=paid, gender=user.get("gender","f"))
     response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
