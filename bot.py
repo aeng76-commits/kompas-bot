@@ -310,7 +310,9 @@ def get_profile_prompt(lang, user, section):
 🔺 Риск 3
 ЛИЧНЫЙ ДЕНЬ: {day_text}"""
 
+    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}
     base = f"""Ты ассистент системы Внутренний Компас. Сегодня {today}.
+{lang_force.get(lang, "")}
 {context}
 {instruction}
 
@@ -430,7 +432,9 @@ def get_profile_prompt(lang, user, section):
 🔺 Риск 3
 ЛИЧНЫЙ ДЕНЬ: {day_text}"""
 
+    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}
     base = f"""Ты ассистент системы Внутренний Компас. Сегодня {today}.
+{lang_force.get(lang, "")}
 {context}
 {instruction}
 
