@@ -1091,13 +1091,21 @@ async def pay_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
         "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
     }
-    sepa = "IBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra Engel"
-    texts = {
-        "ru": f"Тариф: {descriptions['ru'][plan]}\n\nСпособ 1 — PayPal:\n{links[plan]}\n\nСпособ 2 — Банковский перевод (SEPA):\n{sepa}\nУкажи в назначении: {descriptions['ru'][plan]}\n\nПосле оплаты напиши @aeng0 — активирую доступ в течение 24 часов.",
-        "de": f"Tarif: {descriptions['de'][plan]}\n\nOption 1 — PayPal:\n{links[plan]}\n\nOption 2 — Banküberweisung (SEPA):\n{sepa}\nVerwendungszweck: {descriptions['de'][plan]}\n\nNach der Zahlung schreibe @aeng0 — ich aktiviere den Zugang innerhalb von 24 Stunden.",
-        "en": f"Plan: {descriptions['en'][plan]}\n\nOption 1 — PayPal:\n{links[plan]}\n\nOption 2 — Bank transfer (SEPA):\n{sepa}\nReference: {descriptions['en'][plan]}\n\nAfter payment write @aeng0 — I will activate access within 24 hours."
+    plan_label = descriptions[lang][plan]
+    header = {
+        "ru": f"Тариф: {plan_label}\n\nВыбери способ оплаты:",
+        "de": f"Tarif: {plan_label}\n\nWähle die Zahlungsmethode:",
+        "en": f"Plan: {plan_label}\n\nChoose payment method:"
     }
-    await query.edit_message_text(texts.get(lang, texts["ru"]))
+    pay_btns = [
+        [InlineKeyboardButton("💳 PayPal", callback_data=f"paypal_{plan}"),
+         InlineKeyboardButton("🏦 Перевод", callback_data=f"sepa_{plan}")],
+        [InlineKeyboardButton("◀️ Назад", callback_data="btn_pay")]
+    ]
+    try:
+        await query.edit_message_text(header.get(lang, header["ru"]), reply_markup=InlineKeyboardMarkup(pay_btns))
+    except Exception:
+        await context.bot.send_message(user_id, header.get(lang, header["ru"]), reply_markup=InlineKeyboardMarkup(pay_btns))
 
 async def paypal_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
