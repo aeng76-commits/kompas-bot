@@ -314,6 +314,126 @@ def get_profile_prompt(lang, user, section):
 {context}
 {instruction}
 
+ЭТАЛОН СТИЛЯ для русского:
+"Для тебя, с твоим постоянным желанием всё улучшить и переделать, это странное ощущение — как будто тебя просят сидеть спокойно, когда внутри бурлит энергия перемен."
+"Твой ум привык искать проблемы и решать их, а когда проблем меньше — ты начинаешь их выдумывать."
+"Год комфорта превратится в год изматывающей гонки за идеалом."
+
+ЭТАЛОН СТИЛЯ для немецкого:
+"Du gehst durch eine Phase, in der vieles, was du aufgebaut hast, endlich Fruechte traegt. Aber genau das macht dir Unbehagen — dein Kopf sucht staendig nach dem naechsten Problem."
+"Du siehst Loesungen, wo andere nur Probleme sehen. Aber manchmal erschoepft dich genau das — weil du nicht abschalten kannst, solange etwas nicht perfekt funktioniert."
+"Diese Phase bittet dich um etwas Ungewohntes: halte inne und geniesse, was du bereits erreicht hast."
+
+ЭТАЛОН СТИЛЯ для английского:
+"You are someone who cannot walk past something broken without mentally redesigning it. That is not criticism — it is just how your mind works."
+"Right now, when things are finally settling into a comfortable rhythm, part of you gets restless. Not because something is wrong, but because calm feels unfamiliar."
+"This period is asking you to do something harder than starting over: finish what you have already begun."
+
+ЗАПРЕЩЕНО везде: незаконченные фразы, обрывки мыслей, штампы типа суперспособность или внутренний критик.
+
+ПРАВИЛА:
+- Язык: {'русский' if lang == 'ru' else ('немецкий' if lang == 'de' else 'английский')}
+- Обращение: ТЫ, имя точно: {name}
+- Пол: {"женский — женские окончания" if gender == "f" else "мужской — мужские окончания"}
+- Только чистый текст, никакого markdown
+- Запрещено: нумерология, вибрация, трансформация, вызовы"""
+
+def get_profile_prompt(lang, user, section):
+    today = datetime.datetime.now().strftime("%d.%m.%Y")
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    day = datetime.datetime.now().day
+    m = D.get_model(user["day"])
+    py = D.get_year(user["day"], user["month"], year)
+    pm = D.get_month(py, month)
+    pd = D.get_day(pm, day)
+    mi = D.MODELS.get(m, {})
+    year_text = D.YEARS.get(py, "")
+    month_text = D.MONTHS.get(pm, "")
+    day_text = D.DAYS.get(pd, "")
+    name = user.get("name", "")
+    birth_day = user.get("day", "")
+    gender = user.get("gender", "f")
+
+    context = f"""=== ПРОФИЛЬ ===
+Имя: {name}, день рождения: {birth_day}
+Модель мышления: {mi.get("full_name", mi.get("name",""))}
+Суть: {mi.get("profile","")}
+Сильные стороны: {mi.get("strengths","")}
+Риски: {mi.get("risks","")}
+В трудных ситуациях: {mi.get("chaos","")}
+Формула роста: {mi.get("formula","")}
+Личный год: {year_text}
+Личный месяц: {month_text}
+Личный день: {day_text}
+=== КОНЕЦ ПРОФИЛЯ ==="""
+
+    if section == "me":
+        instruction = f"""Напиши развёрнутый анализ личности {name}.
+ЛОГИКА: Покажи как эта модель мышления проявляется в реальной жизни. Как сильные стороны работают прямо сейчас с учётом текущего года и месяца. Где риски особенно актуальны сегодня.
+СТРУКТУРА:
+✨ Кто ты есть на самом деле — 2-3 абзаца, живо и точно, без пафоса
+・・・・・・・・・・
+🌿 Твои настоящие сильные стороны — конкретно и образно
+・・・・・・・・・・
+🔺 Где ты можешь себе мешать — мягко, с пониманием, без диагнозов
+・・・・・・・・・・
+🌱 Как превратить это в силу прямо сейчас — практично и применимо"""
+
+    elif section == "year":
+        instruction = f"""Напиши развёрнутый анализ личного года для {name}.
+ЛОГИКА: Годовой вектор — главная тема года. Но {name} проживает его через свою модель мышления. Покажи как именно эта модель взаимодействует с вектором года. Где усиление, где напряжение. Говори про конкретного человека — не про абстрактный тип.
+СТРУКТУРА:
+🧭 Что происходит в этом году — суть периода через призму твоей личности
+・・・・・・・・・・
+✨ Где ты сейчас сильнее всего — возможности года именно для тебя
+・・・・・・・・・・
+🔺 Что может тянуть назад — риски года с учётом твоих особенностей
+・・・・・・・・・・
+🌿 Как двигаться этот год — рекомендации конкретно для тебя
+・・・・・・・・・・
+🌱 Что важно прямо сейчас — один-два конкретных шага"""
+
+    elif section == "month":
+        instruction = f"""Напиши анализ личного месяца для {name}.
+ЛОГИКА: Месяц — тактика внутри года. Сначала вектор года, потом как месяц работает внутри него. И всё через модель мышления {name}. Три уровня в одном анализе — не разделяй их.
+СТРУКТУРА:
+🧭 Тактика этого месяца в контексте твоего года
+・・・・・・・・・・
+✨ Возможности месяца именно для тебя — с учётом модели мышления
+・・・・・・・・・・
+🔺 Риски месяца — где твои особенности могут усилить сложности
+・・・・・・・・・・
+🌿 Рекомендации на этот месяц — конкретно и применимо
+・・・・・・・・・・
+🌱 Шаги на ближайшие 7-14 дней"""
+
+    elif section == "day":
+        instruction = f"""Дай развёрнутый анализ личного дня для {name}.
+Структура:
+🧭 Энергия сегодняшнего дня
+🌿 2-3 рекомендации на сегодня
+🔺 2-3 риска на сегодня
+🌱 Главный фокус дня — одна конкретная задача
+Используй разделитель ・・・・・・・・・・ между блоками.
+ЛИЧНЫЙ ДЕНЬ: {day_text}"""
+
+    elif section == "day_auto":
+        instruction = f"""Утреннее сообщение для {name}. Коротко и по делу.
+Без приветствия. Сразу к сути.
+🌿 Рекомендация 1
+🌿 Рекомендация 2
+🌿 Рекомендация 3
+・・・・・・・・・・
+🔺 Риск 1
+🔺 Риск 2
+🔺 Риск 3
+ЛИЧНЫЙ ДЕНЬ: {day_text}"""
+
+    base = f"""Ты ассистент системы Внутренний Компас. Сегодня {today}.
+{context}
+{instruction}
+
 ЭТАЛОН СТИЛЯ — пиши именно так, не хуже:
 "Для тебя, с твоим постоянным желанием всё улучшить и переделать, это странное ощущение — как будто тебя просят сидеть спокойно, когда внутри бурлит энергия перемен."
 "Твой ум привык искать проблемы и решать их, а когда проблем меньше — ты начинаешь их выдумывать или искать новые поводы там, где нужно просто наслаждаться результатом."
