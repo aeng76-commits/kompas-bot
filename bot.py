@@ -35,9 +35,16 @@ def init_db():
             agreed BOOLEAN DEFAULT FALSE,
             registered_at TIMESTAMP DEFAULT NOW(),
             trial_started_at TIMESTAMP,
-            paid_until TIMESTAMP
+            paid_until TIMESTAMP,
+            gender TEXT DEFAULT 'f'
         )
     """)
+    # Добавляем колонку если не существует
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS gender TEXT DEFAULT 'f'")
+        conn.commit()
+    except:
+        pass
     conn.commit()
     cur.close()
     conn.close()
@@ -45,12 +52,12 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT name, birth_day, birth_month, birth_year, lang, agreed, trial_started_at, paid_until FROM users WHERE user_id = %s", (user_id,))
+    cur.execute("SELECT name, birth_day, birth_month, birth_year, lang, agreed, trial_started_at, paid_until, gender FROM users WHERE user_id = %s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if row:
-        return {"name": row[0], "day": row[1], "month": row[2], "year": row[3], "lang": row[4], "agreed": row[5], "trial_started_at": row[6], "paid_until": row[7]}
+        return {"name": row[0], "day": row[1], "month": row[2], "year": row[3], "lang": row[4], "agreed": row[5], "trial_started_at": row[6], "paid_until": row[7], "gender": row[8] or "f"}
     return None
 
 def get_all_paid_users():
@@ -243,7 +250,8 @@ def get_profile_prompt(lang, user, section):
 
 ПРАВИЛА:
 - Язык: {'русский' if lang == 'ru' else ('немецкий' if lang == 'de' else 'английский')}
-- Обращение: ТЫ, имя точно: {name}, правильные окончания по полу
+- Обращение: ТЫ, имя точно: {name}
+- Пол: {"женский — используй женские окончания: умная, сильная, готова" if gender == "f" else "мужской — используй мужские окончания: умный, сильный, готов"}
 - Стиль: живой тёплый, как умный близкий человек — говори то что человек чувствовал но не мог сформулировать
 - Короткие абзацы — максимум 3 предложения в абзаце
 - Только чистый текст, никакого markdown, никаких иероглифов
@@ -252,7 +260,7 @@ def get_profile_prompt(lang, user, section):
 - Текст должен вызывать эмоции и заставлять задуматься"""
     return base
 
-def get_system_prompt(lang, name=None, birth_day=None, birth_month=None, birth_year=None, paid=False):
+def get_system_prompt(lang, name=None, birth_day=None, birth_month=None, birth_year=None, paid=False, gender="f"):
     today = datetime.datetime.now().strftime("%d.%m.%Y")
     year = datetime.datetime.now().year
     month = datetime.datetime.now().month
@@ -797,6 +805,23 @@ async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await send_rules(query, lang, edit=True)
 
+async def gender_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+    user = get_user(user_id)
+    lang = user.get("lang", "ru") if user else "ru"
+    gender = "f" if query.data == "gender_f" else "m"
+    save_user(user_id, gender=gender)
+    user = get_user(user_id)
+    # Просим дату рождения
+    date_q = {
+        "ru": "Напиши свою дату рождения в формате ДД.ММ.ГГГГ",
+        "de": "Schreib dein Geburtsdatum im Format TT.MM.JJJJ",
+        "en": "Write your date of birth in format DD.MM.YYYY"
+    }
+    await query.edit_message_text(date_q.get(lang, date_q["ru"]))
+
 async def pay_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -875,15 +900,32 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_sessions[user_id] = []
     user_sessions[user_id].append({"role": "user", "content": user_text})
     if not user.get("name"):
-        save_user(user_id, name=user_text.strip())
+        name = user_text.strip()
+        save_user(user_id, name=name)
         user = get_user(user_id)
+        # Спрашиваем пол
+        gender_q = {
+            "ru": f"Приятно познакомиться, {name}! Как мне к тебе обращаться?",
+            "de": f"Schön, dich kennenzulernen, {name}! Wie soll ich dich ansprechen?",
+            "en": f"Nice to meet you, {name}! How should I address you?"
+        }
+        gender_btns = {
+            "ru": [InlineKeyboardButton("👩 Женский род", callback_data="gender_f"), InlineKeyboardButton("👨 Мужской род", callback_data="gender_m")],
+            "de": [InlineKeyboardButton("👩 Weiblich", callback_data="gender_f"), InlineKeyboardButton("👨 Männlich", callback_data="gender_m")],
+            "en": [InlineKeyboardButton("👩 She/her", callback_data="gender_f"), InlineKeyboardButton("👨 He/him", callback_data="gender_m")]
+        }
+        await update.message.reply_text(
+            gender_q.get(lang, gender_q["ru"]),
+            reply_markup=InlineKeyboardMarkup([gender_btns.get(lang, gender_btns["ru"])])
+        )
+        return
     elif not user.get("day"):
         m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
         if m:
             save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now())
             user = get_user(user_id)
     paid = is_paid(user)
-    sys_prompt = get_system_prompt(lang, user.get("name"), user.get("day"), user.get("month"), user.get("year"), paid=paid)
+    sys_prompt = get_system_prompt(lang, user.get("name"), user.get("day"), user.get("month"), user.get("year"), paid=paid, gender=user.get("gender","f"))
     response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = response.content[0].text
     user_sessions[user_id].append({"role": "assistant", "content": reply})
@@ -923,6 +965,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("reset_user", admin_reset))
     app.add_handler(CommandHandler("grant_access", admin_grant))
     app.add_handler(CallbackQueryHandler(agree_cb, pattern="^(agree|disagree)$"))
+    app.add_handler(CallbackQueryHandler(gender_cb, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(menu_btn_cb, pattern="^btn_"))
     app.add_handler(CallbackQueryHandler(pay_cb, pattern="^pay_"))
