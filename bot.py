@@ -657,14 +657,26 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, "Сначала введи дату рождения. Начни с /start")
             return
-        if not has_access(user):
-            await context.bot.send_message(user_id, "Для доступа к этому разделу нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
-            return
-        prompt = get_profile_prompt(lang, user, "me")
-        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-        for part in split_message(response.content[0].text):
-            await context.bot.send_message(user_id, part)
-        await show_main_menu_msg(context, user_id, lang)
+        if is_paid(user) or is_trial_active(user):
+            prompt = get_profile_prompt(lang, user, "me")
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+            for part in split_message(response.content[0].text):
+                await context.bot.send_message(user_id, part)
+            await show_main_menu_msg(context, user_id, lang)
+        else:
+            if not check_free_limit(user_id, "me"):
+                no_limit = {"ru": "Сегодня ты уже смотрела этот раздел. Загляни завтра или открой полный доступ.", "de": "Du hast diesen Bereich heute schon angesehen. Schau morgen wieder oder öffne den vollen Zugang.", "en": "You've already viewed this section today. Come back tomorrow or get full access."}
+                await context.bot.send_message(user_id, no_limit.get(lang, no_limit["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                await show_main_menu_msg(context, user_id, lang)
+                return
+            increment_usage(user_id, "me")
+            prompt = get_free_profile_prompt(lang, user, "me")
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1000, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+            reply = clean_text(response.content[0].text)
+            await context.bot.send_message(user_id, reply)
+            upgrade_text = {"ru": "Это краткий взгляд. Хочешь разобраться глубже?", "de": "Das ist ein kurzer Einblick. Möchtest du tiefer gehen?", "en": "This is a brief look. Want to go deeper?"}
+            await context.bot.send_message(user_id, upgrade_text.get(lang, upgrade_text["ru"]), reply_markup=get_upgrade_keyboard(lang))
+            await show_main_menu_msg(context, user_id, lang)
 
     elif data == "btn_year":
         await query.edit_message_text("🧭 Анализирую твой год...")
@@ -699,14 +711,26 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, "Сначала введи дату рождения.")
             return
-        if not has_access(user):
-            await context.bot.send_message(user_id, "Для доступа нужна подписка.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💳 Купить доступ", callback_data="btn_pay")]]))
-            return
-        prompt = get_profile_prompt(lang, user, "day")
-        response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-        for part in split_message(response.content[0].text):
-            await context.bot.send_message(user_id, part)
-        await show_main_menu_msg(context, user_id, lang)
+        if is_paid(user) or is_trial_active(user):
+            prompt = get_profile_prompt(lang, user, "day")
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=1500, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+            for part in split_message(response.content[0].text):
+                await context.bot.send_message(user_id, part)
+            await show_main_menu_msg(context, user_id, lang)
+        else:
+            if not check_free_limit(user_id, "day"):
+                no_limit = {"ru": "Сегодня ты уже смотрела этот раздел. Загляни завтра или открой полный доступ.", "de": "Du hast diesen Bereich heute schon angesehen.", "en": "You've already viewed this section today."}
+                await context.bot.send_message(user_id, no_limit.get(lang, no_limit["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                await show_main_menu_msg(context, user_id, lang)
+                return
+            increment_usage(user_id, "day")
+            prompt = get_free_profile_prompt(lang, user, "day")
+            response = client.messages.create(model="claude-sonnet-4-5", max_tokens=500, system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+            reply = clean_text(response.content[0].text)
+            await context.bot.send_message(user_id, reply)
+            upgrade_text = {"ru": "Это краткий взгляд. Хочешь разобраться глубже?", "de": "Das ist ein kurzer Einblick. Möchtest du tiefer gehen?", "en": "This is a brief look. Want to go deeper?"}
+            await context.bot.send_message(user_id, upgrade_text.get(lang, upgrade_text["ru"]), reply_markup=get_upgrade_keyboard(lang))
+            await show_main_menu_msg(context, user_id, lang)
 
     elif data == "btn_compass":
         if not user or not user.get("day"):
