@@ -141,6 +141,7 @@ def get_profile_prompt(lang, user, section):
     day_text = D.DAYS.get(pd, "")
     name = user.get("name", "")
     birth_day = user.get("day", "")
+    gender = user.get("gender", "f")
 
     context = f"""=== ПРОФИЛЬ ===
 Имя: {name}, день рождения: {birth_day}
