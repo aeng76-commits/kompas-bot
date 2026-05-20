@@ -212,7 +212,7 @@ def get_free_profile_prompt(lang, user, section):
 {instruction}
 
 ПРАВИЛА:
-- Язык: {'русский' if lang == 'ru' else ('немецкий' if lang == 'de' else 'английский')}
+- WRITE ONLY IN {'Russian' if lang == 'ru' else ('German' if lang == 'de' else 'English')}. NO OTHER LANGUAGE ALLOWED.
 - Обращение: ТЫ, имя точно: {name}
 - Пол: {"женский — женские окончания" if gender == "f" else "мужской — мужские окончания"}
 - Только чистый текст, никакого markdown
@@ -332,7 +332,7 @@ def get_profile_prompt(lang, user, section):
 ЗАПРЕЩЕНО везде: незаконченные фразы, обрывки мыслей, штампы типа суперспособность или внутренний критик.
 
 ПРАВИЛА:
-- Язык: {'русский' if lang == 'ru' else ('немецкий' if lang == 'de' else 'английский')}
+- WRITE ONLY IN {'Russian' if lang == 'ru' else ('German' if lang == 'de' else 'English')}. NO OTHER LANGUAGE ALLOWED.
 - Обращение: ТЫ, имя точно: {name}
 - Пол: {"женский — женские окончания" if gender == "f" else "мужской — мужские окончания"}
 - Только чистый текст, никакого markdown
@@ -446,7 +446,7 @@ def get_profile_prompt(lang, user, section):
 Незаконченные фразы и обрывки мыслей.
 
 ПРАВИЛА:
-- Язык: {'русский' if lang == 'ru' else ('немецкий' if lang == 'de' else 'английский')}
+- WRITE ONLY IN {'Russian' if lang == 'ru' else ('German' if lang == 'de' else 'English')}. NO OTHER LANGUAGE ALLOWED.
 - Обращение: ТЫ, имя точно: {name}
 - Пол: {"женский — используй женские окончания: умная, сильная, готова" if gender == "f" else "мужской — используй мужские окончания: умный, сильный, готов"}
 - Стиль: живой тёплый, как умный близкий человек — говори то что человек чувствовал но не мог сформулировать
