@@ -877,7 +877,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     if data == "btn_me":
-        await query.edit_message_text("🌟 Загружаю твой профиль...")
+        await query.edit_message_text({"ru": "🌟 Загружаю твой профиль...", "de": "🌟 Lade dein Profil...", "en": "🌟 Loading your profile..."}.get(lang, "🌟 Загружаю твой профиль..."))
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, "Сначала введи дату рождения. Начни с /start")
             return
@@ -903,7 +903,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await show_main_menu_msg(context, user_id, lang)
 
     elif data == "btn_year":
-        await query.edit_message_text("🧭 Анализирую твой год...")
+        await query.edit_message_text({"ru": "🧭 Анализирую твой год...", "de": "🧭 Analysiere dein Jahr...", "en": "🧭 Analysing your year..."}.get(lang, "🧭 Анализирую твой год..."))
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, "Сначала введи дату рождения.")
             return
@@ -917,7 +917,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu_msg(context, user_id, lang)
 
     elif data == "btn_month":
-        await query.edit_message_text("📍 Анализирую твой месяц...")
+        await query.edit_message_text({"ru": "📍 Анализирую твой месяц...", "de": "📍 Analysiere deinen Monat...", "en": "📍 Analysing your month..."}.get(lang, "📍 Анализирую твой месяц..."))
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, "Сначала введи дату рождения.")
             return
@@ -931,7 +931,7 @@ async def menu_btn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu_msg(context, user_id, lang)
 
     elif data == "btn_day":
-        await query.edit_message_text("☀️ Анализирую твой день...")
+        await query.edit_message_text({"ru": "☀️ Анализирую твой день...", "de": "☀️ Analysiere deinen Tag...", "en": "☀️ Analysing your day..."}.get(lang, "☀️ Анализирую твой день..."))
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, "Сначала введи дату рождения.")
             return
