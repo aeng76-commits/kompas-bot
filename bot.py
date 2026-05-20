@@ -964,9 +964,9 @@ async def post_init(app):
 if __name__ == "__main__":
     init_db()
     # Сбрасываем старые соединения перед стартом
-    import requests as req
     try:
-        req.get(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/deleteWebhook?drop_pending_updates=true", timeout=10)
+        import urllib.request
+        urllib.request.urlopen(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/deleteWebhook?drop_pending_updates=true", timeout=10)
     except:
         pass
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).post_init(post_init).build()
