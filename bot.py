@@ -322,30 +322,36 @@ async def send_rules(update_or_query, lang, edit=False):
 
 
 def split_message(text, max_length=4000):
-    # Сначала пробуем разбить по разделителю блоков
+    import re
+    # Разбиваем по разделителю или по заголовкам с эмодзи
     if "・・・・・・・・・・" in text:
-        blocks = text.split("・・・・・・・・・・")
+        segments = text.split("・・・・・・・・・・")
     else:
-        # Если разделителя нет — разбиваем по заголовкам (эмодзи в начале строки)
-        import re
-        blocks = re.split(r'(?=\n[🧭✨🌿🔺🌱💬])', text)
-        if len(blocks) == 1:
-            # Совсем нет структуры — режем по двойным переносам
-            blocks = text.split("\n\n")
+        # Разбиваем перед строками которые начинаются с эмодзи-заголовка
+        segments = re.split(r'(?:\n)(?=[🧭✨🌿🔺🌱💬☀️📍🌟💡])', text)
     parts = []
-    current = ""
-    for block in blocks:
-        block = block.strip()
-        if not block:
+    for seg in segments:
+        seg = seg.strip()
+        if not seg:
             continue
-        if len(current) + len(block) + 2 <= max_length:
-            current = (current + "\n\n" + block).strip() if current else block
+        if len(seg) <= max_length:
+            parts.append(seg)
         else:
+            # Длинный сегмент режем по двойным переносам
+            paras = seg.split("\n\n")
+            current = ""
+            for para in paras:
+                para = para.strip()
+                if not para:
+                    continue
+                if len(current) + len(para) + 2 <= max_length:
+                    current = (current + "\n\n" + para).strip() if current else para
+                else:
+                    if current:
+                        parts.append(current)
+                    current = para
             if current:
                 parts.append(current)
-            current = block
-    if current:
-        parts.append(current)
     return parts if parts else [text]
 
 MENU_BUTTONS = {
