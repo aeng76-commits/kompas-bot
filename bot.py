@@ -1097,10 +1097,12 @@ async def pay_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "de": f"Tarif: {plan_label}\n\nWähle die Zahlungsmethode:",
         "en": f"Plan: {plan_label}\n\nChoose payment method:"
     }
+    transfer_label = {"ru": "🏦 Перевод", "de": "🏦 Überweisung", "en": "🏦 Bank transfer"}
+    back_label = {"ru": "◀️ Назад", "de": "◀️ Zurück", "en": "◀️ Back"}
     pay_btns = [
         [InlineKeyboardButton("💳 PayPal", callback_data=f"paypal_{plan}"),
-         InlineKeyboardButton("🏦 Перевод", callback_data=f"sepa_{plan}")],
-        [InlineKeyboardButton("◀️ Назад", callback_data="btn_pay")]
+         InlineKeyboardButton(transfer_label.get(lang, "🏦 Перевод"), callback_data=f"sepa_{plan}")],
+        [InlineKeyboardButton(back_label.get(lang, "◀️ Назад"), callback_data="btn_pay")]
     ]
     try:
         await query.edit_message_text(header.get(lang, header["ru"]), reply_markup=InlineKeyboardMarkup(pay_btns))
