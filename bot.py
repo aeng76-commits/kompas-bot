@@ -942,6 +942,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Человек сказал что ему что-то непонятно в анализе. Его сообщение: "{user_text}"
 
 Задай ОДИН мягкий уточняющий вопрос чтобы понять что именно требует пояснения.
+Обращайся только на ТЫ — никакого "вы".
 Только вопрос. Коротко. Без вступления. Дипломатично."""
                 response = client.messages.create(
                     model="claude-sonnet-4-5", max_tokens=200,
