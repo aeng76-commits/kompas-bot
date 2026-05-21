@@ -585,7 +585,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             state["clarify_count"] = clarify_count + 1
             compass_state[user_id] = state
             user_sessions[user_id].append({"role": "assistant", "content": reply})
-            await update.message.reply_text(reply)
+            await update.message.reply_text(reply, parse_mode="Markdown")
             return
 
         if q_count >= 5:
@@ -602,7 +602,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ТЫ. Живой стиль. Чистый текст. {lang_only}"""
             resp = client.messages.create(model="claude-haiku-4-5", max_tokens=3000, system=analysis_sys, messages=user_sessions[user_id])
             for part in split_message(resp.content[0].text):
-                await update.message.reply_text(part)
+                await update.message.reply_text(part, parse_mode="Markdown")
             understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
             btns = [[
                 InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="compass_yes"),
@@ -623,7 +623,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         state["q_count"] = q_count + 1
         compass_state[user_id] = state
         user_sessions[user_id].append({"role": "assistant", "content": reply})
-        await update.message.reply_text(reply)
+        await update.message.reply_text(reply, parse_mode="Markdown")
         return
 
     # Имя
@@ -660,7 +660,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = clean_text(response.content[0].text)
     user_sessions[user_id].append({"role": "assistant", "content": reply})
-    await update.message.reply_text(reply)
+    await update.message.reply_text(reply, parse_mode="Markdown")
 
 async def admin_reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
