@@ -420,7 +420,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             prompt = get_profile_prompt(lang, user, section)
             response = client.messages.create(model="claude-haiku-4-5", max_tokens=tokens[data], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
             for part in split_message(response.content[0].text):
-                await context.bot.send_message(user_id, part, parse_mode="Markdown")
+                await context.bot.send_message(user_id, part, parse_mode="HTML")
         else:
             if not check_free_limit(user_id, section):
                 await context.bot.send_message(user_id, limit_msg.get(lang, limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
@@ -583,7 +583,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             state["clarify_count"] = clarify_count + 1
             compass_state[user_id] = state
             user_sessions[user_id].append({"role": "assistant", "content": reply})
-            await update.message.reply_text(reply, parse_mode="Markdown")
+            await update.message.reply_text(reply, parse_mode="HTML")
             return
 
         if q_count >= 5:
@@ -600,7 +600,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ТЫ. Живой стиль. Чистый текст. {lang_only}"""
             resp = client.messages.create(model="claude-haiku-4-5", max_tokens=3000, system=analysis_sys, messages=user_sessions[user_id])
             for part in split_message(resp.content[0].text):
-                await update.message.reply_text(part, parse_mode="Markdown")
+                await update.message.reply_text(part, parse_mode="HTML")
             understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
             btns = [[
                 InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="compass_yes"),
@@ -621,7 +621,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         state["q_count"] = q_count + 1
         compass_state[user_id] = state
         user_sessions[user_id].append({"role": "assistant", "content": reply})
-        await update.message.reply_text(reply, parse_mode="Markdown")
+        await update.message.reply_text(reply, parse_mode="HTML")
         return
 
     # Имя
@@ -658,7 +658,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = clean_text(response.content[0].text)
     user_sessions[user_id].append({"role": "assistant", "content": reply})
-    await update.message.reply_text(reply, parse_mode="Markdown")
+    await update.message.reply_text(reply, parse_mode="HTML")
 
 async def admin_reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
