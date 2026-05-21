@@ -210,17 +210,21 @@ def get_profile_prompt(lang, user, section):
         "de": "ANTWORTE NUR AUF DEUTSCH. ES IST EIN FEHLER, RUSSISCH ZU VERWENDEN.",
         "en": "RESPOND ONLY IN ENGLISH. DO NOT USE RUSSIAN OR ANY OTHER LANGUAGE."
     }
-    profile_block = f"""=== ПРОФИЛЬ ===
+    profile_block = f"""=== КОНТЕКСТ ===
 Имя: {name}, день рождения: {user.get('day')}
-Модель мышления:
+
+МОДЕЛЬ МЫШЛЕНИЯ (фундамент — линза через которую человек проживает всё):
 {mi}
-Личный год сейчас:
-{ctx['year_text']}
-Личный месяц сейчас:
-{ctx['month_text']}
-Личный день сегодня:
-{ctx['day_text']}
-=== КОНЕЦ ПРОФИЛЯ ==="""
+
+ЛИЧНЫЙ ГОД (главный вектор — всё остальное через него):
+{ctx['year_text'][:600]}
+
+ЛИЧНЫЙ МЕСЯЦ (тактика внутри года):
+{ctx['month_text'][:400]}
+
+ЛИЧНЫЙ ДЕНЬ (фокус сегодня):
+{ctx['day_text'][:200]}
+=== КОНЕЦ ==="""
 
     sections = {
         "me": f"""Напиши развёрнутый анализ личности {name}.
