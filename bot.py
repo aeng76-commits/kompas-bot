@@ -212,14 +212,14 @@ def get_profile_prompt(lang, user, section):
     }
     profile_block = f"""=== ПРОФИЛЬ ===
 Имя: {name}, день рождения: {user.get('day')}
-Тип мышления: {mi.get('name','')}
-Сильные стороны: {mi.get('strengths','')}
-Риски: {mi.get('risks','')}
-В трудных ситуациях: {mi.get('chaos','')}
-Формула роста: {mi.get('formula','')}
-Личный год сейчас: {ctx['year_text']}
-Личный месяц сейчас: {ctx['month_text']}
-Личный день сегодня: {ctx['day_text']}
+Модель мышления:
+{mi}
+Личный год сейчас:
+{ctx['year_text']}
+Личный месяц сейчас:
+{ctx['month_text']}
+Личный день сегодня:
+{ctx['day_text']}
 === КОНЕЦ ПРОФИЛЯ ==="""
 
     sections = {
