@@ -299,7 +299,8 @@ def get_free_prompt(lang, user, section):
     }
     return f"""Ты ассистент системы Внутренний Компас. Сегодня {ctx['today']}.
 {lang_force.get(lang, '')}
-Тип мышления {name}: {mi.get('name','')}. Сильные стороны: {mi.get('strengths','')}. Риски: {mi.get('risks','')}.
+Модель мышления {name}:
+{mi}.
 Личный год: {ctx['year_text'][:120]}
 Личный месяц: {ctx['month_text'][:120]}
 {hints.get(section, hints['me'])}
@@ -317,7 +318,8 @@ def get_system_prompt(lang, user):
         mi = ctx["mi"]
         profile_block = f"""
 === ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ===
-Тип мышления: {mi.get('name','')}. Сильные стороны: {mi.get('strengths','')}. Риски: {mi.get('risks','')}.
+Модель мышления:
+{mi}.
 Личный год: {ctx['year_text']}
 Личный месяц: {ctx['month_text']}
 === КОНЕЦ ==="""
