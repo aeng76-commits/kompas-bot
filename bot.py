@@ -111,9 +111,9 @@ def increment_usage(user_id, section):
     save_user(user_id, daily_usage=usage)
 
 RULES = {
-    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Имя и дату рождения можно изменить самостоятельно 1 раз. После этого — только через @aeng0.\n4. Твои данные используются только для твоего анализа и никому не передаются.\n5. Подписка оформляется вручную через @aeng0.",
-    "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung fuer Entscheidungen liegt bei dir.\n3. Deine Daten werden nur fuer deine Analyse gespeichert.\n4. Das Abonnement wird manuell ueber @aeng0 eingerichtet.",
-    "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your data is stored and used only for your analysis.\n4. Subscription is set up manually via @aeng0."
+    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Твои имя и дата рождения сохраняются и используются только для твоего анализа. Изменить можно самостоятельно 1 раз, после этого только через администратора.\n4. Твои данные никому не передаются.\n5. Подписка продлевается автоматически. Отменить можно в любой момент.",
+    "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung fuer Entscheidungen liegt bei dir.\n3. Dein Name und Geburtsdatum werden gespeichert und nur fuer deine Analyse verwendet. Du kannst sie einmal selbst aendern, danach nur durch den Administrator.\n4. Deine Daten werden nicht weitergegeben.\n5. Das Abonnement verlaengert sich automatisch. Du kannst jederzeit kuendigen.",
+    "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your name and date of birth are stored and used only for your analysis. You can change them once yourself, after that only through the administrator.\n4. Your data is not shared with anyone.\n5. Subscription renews automatically. You can cancel at any time."
 }
 
 PAYPAL_LINKS = {
