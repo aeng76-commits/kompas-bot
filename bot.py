@@ -422,7 +422,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             prompt = get_profile_prompt(lang, user, section)
             response = client.messages.create(model="claude-haiku-4-5", max_tokens=tokens[data], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
             for part in split_message(response.content[0].text):
-                await context.bot.send_message(user_id, part)
+                await context.bot.send_message(user_id, part, parse_mode="Markdown")
         else:
             if not check_free_limit(user_id, section):
                 await context.bot.send_message(user_id, limit_msg.get(lang, limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
