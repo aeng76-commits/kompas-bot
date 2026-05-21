@@ -155,8 +155,6 @@ def get_upgrade_keyboard(lang):
     return InlineKeyboardMarkup([[InlineKeyboardButton(labels.get(lang, labels["ru"]), callback_data="btn_pay")]])
 
 def clean_text(text):
-    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
-    text = re.sub(r'\*(.+?)\*', r'\1', text)
     text = re.sub(r'#{1,6}\s', '', text)
     text = re.sub(r'__(.+?)__', r'\1', text)
     return text.strip()
