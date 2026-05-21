@@ -638,33 +638,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         label = descriptions[lang][plan]
         sepa_text = {
-            "ru": f"Банковский перевод (SEPA)
-
-Сумма: {label}
-IBAN: DE28 5002 4024 4782 1216 01
-Bank: C24 Bank
-Получатель: Alexandra Engel
-Назначение: Внутренний Компас {label}
-
-После оплаты напиши администратору для активации доступа.",
-            "de": f"Banküberweisung (SEPA)
-
-Betrag: {label}
-IBAN: DE28 5002 4024 4782 1216 01
-Bank: C24 Bank
-Empfänger: Alexandra Engel
-Verwendungszweck: Innerer Kompass {label}
-
-Nach der Zahlung schreibe dem Administrator zur Aktivierung.",
-            "en": f"Bank transfer (SEPA)
-
-Amount: {label}
-IBAN: DE28 5002 4024 4782 1216 01
-Bank: C24 Bank
-Recipient: Alexandra Engel
-Reference: Inner Compass {label}
-
-After payment write to the administrator for activation."
+            "ru": "Банковский перевод (SEPA)\n\nСумма: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nПолучатель: Alexandra Engel\nНазначение: Внутренний Компас " + label + "\n\nПосле оплаты напиши администратору для активации доступа.",
+            "de": "Bankueberweisung (SEPA)\n\nBetrag: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfaenger: Alexandra Engel\nVerwendungszweck: Innerer Kompass " + label + "\n\nNach der Zahlung schreibe dem Administrator zur Aktivierung.",
+            "en": "Bank transfer (SEPA)\n\nAmount: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: Inner Compass " + label + "\n\nAfter payment write to the administrator for activation."
         }
         btns = [
             [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
