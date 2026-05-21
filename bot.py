@@ -560,26 +560,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         changes_left = 1 - (user.get("data_changes") or 0)
         change_note = {"ru": f"Изменить данные: {'1 раз осталось' if changes_left > 0 else 'только через @aeng0'}", "de": f"Daten ändern: {'1x möglich' if changes_left > 0 else 'nur über @aeng0'}", "en": f"Change data: {'1 time left' if changes_left > 0 else 'only via @aeng0'}"}
-        info = {
-            "ru": f"⚙️ Настройки
-
-Имя: {user.get('name','-')}
-Дата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}
-Статус: {status_map['ru']}
-{change_note['ru']}",
-            "de": f"⚙️ Einstellungen
-
-Name: {user.get('name','-')}
-Geburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}
-Status: {status_map['de']}
-{change_note['de']}",
-            "en": f"⚙️ Settings
-
-Name: {user.get('name','-')}
-Date of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}
-Status: {status_map['en']}
-{change_note['en']}"
-        }
+        ru_info = "⚙️ Настройки\n\nИмя: " + str(user.get("name","-")) + "\nДата рождения: " + str(user.get("day")) + "." + str(user.get("month")) + "." + str(user.get("year")) + "\nСтатус: " + status_map["ru"] + "\n" + change_note["ru"]
+        de_info = "⚙️ Einstellungen\n\nName: " + str(user.get("name","-")) + "\nGeburtsdatum: " + str(user.get("day")) + "." + str(user.get("month")) + "." + str(user.get("year")) + "\nStatus: " + status_map["de"] + "\n" + change_note["de"]
+        en_info = "⚙️ Settings\n\nName: " + str(user.get("name","-")) + "\nDate of birth: " + str(user.get("day")) + "." + str(user.get("month")) + "." + str(user.get("year")) + "\nStatus: " + status_map["en"] + "\n" + change_note["en"]
+        info = {"ru": ru_info, "de": de_info, "en": en_info}
         btns = [
             [InlineKeyboardButton("📋 Правила" if lang=="ru" else ("📋 Regeln" if lang=="de" else "📋 Rules"), callback_data="btn_rules")],
             [InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay")],
