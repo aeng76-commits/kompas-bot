@@ -461,10 +461,12 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, no_date_msg.get(lang, no_date_msg["ru"]))
             return
         if has_access(user):
-            prompt = get_profile_prompt(lang, user, section)
-            response = client.messages.create(model="claude-haiku-4-5", max_tokens=tokens[data], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-            for part in split_message(response.content[0].text):
-                await context.bot.send_message(user_id, part, parse_mode="HTML")
+            prompts = get_profile_prompts_list(lang, user, section)
+            for p in prompts:
+                resp = client.messages.create(model="claude-haiku-4-5", max_tokens=600, system=p, messages=[{"role": "user", "content": "Напиши"}])
+                txt = clean_text(resp.content[0].text)
+                if txt:
+                    await context.bot.send_message(user_id, txt, parse_mode="HTML")
         else:
             if not check_free_limit(user_id, section):
                 await context.bot.send_message(user_id, limit_msg.get(lang, limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
