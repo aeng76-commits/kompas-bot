@@ -846,6 +846,57 @@ async def admin_grant(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user(target_id, paid_until=paid_until)
     await update.message.reply_text(f"OK: доступ для {target_id} на {days} дней до {paid_until.strftime('%d.%m.%Y')}.")
 
+async def send_daily_messages(context):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    users_list = cur.fetchall()
+    cur.close()
+    conn.close()
+    for row in users_list:
+        uid, name, day, month, year, lang, gender = row
+        if not day:
+            continue
+        try:
+            user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
+            ctx = build_profile_context(user)
+            mi = ctx["mi"]
+            model_name = mi.get("name", "") if isinstance(mi, dict) else ""
+            model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
+            lf = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "")
+            g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
+
+            sys1 = f"""{lf}
+Ты ассистент Внутренний Компас. Сегодня {ctx['today']}.
+Имя: {name}. {g}. Модель мышления: {model_name}.
+Личный день: {ctx['day_text']}
+Личный месяц: {ctx['month_text'][:200]}
+
+Напиши ровно 3 рекомендации на сегодня для {name}.
+Начни с тега <b>🌿 Рекомендации на сегодня</b>.
+Каждая рекомендация — отдельный абзац. Конкретно, применимо, без клише.
+ТЫ. {g}. Без markdown звёздочек."""
+
+            sys2 = f"""{lf}
+Ты ассистент Внутренний Компас. Сегодня {ctx['today']}.
+Имя: {name}. {g}. Модель мышления: {model_name}. Риски: {model_risks}.
+Личный день: {ctx['day_text']}
+
+Напиши ровно 3 риска на сегодня для {name}.
+Начни с тега <b>🔺 Риски на сегодня</b>.
+Каждый риск — отдельный абзац. Мягко, с пониманием.
+ТЫ. {g}. Без markdown звёздочек."""
+
+            r1 = client.messages.create(model="claude-haiku-4-5", max_tokens=500, system=sys1, messages=[{"role": "user", "content": "Напиши"}])
+            await context.bot.send_message(uid, clean_text(r1.content[0].text), parse_mode="HTML")
+
+            r2 = client.messages.create(model="claude-haiku-4-5", max_tokens=500, system=sys2, messages=[{"role": "user", "content": "Напиши"}])
+            await context.bot.send_message(uid, clean_text(r2.content[0].text), parse_mode="HTML")
+
+            await show_menu(context, uid, lang)
+        except Exception as e:
+            print(f"Daily msg error {uid}: {e}", flush=True)
+
 if __name__ == "__main__":
     init_db()
     try:
@@ -854,6 +905,8 @@ if __name__ == "__main__":
     except:
         pass
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    import datetime as dt
+    app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("reset_user", admin_reset))
     app.add_handler(CommandHandler("grant_access", admin_grant))
