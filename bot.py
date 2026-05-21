@@ -111,7 +111,7 @@ def increment_usage(user_id, section):
     save_user(user_id, daily_usage=usage)
 
 RULES = {
-    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога или юриста.\n2. Ответственность за решения остаётся за тобой.\n3. Твои данные сохраняются и используются только для твоего анализа.\n4. Подписка оформляется вручную через @aeng0.",
+    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Твои имя и дата рождения сохраняются один раз и не могут быть изменены самостоятельно.\n4. Твои данные используются только для твоего анализа и никому не передаются.\n5. Подписка продлевается автоматически. Отменить можно в любой момент — изменения вступают в силу в конце текущего периода.",
     "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung fuer Entscheidungen liegt bei dir.\n3. Deine Daten werden nur fuer deine Analyse gespeichert.\n4. Das Abonnement wird manuell ueber @aeng0 eingerichtet.",
     "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your data is stored and used only for your analysis.\n4. Subscription is set up manually via @aeng0."
 }
