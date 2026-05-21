@@ -558,16 +558,53 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "de": ("Vollzugang ✅" if is_paid(user) else ("Testphase 🌿" if is_trial_active(user) else "Zugang beendet 🔺")),
             "en": ("Full access ✅" if is_paid(user) else ("Trial 🌿" if is_trial_active(user) else "Access ended 🔺")),
         }
+        changes_left = 1 - (user.get("data_changes") or 0)
+        change_note = {"ru": f"Изменить данные: {'1 раз осталось' if changes_left > 0 else 'только через @aeng0'}", "de": f"Daten ändern: {'1x möglich' if changes_left > 0 else 'nur über @aeng0'}", "en": f"Change data: {'1 time left' if changes_left > 0 else 'only via @aeng0'}"}
         info = {
-            "ru": f"Имя: {user.get('name','-')}\nДата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}\nСтатус: {status_map['ru']}",
-            "de": f"Name: {user.get('name','-')}\nGeburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}\nStatus: {status_map['de']}",
-            "en": f"Name: {user.get('name','-')}\nDate of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}\nStatus: {status_map['en']}"
+            "ru": f"⚙️ Настройки
+
+Имя: {user.get('name','-')}
+Дата рождения: {user.get('day')}.{user.get('month')}.{user.get('year')}
+Статус: {status_map['ru']}
+{change_note['ru']}",
+            "de": f"⚙️ Einstellungen
+
+Name: {user.get('name','-')}
+Geburtsdatum: {user.get('day')}.{user.get('month')}.{user.get('year')}
+Status: {status_map['de']}
+{change_note['de']}",
+            "en": f"⚙️ Settings
+
+Name: {user.get('name','-')}
+Date of birth: {user.get('day')}.{user.get('month')}.{user.get('year')}
+Status: {status_map['en']}
+{change_note['en']}"
         }
         btns = [
+            [InlineKeyboardButton("📋 Правила" if lang=="ru" else ("📋 Regeln" if lang=="de" else "📋 Rules"), callback_data="btn_rules")],
             [InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay")],
-            [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache aendern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
+            [InlineKeyboardButton("✏️ Изменить данные" if lang=="ru" else ("✏️ Daten ändern" if lang=="de" else "✏️ Change data"), callback_data="btn_change_data")],
+            [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache ändern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
+            [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
         ]
         await query.edit_message_text(info.get(lang, info["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+
+    elif data == "btn_rules":
+        await query.edit_message_text(RULES[lang], reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data="btn_settings")]]))
+
+    elif data == "btn_change_data":
+        changes_left = 1 - (user.get("data_changes") or 0)
+        if changes_left <= 0:
+            msg = {"ru": "Ты уже использовала возможность изменить данные. Для изменений напиши @aeng0.", "de": "Du hast die Möglichkeit bereits genutzt. Schreibe @aeng0.", "en": "You have already used your one change. Contact @aeng0."}
+            await query.edit_message_text(msg.get(lang, msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Назад" if lang=="ru" else "◀️ Back", callback_data="btn_settings")]]))
+            return
+        msg = {"ru": "Напиши новое имя или дату рождения (ДД.ММ.ГГГГ). Это можно сделать только 1 раз.", "de": "Schreibe deinen neuen Namen oder dein Geburtsdatum (TT.MM.JJJJ). Dies ist nur 1x möglich.", "en": "Write your new name or date of birth (DD.MM.YYYY). This can only be done once."}
+        save_user(user_id, lang=lang)
+        user_sessions[user_id] = [{"role": "assistant", "content": "change_data"}]
+        await query.edit_message_text(msg.get(lang, msg["ru"]))
+
+    elif data == "btn_menu_home":
+        await show_menu(context, user_id, lang)
 
     elif data == "btn_lang":
         keyboard = [
@@ -605,7 +642,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "de": f"Tarif: {label}\n\nOption 1 — PayPal:\n{paypal_url}\n\nOption 2 — Bankueberweisung (SEPA):\n{SEPA}\nVerwendungszweck: {label}\n\nNach der Zahlung schreibe @aeng0 — Zugang wird innerhalb von 24 Stunden aktiviert.",
             "en": f"Plan: {label}\n\nOption 1 — PayPal:\n{paypal_url}\n\nOption 2 — Bank transfer (SEPA):\n{SEPA}\nReference: {label}\n\nAfter payment write @aeng0 — access will be activated within 24 hours."
         }
-        btns = [[InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurueck" if lang=="de" else "◀️ Back"), callback_data="btn_pay")]]
+        btns = [
+            [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data="btn_pay")],
+            [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
+        ]
         await query.edit_message_text(texts.get(lang, texts["ru"]), reply_markup=InlineKeyboardMarkup(btns))
 
 async def gender_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -720,6 +760,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         compass_state[user_id] = state
         user_sessions[user_id].append({"role": "assistant", "content": reply})
         await update.message.reply_text(reply, parse_mode="HTML")
+        return
+
+    # Изменение данных
+    if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_data":
+        changes_left = 1 - (user.get("data_changes") or 0)
+        if changes_left <= 0:
+            user_sessions[user_id] = []
+            await show_menu(context, user_id, lang)
+            return
+        m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
+        if m:
+            save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), data_changes=(user.get("data_changes") or 0) + 1)
+            msg = {"ru": "Дата рождения обновлена ✅", "de": "Geburtsdatum aktualisiert ✅", "en": "Date of birth updated ✅"}
+        else:
+            save_user(user_id, name=user_text.strip(), data_changes=(user.get("data_changes") or 0) + 1)
+            msg = {"ru": f"Имя обновлено на {user_text.strip()} ✅", "de": f"Name auf {user_text.strip()} aktualisiert ✅", "en": f"Name updated to {user_text.strip()} ✅"}
+        user_sessions[user_id] = []
+        await update.message.reply_text(msg.get(lang, msg["ru"]))
+        await show_menu(context, user_id, lang)
         return
 
     # Имя
