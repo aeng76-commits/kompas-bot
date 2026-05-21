@@ -161,7 +161,9 @@ def clean_text(text):
 
 def split_message(text, max_length=4000):
     text = clean_text(text)
-    if "・・・・・・・・・・" in text:
+    if "===БЛОК===" in text:
+        segments = text.split("===БЛОК===")
+    elif "・・・・・・・・・・" in text:
         segments = text.split("・・・・・・・・・・")
     else:
         segments = re.split(r'(?=\n[🌟🧭📍☀️💡✨🌿🔺🌱])', text)
