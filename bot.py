@@ -621,16 +621,64 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         label = descriptions[lang][plan]
         paypal_url = PAYPAL_LINKS[plan]
-        texts = {
-            "ru": f"Тариф: {label}\n\nСпособ 1 — PayPal:\n{paypal_url}\n\nСпособ 2 — Банковский перевод (SEPA):\n{SEPA}\nНазначение: {label}\n\nПосле оплаты напиши @aeng0 — активирую в течение 24 часов.",
-            "de": f"Tarif: {label}\n\nOption 1 — PayPal:\n{paypal_url}\n\nOption 2 — Bankueberweisung (SEPA):\n{SEPA}\nVerwendungszweck: {label}\n\nNach der Zahlung schreibe @aeng0 — Zugang wird innerhalb von 24 Stunden aktiviert.",
-            "en": f"Plan: {label}\n\nOption 1 — PayPal:\n{paypal_url}\n\nOption 2 — Bank transfer (SEPA):\n{SEPA}\nReference: {label}\n\nAfter payment write @aeng0 — access will be activated within 24 hours."
+        header = {"ru": f"Тариф: {label}
+
+Выбери способ оплаты:", "de": f"Tarif: {label}
+
+Wähle die Zahlungsmethode:", "en": f"Plan: {label}
+
+Choose payment method:"}
+        btns = [
+            [InlineKeyboardButton("💳 PayPal", url=paypal_url)],
+            [InlineKeyboardButton("🏦 Банковский перевод (SEPA)" if lang=="ru" else ("🏦 Banküberweisung (SEPA)" if lang=="de" else "🏦 Bank transfer (SEPA)"), callback_data=f"sepa_{plan}")],
+            [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data="btn_pay")],
+        ]
+        await query.edit_message_text(header.get(lang, header["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+
+    elif data.startswith("sepa_"):
+        plan = data.replace("sepa_", "")
+        descriptions = {
+            "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
+            "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
+            "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
+        }
+        label = descriptions[lang][plan]
+        sepa_text = {
+            "ru": f"Банковский перевод (SEPA)
+
+Сумма: {label}
+IBAN: DE28 5002 4024 4782 1216 01
+Bank: C24 Bank
+Получатель: Alexandra Engel
+Назначение: Внутренний Компас {label}
+
+После оплаты напиши администратору для активации доступа.",
+            "de": f"Banküberweisung (SEPA)
+
+Betrag: {label}
+IBAN: DE28 5002 4024 4782 1216 01
+Bank: C24 Bank
+Empfänger: Alexandra Engel
+Verwendungszweck: Innerer Kompass {label}
+
+Nach der Zahlung schreibe dem Administrator zur Aktivierung.",
+            "en": f"Bank transfer (SEPA)
+
+Amount: {label}
+IBAN: DE28 5002 4024 4782 1216 01
+Bank: C24 Bank
+Recipient: Alexandra Engel
+Reference: Inner Compass {label}
+
+After payment write to the administrator for activation."
         }
         btns = [
-            [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data="btn_pay")],
+            [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
+            [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data=f"pay_{plan}")],
             [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
         ]
-        await query.edit_message_text(texts.get(lang, texts["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+        await query.edit_message_text(sepa_text.get(lang, sepa_text["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+
 
 async def gender_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
