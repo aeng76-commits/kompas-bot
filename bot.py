@@ -809,12 +809,13 @@ async def compass_yn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "compass_yes":
         compass_state.pop(user_id, None)
         user_sessions[user_id] = []
-        await query.edit_message_text({"ru": "Рада помочь!", "de": "Gerne!", "en": "Glad to help!"}.get(lang, ""))
+        await query.edit_message_text({"ru": "Рада помочь! 🌿", "de": "Gerne!", "en": "Glad to help!"}.get(lang, ""))
         await show_menu(context, user_id, lang)
     else:
-        compass_state[user_id] = compass_state.get(user_id, {})
-        compass_state[user_id]["clarify_mode"] = True
-        compass_state[user_id]["clarify_count"] = 0
+        state = compass_state.get(user_id, {})
+        state["stage"] = "clarify"
+        state["clarify_count"] = 0
+        compass_state[user_id] = state
         texts = {"ru": "Хорошо. Что именно осталось непонятным?", "de": "Okay. Was genau ist unklar geblieben?", "en": "Okay. What exactly is still unclear?"}
         msg = texts.get(lang, texts["ru"])
         user_sessions[user_id].append({"role": "assistant", "content": msg})
@@ -952,7 +953,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             clarify_count = state.get("clarify_count", 0)
 
             if clarify_count >= 3:
-                # Финальный анализ и меню
+                # Финальный анализ после уточнений
+                final_sys = f"""{lf}
+Ты ассистент Внутренний Компас.
+{context_block}
+На основе всего разговора дай финальный краткий анализ — что стало яснее, и 2-3 практических шага.
+Тепло, без оценок. ТЫ. {g}."""
+                resp_final = client.messages.create(
+                    model="claude-sonnet-4-6", max_tokens=800,
+                    system=final_sys, messages=user_sessions[user_id]
+                )
+                await update.message.reply_text(clean_text(resp_final.content[0].text), parse_mode="HTML")
                 compass_state.pop(user_id, None)
                 user_sessions[user_id] = []
                 await show_menu(context, user_id, lang)
