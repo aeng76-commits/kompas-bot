@@ -1028,6 +1028,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_sessions[user_id].append({"role": "assistant", "content": reply})
     await update.message.reply_text(reply, parse_mode="HTML")
 
+async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT user_id, name, lang, trial_started_at, paid_until FROM users ORDER BY trial_started_at DESC LIMIT 20')
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    if not rows:
+        await update.message.reply_text('Пользователей нет.')
+        return
+    text = 'Пользователи:
+
+'
+    for row in rows:
+        uid, name, lang, trial, paid = row
+        status = 'Платный' if paid and paid.replace(tzinfo=None) > datetime.datetime.now() else 'Пробный'
+        text += f'{name} ({lang}) — {uid} — {status}
+'
+    await update.message.reply_text(text)
+
 async def admin_reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -1119,6 +1141,7 @@ if __name__ == "__main__":
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("users", admin_users))
     app.add_handler(CommandHandler("reset_user", admin_reset))
     app.add_handler(CommandHandler("grant_access", admin_grant))
     app.add_handler(CallbackQueryHandler(agree_cb, pattern="^(agree|disagree)$"))
