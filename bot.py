@@ -670,12 +670,17 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=get_upgrade_keyboard(lang)
             )
             return
-        compass_state[user_id] = {"q_count": 0, "clarify_mode": False}
+        compass_state[user_id] = {"stage": "initial", "q_count": 0, "clarify_count": 0, "topic": ""}
         user_sessions[user_id] = []
-        start_q = {"ru": "Расскажи — что сейчас происходит в твоей жизни? С чем хочешь разобраться?", "de": "Erzaehl mir — was passiert gerade in deinem Leben? Womit moechtest du dich auseinandersetzen?", "en": "Tell me — what's happening in your life right now? What would you like to figure out?"}
+        start_q = {
+            "ru": "Расскажи — что сейчас занимает твои мысли больше всего? Какую ситуацию или вопрос ты хочешь прояснить?",
+            "de": "Erzaehl mir — was beschaeftigt dich gerade am meisten? Welche Situation oder Frage moechtest du klaeren?",
+            "en": "Tell me — what's been on your mind the most lately? What situation or question would you like to clarify?"
+        }
         msg = start_q.get(lang, start_q["ru"])
         user_sessions[user_id].append({"role": "assistant", "content": msg})
         await query.edit_message_text(msg)
+
 
     elif data == "btn_settings":
         if not user:
@@ -832,84 +837,148 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Компас: режим диалога
     if user_id in compass_state:
         state = compass_state[user_id]
-        q_count = state.get("q_count", 0)
-        clarify_mode = state.get("clarify_mode", False)
+        stage = state.get("stage", "initial")
         ctx = build_profile_context(user) if user.get("day") else {}
         mi = ctx.get("mi", {})
-        profile_context = f"Имя: {user.get('name','')}, тип: {mi.get('name','')}.\nСильные стороны: {mi.get('strengths','')}. Риски: {mi.get('risks','')}.\nГод: {ctx.get('year_text','')}. Месяц: {ctx.get('month_text','')}."
-        lang_only = f"RESPOND IN {'Russian' if lang=='ru' else ('German' if lang=='de' else 'English')} ONLY."
+        model_name = mi.get("name", "") if isinstance(mi, dict) else ""
+        model_profile = mi.get("profile", "") if isinstance(mi, dict) else str(mi)
+        model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
+        lf = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "")
+        g = "женские окончания" if user.get("gender","f") == "f" else "мужские окончания"
 
-        if clarify_mode:
+        context_block = f"""Имя: {user.get('name','')}. {g}.
+Модель мышления: {model_name}. {model_profile}
+Риски: {model_risks}
+Личный год: {ctx.get('year_text','')}
+Личный месяц: {ctx.get('month_text','')}
+Личный день: {ctx.get('day_text','')}"""
+
+        if stage == "questions":
+            q_count = state.get("q_count", 0)
+            topic = state.get("topic", "")
+
+            if q_count >= 5:
+                # Анализ после 5 вопросов
+                analysis_sys = f"""{lf}
+Ты ассистент Внутренний Компас.
+{context_block}
+
+Тема которую человек хочет прояснить: {topic}
+
+На основе всего разговора дай глубокий персональный анализ ситуации.
+Учти модель мышления, личный год и месяц — покажи как они влияют на эту ситуацию.
+
+СТРУКТУРА:
+Два-три абзаца анализа — что происходит на самом деле, как модель мышления влияет на эту ситуацию.
+Затем 3-4 конкретных рекомендации подходящих именно этой модели мышления и текущему периоду.
+
+СТИЛЬ: тёплый, глубокий, без диагнозов. Говори как умный друг который хорошо тебя знает.
+ЗАПРЕЩЕНО: клише, оценки, слова напряжение/хаос/нестабильность, markdown."""
+
+                resp = client.messages.create(
+                    model="claude-sonnet-4-6", max_tokens=1500,
+                    system=analysis_sys, messages=user_sessions[user_id]
+                )
+                analysis_text = clean_text(resp.content[0].text)
+                await update.message.reply_text(analysis_text, parse_mode="HTML")
+
+                understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
+                btns = [[
+                    InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="compass_yes"),
+                    InlineKeyboardButton("❓ Нет" if lang=="ru" else ("❓ Nein" if lang=="de" else "❓ No"), callback_data="compass_no")
+                ]]
+                await update.message.reply_text(understood.get(lang, understood["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+                state["stage"] = "after_analysis"
+                state["analysis"] = analysis_text
+                compass_state[user_id] = state
+                return
+
+            # Задаём следующий вопрос
+            q_sys = f"""{lf}
+Ты ассистент Внутренний Компас. Ведёшь диалог с {user.get('name','')}.
+{context_block}
+
+Тема: {topic}
+Это вопрос {q_count + 1} из 5.
+
+Задай ОДИН глубокий вопрос который поможет человеку самому осознать что происходит.
+Вопрос должен быть таким чтобы человек думал перед ответом и отвечал развёрнуто.
+Сначала дай короткий живой отклик на предыдущий ответ (1 предложение), потом вопрос.
+Учитывай модель мышления при формулировке вопроса.
+ТЫ. {g}. Тепло и без оценок."""
+
+            resp = client.messages.create(
+                model="claude-sonnet-4-6", max_tokens=300,
+                system=q_sys, messages=user_sessions[user_id]
+            )
+            reply = clean_text(resp.content[0].text)
+            state["q_count"] = q_count + 1
+            compass_state[user_id] = state
+            user_sessions[user_id].append({"role": "assistant", "content": reply})
+            await update.message.reply_text(reply)
+            return
+
+        elif stage == "initial":
+            # Первый ответ — тема определена
+            state["topic"] = user_text
+            state["stage"] = "questions"
+            state["q_count"] = 0
+
+            first_q_sys = f"""{lf}
+Ты ассистент Внутренний Компас. Ведёшь диалог с {user.get('name','')}.
+{context_block}
+
+Человек хочет прояснить: {user_text}
+
+Задай ПЕРВЫЙ глубокий вопрос который поможет лучше понять суть ситуации.
+Вопрос должен быть таким чтобы человек думал и отвечал развёрнуто.
+Сначала покажи что услышал (1 предложение), потом вопрос.
+Учитывай модель мышления при формулировке.
+ТЫ. {g}. Тепло, без оценок."""
+
+            resp = client.messages.create(
+                model="claude-sonnet-4-6", max_tokens=300,
+                system=first_q_sys, messages=user_sessions[user_id]
+            )
+            reply = clean_text(resp.content[0].text)
+            state["q_count"] = 1
+            compass_state[user_id] = state
+            user_sessions[user_id].append({"role": "assistant", "content": reply})
+            await update.message.reply_text(reply)
+            return
+
+        elif stage == "clarify":
+            # Уточняющие вопросы после "нет"
             clarify_count = state.get("clarify_count", 0)
-            if clarify_count >= 2:
+
+            if clarify_count >= 3:
+                # Финальный анализ и меню
                 compass_state.pop(user_id, None)
+                user_sessions[user_id] = []
                 await show_menu(context, user_id, lang)
                 return
-            sys = f"{profile_context}\nЧеловек сказал что ему что-то непонятно: \"{user_text}\"\nЗадай ОДИН мягкий уточняющий вопрос. ТЫ. Коротко. {lang_only}"
-            resp = client.messages.create(model="claude-haiku-4-5", max_tokens=200, system=sys, messages=user_sessions[user_id])
+
+            clarify_sys = f"""{lf}
+Ты ассистент Внутренний Компас.
+{context_block}
+
+Человек сказал что что-то не понятно: "{user_text}"
+Это уточняющий вопрос {clarify_count + 1} из 3.
+
+Задай ОДИН вопрос чтобы прояснить что именно не понятно.
+Коротко и тепло. ТЫ. {g}."""
+
+            resp = client.messages.create(
+                model="claude-sonnet-4-6", max_tokens=200,
+                system=clarify_sys, messages=user_sessions[user_id]
+            )
             reply = clean_text(resp.content[0].text)
             state["clarify_count"] = clarify_count + 1
             compass_state[user_id] = state
             user_sessions[user_id].append({"role": "assistant", "content": reply})
-            await update.message.reply_text(reply, parse_mode="HTML")
+            await update.message.reply_text(reply)
             return
 
-        if q_count >= 5:
-            analysis_sys = f"""{profile_context}
-Человек рассказал о своей ситуации. Дай глубокий персональный анализ.
-СТРУКТУРА (используй ・・・・・・・・・・ между блоками):
-🧭 Что сейчас происходит — назови суть ситуации точно
-・・・・・・・・・・
-✨ Где твоя сила в этом — конкретно для этого человека
-・・・・・・・・・・
-🔺 Что может мешать — честно и с пониманием
-・・・・・・・・・・
-🌱 Конкретные шаги на эту неделю — 2-3 действия
-ТЫ. Живой стиль. Чистый текст. {lang_only}"""
-            resp = client.messages.create(model="claude-haiku-4-5", max_tokens=3000, system=analysis_sys, messages=user_sessions[user_id])
-            for part in split_message(resp.content[0].text):
-                await update.message.reply_text(part, parse_mode="HTML")
-            understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
-            btns = [[
-                InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="compass_yes"),
-                InlineKeyboardButton("❓ Нет" if lang=="ru" else ("❓ Nein" if lang=="de" else "❓ No"), callback_data="compass_no")
-            ]]
-            await update.message.reply_text(understood.get(lang, understood["ru"]), reply_markup=InlineKeyboardMarkup(btns))
-            state["q_count"] = 99
-            compass_state[user_id] = state
-            return
-
-        q_sys = f"""{profile_context}
-Ты ведёшь диалог с {user.get('name','')} чтобы понять её ситуацию. Это вопрос {q_count+1} из 5.
-Сначала дай короткий живой отклик на то что человек сказал (1-2 предложения).
-Потом задай ОДИН следующий вопрос — логично вытекающий из ответа.
-ТЫ. Просто. Тепло. {lang_only}"""
-        resp = client.messages.create(model="claude-haiku-4-5", max_tokens=200, system=q_sys, messages=user_sessions[user_id])
-        reply = clean_text(resp.content[0].text)
-        state["q_count"] = q_count + 1
-        compass_state[user_id] = state
-        user_sessions[user_id].append({"role": "assistant", "content": reply})
-        await update.message.reply_text(reply, parse_mode="HTML")
-        return
-
-    # Изменение данных
-    if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_data":
-        changes_left = 1 - (user.get("data_changes") or 0)
-        if changes_left <= 0:
-            user_sessions[user_id] = []
-            await show_menu(context, user_id, lang)
-            return
-        m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
-        if m:
-            save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), data_changes=(user.get("data_changes") or 0) + 1)
-            msg = {"ru": "Дата рождения обновлена ✅", "de": "Geburtsdatum aktualisiert ✅", "en": "Date of birth updated ✅"}
-        else:
-            save_user(user_id, name=user_text.strip(), data_changes=(user.get("data_changes") or 0) + 1)
-            msg = {"ru": f"Имя обновлено на {user_text.strip()} ✅", "de": f"Name auf {user_text.strip()} aktualisiert ✅", "en": f"Name updated to {user_text.strip()} ✅"}
-        user_sessions[user_id] = []
-        await update.message.reply_text(msg.get(lang, msg["ru"]))
-        await show_menu(context, user_id, lang)
-        return
 
     # Имя
     if not user.get("name"):
