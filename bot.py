@@ -858,7 +858,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             q_count = state.get("q_count", 0)
             topic = state.get("topic", "")
 
-            if q_count >= 5:
+            if q_count >= 5 or "готов" in user_text.lower() or "давай" in user_text.lower():
                 # Анализ после 5 вопросов
                 analysis_sys = f"""{lf}
 Ты ассистент Внутренний Компас.
@@ -906,6 +906,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Вопрос должен быть таким чтобы человек думал перед ответом и отвечал развёрнуто.
 Сначала дай короткий живой отклик на предыдущий ответ (1 предложение), потом вопрос.
 Учитывай модель мышления при формулировке вопроса.
+НЕ спрашивай "Готова к анализу?" или подобное — просто задавай вопрос.
 ТЫ. {g}. Тепло и без оценок."""
 
             resp = client.messages.create(
