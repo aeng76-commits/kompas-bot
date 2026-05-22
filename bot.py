@@ -858,7 +858,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             q_count = state.get("q_count", 0)
             topic = state.get("topic", "")
 
-            if q_count >= 5 or "готов" in user_text.lower() or "давай" in user_text.lower():
+            if q_count >= 5:
                 # Анализ после 5 вопросов
                 analysis_sys = f"""{lf}
 Ты ассистент Внутренний Компас.
