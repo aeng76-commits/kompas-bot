@@ -1040,9 +1040,7 @@ async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not rows:
         await update.message.reply_text('Пользователей нет.')
         return
-    text = 'Пользователи:
-
-'
+    text = "Пользователи:\n\n"
     for row in rows:
         uid, name, lang, trial, paid = row
         status = 'Платный' if paid and paid.replace(tzinfo=None) > datetime.datetime.now() else 'Пробный'
