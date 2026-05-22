@@ -1044,8 +1044,7 @@ async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for row in rows:
         uid, name, lang, trial, paid = row
         status = 'Платный' if paid and paid.replace(tzinfo=None) > datetime.datetime.now() else 'Пробный'
-        text += f'{name} ({lang}) — {uid} — {status}
-'
+        text += f"{name} ({lang}) — {uid} — {status}\n"
     await update.message.reply_text(text)
 
 async def admin_reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
