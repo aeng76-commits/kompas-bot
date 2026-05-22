@@ -368,7 +368,7 @@ def get_profile_prompts_list(lang, user, section):
 ЗАПРЕЩЕНО: markdown, оценки, клише, упоминание чисел периодов.
 Обращение: ТЫ. {g}."""
 
-    b = {{
+    b = {
         "me": [
             base_personality + f"""
 
@@ -484,7 +484,7 @@ def get_profile_prompts_list(lang, user, section):
 Начни с этого тега на первой строке.
 Одна конкретная задача для {name}.""",
         ],
-    }}
+    }
     return b.get(section, b["me"])
 
 
