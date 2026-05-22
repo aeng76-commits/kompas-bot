@@ -621,7 +621,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if has_access(user):
             prompts = get_profile_prompts_list(lang, user, section)
             for p in prompts:
-                resp = client.messages.create(model="claude-haiku-4-5", max_tokens=600, system=p, messages=[{"role": "user", "content": "Напиши"}])
+                resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=800, system=p, messages=[{"role": "user", "content": "Напиши"}])
                 txt = clean_text(resp.content[0].text)
                 if txt:
                     await context.bot.send_message(user_id, txt, parse_mode="HTML")
