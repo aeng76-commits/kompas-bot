@@ -289,7 +289,7 @@ def get_profile_prompt(lang, user, section):
 {instruction}
 
 ПРАВИЛА:
-- WRITE ONLY IN {'Russian' if lang == 'ru' else ('German' if lang == 'de' else 'English')}. NO OTHER LANGUAGE.
+- ПИШИ ТОЛЬКО НА {'русском' if lang == 'ru' else ('немецком' if lang == 'de' else 'английском')} ЯЗЫКЕ. НИКАКИХ СЛОВ НА ДРУГИХ ЯЗЫКАХ. АБСОЛЮТНО НИКАКИХ.
 - Обращение: ТЫ, имя точно: {name}, {gender_rule}
 - Живой тёплый разговорный стиль — как умный друг, не психолог
 - Короткие абзацы — максимум 3 предложения
@@ -569,7 +569,7 @@ def get_system_prompt(lang, user):
 Запрещено: нумерология, вибрация, трансформация, вызовы, силы.
 Не называй числа и номера периодов.
 Один вопрос за раз. После каждого ответа — живой отклик, потом следующий вопрос.
-WRITE ONLY IN {'Russian' if lang == 'ru' else ('German' if lang == 'de' else 'English')}."""
+ПИШИ ТОЛЬКО НА {'русском' if lang == 'ru' else ('немецком' if lang == 'de' else 'английском')} ЯЗЫКЕ. НИКАКИХ СЛОВ НА ДРУГИХ ЯЗЫКАХ."""
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
