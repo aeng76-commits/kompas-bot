@@ -968,15 +968,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 analysis_text = clean_text(resp.content[0].text)
                 await update.message.reply_text(analysis_text)
 
-                understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
-                btns = [[
-                    InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="compass_yes"),
-                    InlineKeyboardButton("❓ Нет" if lang=="ru" else ("❓ Nein" if lang=="de" else "❓ No"), callback_data="compass_no")
-                ]]
-                await update.message.reply_text(understood.get(lang, understood["ru"]), reply_markup=InlineKeyboardMarkup(btns))
-                state["stage"] = "after_analysis"
-                state["analysis"] = analysis_text
-                compass_state[user_id] = state
+                compass_state.pop(user_id, None)
+                user_sessions[user_id] = []
                 return
 
             # Задаём следующий вопрос
