@@ -206,7 +206,7 @@ def get_profile_prompt(lang, user, section):
     name = user.get("name", "")
     gender = user.get("gender", "f")
     lang_force = {
-        "ru": "",
+        "ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.",
         "de": "ANTWORTE NUR AUF DEUTSCH. ES IST EIN FEHLER, RUSSISCH ZU VERWENDEN.",
         "en": "RESPOND ONLY IN ENGLISH. DO NOT USE RUSSIAN OR ANY OTHER LANGUAGE."
     }
@@ -306,7 +306,7 @@ def get_profile_prompts_list(lang, user, section):
     name = user.get("name", "")
     gender = user.get("gender", "f")
     g = "женские окончания" if gender == "f" else "мужские окончания"
-    lf = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "")
+    lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "")
 
     model_name = mi.get("name", "") if isinstance(mi, dict) else ""
     model_profile = mi.get("profile", "") if isinstance(mi, dict) else str(mi)
@@ -526,7 +526,7 @@ def get_free_prompt(lang, user, section):
     name = user.get("name", "")
     gender = user.get("gender", "f")
     gender_rule = "женские окончания" if gender == "f" else "мужские окончания"
-    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}
+    lang_force = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}
     hints = {
         "me": f"Напиши {name} тёплый и точный портрет личности — 6-8 предложений. Покажи главную силу и как она проявляется в жизни. Без оценок, без слов 'тяжесть', 'трудно', 'противоречие', 'насилие'. Последнее предложение — живой вопрос который приглашает к размышлению.",
         "year": f"Напиши {name} о главной теме и задаче этого года — 6-8 предложений. Конкретно, без общих слов. Последнее предложение — намёк что полная картина гораздо глубже.",
@@ -548,7 +548,7 @@ def get_system_prompt(lang, user):
     gender = user.get("gender", "f") if user else "f"
     gender_rule = "женские окончания: умная, сильная, готова" if gender == "f" else "мужские окончания: умный, сильный, готов"
     today = datetime.datetime.now().strftime("%d.%m.%Y")
-    lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}
+    lang_force = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}
     profile_block = ""
     if user and user.get("day"):
         ctx = build_profile_context(user)
@@ -930,7 +930,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         model_name = mi.get("name", "") if isinstance(mi, dict) else ""
         model_profile = mi.get("profile", "") if isinstance(mi, dict) else str(mi)
         model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
-        lf = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "")
+        lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "")
         g = "женские окончания" if user.get("gender","f") == "f" else "мужские окончания"
 
         context_block = f"""Имя: {user.get('name','')}. {g}.
@@ -1193,7 +1193,7 @@ async def send_daily_messages(context):
             mi = ctx["mi"]
             model_name = mi.get("name", "") if isinstance(mi, dict) else ""
             model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
-            lf = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "")
+            lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "")
             g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
 
             sys1 = f"""{lf}
