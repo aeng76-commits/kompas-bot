@@ -1244,14 +1244,15 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "")
-    PORT = int(os.environ.get("PORT", 8443))
+    PORT = int(os.environ.get("PORT", 10000))
     if WEBHOOK_URL:
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
             url_path=TELEGRAM_TOKEN,
             webhook_url=f"{WEBHOOK_URL}/{TELEGRAM_TOKEN}",
-            drop_pending_updates=True
+            drop_pending_updates=True,
+            secret_token=None
         )
     else:
         app.run_polling(stop_signals=None, drop_pending_updates=True)
