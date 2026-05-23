@@ -149,7 +149,7 @@ def increment_usage(user_id, section):
 
 RULES = {
     "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Твои имя и дата рождения сохраняются и используются только для твоего анализа. Изменить можно самостоятельно 1 раз, после этого только через администратора.\n4. Твои данные никому не передаются.\n5. Подписка продлевается автоматически. Отменить можно в любой момент.",
-    "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung fuer Entscheidungen liegt bei dir.\n3. Dein Name und Geburtsdatum werden gespeichert und nur fuer deine Analyse verwendet. Du kannst sie einmal selbst aendern, danach nur durch den Administrator.\n4. Deine Daten werden nicht weitergegeben.\n5. Das Abonnement verlaengert sich automatisch. Du kannst jederzeit kuendigen.",
+    "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung für Entscheidungen liegt bei dir.\n3. Dein Name und Geburtsdatum werden gespeichert und nur für deine Analyse verwendet. Du kannst sie einmal selbst ändern, danach nur durch den Administrator.\n4. Deine Daten werden nicht weitergegeben.\n5. Das Abonnement verlängert sich automatisch. Du kannst jederzeit kündigen.",
     "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your name and date of birth are stored and used only for your analysis. You can change them once yourself, after that only through the administrator.\n4. Your data is not shared with anyone.\n5. Subscription renews automatically. You can cancel at any time."
 }
 
@@ -158,7 +158,7 @@ PAYPAL_LINKS = {
     "6m": "https://www.paypal.me/AlexandraEngel42/78EUR",
     "12m": "https://www.paypal.me/AlexandraEngel42/159EUR"
 }
-SEPA = "IBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfaenger: Alexandra Engel"
+SEPA = "IBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra Engel"
 
 MENU_BUTTONS = {
     "ru": [
@@ -650,7 +650,7 @@ async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     lang = user.get("lang", "ru") if user else "ru"
     if query.data == "disagree":
-        texts = {"ru": "Понятно. Если передумаешь — напиши /start.", "de": "Okay. Wenn du es dir anders ueberlegst — schreibe /start.", "en": "Okay. If you change your mind — write /start."}
+        texts = {"ru": "Понятно. Если передумаешь — напиши /start.", "de": "Okay. Wenn du es dir anders überlegst — schreibe /start.", "en": "Okay. If you change your mind — write /start."}
         await query.edit_message_text(texts.get(lang, texts["ru"]))
         return
     save_user(user_id, agreed=True)
@@ -666,7 +666,7 @@ async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(trial_msg.get(lang, trial_msg["ru"]), reply_markup=trial_btns, parse_mode="HTML")
 
 async def show_menu(context, user_id, lang, text=None):
-    texts = {"ru": "Выбери раздел:", "de": "Waehle einen Bereich:", "en": "Choose a section:"}
+    texts = {"ru": "Выбери раздел:", "de": "Wähle einen Bereich:", "en": "Choose a section:"}
     await context.bot.send_message(user_id, text or texts.get(lang, texts["ru"]), reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"])))
 
 async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -678,7 +678,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     no_date_msg = {"ru": "Сначала введи дату рождения — напиши /start", "de": "Bitte gib dein Geburtsdatum ein — schreibe /start", "en": "Please enter your birthdate — write /start"}
-    upsell_msg = {"ru": "Это лишь начало. Полный анализ — в подписке.", "de": "Das ist nur der Anfang. Vollstaendige Analyse mit Abonnement.", "en": "This is just the beginning. Full analysis with subscription."}
+    upsell_msg = {"ru": "Это лишь начало. Полный анализ — в подписке.", "de": "Das ist nur der Anfang. Vollständige Analyse mit Abonnement.", "en": "This is just the beginning. Full analysis with subscription."}
     limit_msg = {"ru": "Этот раздел уже открыт сегодня — загляни завтра 🌙", "de": "Diesen Bereich hast du heute schon geöffnet — schau morgen wieder rein 🌙", "en": "You've already opened this section today — come back tomorrow 🌙"}
 
     if data in ("btn_me", "btn_year", "btn_month", "btn_day"):
@@ -789,7 +789,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_sessions[user_id] = []
         start_q = {
             "ru": "Расскажи — что сейчас занимает твои мысли больше всего? Какую ситуацию или вопрос ты хочешь прояснить?",
-            "de": "Erzaehl mir — was beschaeftigt dich gerade am meisten? Welche Situation oder Frage moechtest du klaeren?",
+            "de": "Erzähl mir — was beschaeftigt dich gerade am meisten? Welche Situation oder Frage moechtest du klären?",
             "en": "Tell me — what's been on your mind the most lately? What situation or question would you like to clarify?"
         }
         msg = start_q.get(lang, start_q["ru"])
@@ -876,7 +876,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
             "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
         }
-        header = {"ru": "Выбери тариф:", "de": "Waehle einen Tarif:", "en": "Choose a plan:"}
+        header = {"ru": "Выбери тариф:", "de": "Wähle einen Tarif:", "en": "Choose a plan:"}
         btns = [
             [InlineKeyboardButton(descriptions[lang]["1m"], callback_data="pay_1m")],
             [InlineKeyboardButton(f"⭐ {descriptions[lang]['6m']}", callback_data="pay_6m")],
@@ -911,7 +911,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         label = descriptions[lang][plan]
         sepa_text = {
             "ru": "Банковский перевод (SEPA)\n\nСумма: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nПолучатель: Alexandra Engel\nНазначение: Внутренний Компас " + label + "\n\nПосле оплаты напиши администратору для активации доступа.",
-            "de": "Bankueberweisung (SEPA)\n\nBetrag: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfaenger: Alexandra Engel\nVerwendungszweck: Innerer Kompass " + label + "\n\nNach der Zahlung schreibe dem Administrator zur Aktivierung.",
+            "de": "Bankueberweisung (SEPA)\n\nBetrag: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra Engel\nVerwendungszweck: Innerer Kompass " + label + "\n\nNach der Zahlung schreibe dem Administrator zur Aktivierung.",
             "en": "Bank transfer (SEPA)\n\nAmount: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: Inner Compass " + label + "\n\nAfter payment write to the administrator for activation."
         }
         btns = [
@@ -1151,7 +1151,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         gender_btns = {
             "ru": [InlineKeyboardButton("👩 Женский", callback_data="gender_f"), InlineKeyboardButton("👨 Мужской", callback_data="gender_m")],
-            "de": [InlineKeyboardButton("👩 Weiblich", callback_data="gender_f"), InlineKeyboardButton("👨 Maennlich", callback_data="gender_m")],
+            "de": [InlineKeyboardButton("👩 Weiblich", callback_data="gender_f"), InlineKeyboardButton("👨 Männlich", callback_data="gender_m")],
             "en": [InlineKeyboardButton("👩 She/her", callback_data="gender_f"), InlineKeyboardButton("👨 He/him", callback_data="gender_m")],
         }
         await update.message.reply_text(gender_q.get(lang, gender_q["ru"]), reply_markup=InlineKeyboardMarkup([gender_btns.get(lang, gender_btns["ru"])]))
@@ -1168,7 +1168,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "en": "🌿 All set! Each day you have access to:\n\n• Personality — 1 time\n• Personal year — 1 time\n• Personal month — 1 time\n• Personal day — 1 time\n• Let's talk — 1 time\n\nEverything resets tomorrow."
             }
             await update.message.reply_text(welcome_info.get(lang, welcome_info["ru"]))
-            welcome = {"ru": "Готово! Выбери с чего начнём:", "de": "Fertig! Waehle, womit wir beginnen:", "en": "Done! Choose where to start:"}
+            welcome = {"ru": "Готово! Выбери с чего начнём:", "de": "Fertig! Wähle, womit wir beginnen:", "en": "Done! Choose where to start:"}
             await update.message.reply_text(welcome.get(lang, welcome["ru"]), reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"])))
         else:
             err = {"ru": "Напиши дату в формате ДД.ММ.ГГГГ, например 04.10.1976", "de": "Schreibe das Datum im Format TT.MM.JJJJ, z.B. 04.10.1976", "en": "Write the date in format DD.MM.YYYY, e.g. 04.10.1976"}
