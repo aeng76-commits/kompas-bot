@@ -983,7 +983,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             topic = state.get("topic", "")
 
             max_q = 3 if (is_trial_active(user) and not is_paid(user)) else 5
-            print(f"DEBUG compass: q_count={q_count}, max_q={max_q}, trial={is_trial_active(user)}, paid={is_paid(user)}", flush=True)
             if q_count >= max_q:
                 # Анализ после вопросов
                 analysis_sys = f"""{lf}
@@ -1003,19 +1002,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ЗАПРЕЩЕНО: клише, оценки, слова напряжение/хаос/нестабильность, markdown."""
 
                 try:
-                    print(f"Generating analysis, session len: {len(user_sessions[user_id])}", flush=True)
                     analysis_messages = user_sessions[user_id] + [{"role": "user", "content": "Дай полный персональный анализ этой ситуации с рекомендациями."}]
                     resp = client.messages.create(
                         model="claude-sonnet-4-6", max_tokens=1500,
                         system=analysis_sys, messages=analysis_messages
                     )
-                    raw = resp.content[0].text
-                    print(f"RAW analysis: {raw[:200]}", flush=True)
-                    analysis_text = clean_text(raw)
-                    print(f"Analysis generated: {len(analysis_text)} chars", flush=True)
-                    print(f"Sending analysis to user_id={user_id}, text[:50]={analysis_text[:50]}", flush=True)
+                    analysis_text = clean_text(resp.content[0].text)
                     await context.bot.send_message(user_id, analysis_text)
-                    print("Analysis sent", flush=True)
                 except Exception as e:
                     print(f"Analysis error: {e}", flush=True)
                     await update.message.reply_text("Произошла ошибка при генерации анализа. Попробуй ещё раз.")
