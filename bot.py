@@ -1228,14 +1228,8 @@ async def send_daily_messages(context):
             print(f"Daily msg error {uid}: {e}", flush=True)
 
 if __name__ == "__main__":
-    import time
-    time.sleep(5)
+    import os
     init_db()
-    try:
-        import urllib.request
-        urllib.request.urlopen(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/deleteWebhook?drop_pending_updates=true", timeout=10)
-    except:
-        pass
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
@@ -1249,4 +1243,15 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
     app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling(stop_signals=None, drop_pending_updates=True)
+    WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "")
+    PORT = int(os.environ.get("PORT", 8443))
+    if WEBHOOK_URL:
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            url_path=TELEGRAM_TOKEN,
+            webhook_url=f"{WEBHOOK_URL}/{TELEGRAM_TOKEN}",
+            drop_pending_updates=True
+        )
+    else:
+        app.run_polling(stop_signals=None, drop_pending_updates=True)
