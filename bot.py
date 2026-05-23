@@ -425,7 +425,7 @@ def get_profile_prompts_list(lang, user, section):
         "me": [
             base_personality + f"""
 
-Напиши ТОЛЬКО этот блок: <b>✨ Кто ты есть на самом деле</b>
+Напиши ТОЛЬКО этот блок: {"<b>✨ Кто ты есть на самом деле</b>" if lang=="ru" else ("<b>✨ Wer du wirklich bist</b>" if lang=="de" else "<b>✨ Who You Really Are</b>")}
 Начни с этого тега на первой строке.
 3 абзаца. Только о личности {name} — без года, месяца, дня.
 
@@ -439,7 +439,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_personality + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🌿 Твои настоящие сильные стороны</b>
+Напиши ТОЛЬКО этот блок: {"<b>🌿 Твои настоящие сильные стороны</b>" if lang=="ru" else ("<b>🌿 Deine wahren Stärken</b>" if lang=="de" else "<b>🌿 Your True Strengths</b>")}
 Начни с этого тега на первой строке.
 3-4 абзаца. Только о сильных сторонах личности {name} — без года и дня.
 Покажи каждую силу через конкретную ситуацию или образ — не абстрактно.
@@ -448,7 +448,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_personality + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🔺 Где ты можешь себе мешать</b>
+Напиши ТОЛЬКО этот блок: {"<b>🔺 Где ты можешь себе мешать</b>" if lang=="ru" else ("<b>🔺 Wo du dir selbst im Weg stehst</b>" if lang=="de" else "<b>🔺 Where You Can Block Yourself</b>")}
 Начни с этого тега на первой строке.
 3 абзаца. Только о личностных паттернах — без года и дня.
 Покажи механизм — не "ты делаешь X" а "вот что происходит внутри когда..."
@@ -457,7 +457,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_personality + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🌱 Как превратить это в силу</b>
+Напиши ТОЛЬКО этот блок: {"<b>🌱 Как превратить это в силу</b>" if lang=="ru" else ("<b>🌱 Wie du das in Stärke verwandelst</b>" if lang=="de" else "<b>🌱 How to Turn This Into Strength</b>")}
 Начни с этого тега на первой строке.
 2-3 абзаца. Только о личности — без года и дня.
 Покажи как именно {name} с её конкретной моделью мышления может превратить свои слабые стороны в сильные.
@@ -526,7 +526,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🌱 Шаги на ближайшие 2 недели</b>
+Напиши ТОЛЬКО этот блок: {"<b>🌱 Шаги на ближайшие 2 недели</b>" if lang=="ru" else ("<b>🌱 Schritte für die nächsten 2 Wochen</b>" if lang=="de" else "<b>🌱 Steps for the Next 2 Weeks</b>")}
 Начни с этого тега на первой строке.
 Говори ТОЛЬКО о месяце — без упоминания конкретного дня.
 2-3 конкретных простых шага для {name} на ближайшие 2 недели.""",
@@ -534,25 +534,25 @@ def get_profile_prompts_list(lang, user, section):
         "day": [
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🧭 Энергия сегодняшнего дня</b>
+Напиши ТОЛЬКО этот блок: {"<b>🧭 Энергия сегодняшнего дня</b>" if lang=="ru" else ("<b>🧭 Energie des heutigen Tages</b>" if lang=="de" else "<b>🧭 Energy of Today</b>")}
 Начни с этого тега на первой строке.
 Суть дня через призму модели {name}.""",
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🌿 Рекомендации на сегодня</b>
+Напиши ТОЛЬКО этот блок: {"<b>🌿 Рекомендации на сегодня</b>" if lang=="ru" else ("<b>🌿 Empfehlungen für heute</b>" if lang=="de" else "<b>🌿 Recommendations for Today</b>")}
 Начни с этого тега на первой строке.
 2-3 конкретных действия для {name} сегодня.""",
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🔺 Риски на сегодня</b>
+Напиши ТОЛЬКО этот блок: {"<b>🔺 Риски на сегодня</b>" if lang=="ru" else ("<b>🔺 Risiken für heute</b>" if lang=="de" else "<b>🔺 Risks for Today</b>")}
 Начни с этого тега на первой строке.
 2-3 конкретных риска для {name} сегодня.""",
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🌱 Главный фокус дня</b>
+Напиши ТОЛЬКО этот блок: {"<b>🌱 Главный фокус дня</b>" if lang=="ru" else ("<b>🌱 Hauptfokus des Tages</b>" if lang=="de" else "<b>🌱 Main Focus of the Day</b>")}
 Начни с этого тега на первой строке.
 Одна конкретная задача для {name}.""",
         ],
