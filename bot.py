@@ -658,7 +658,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Проверяем общий лимит: max 1 раз каждый раздел в день
             daily = get_daily_usage(user_id)
             total_today = sum(daily.get(s, 0) for s in ["me", "year", "month", "day"])
-            if total_today >= 4:
+            if total_today >= 5:
                 day_limit_msg = {
                     "ru": "На сегодня ты использовала оба бесплатных запроса 🌙\nЗавтра снова будет доступно — или открой полный доступ прямо сейчас.",
                     "de": "Du hast heute beide kostenlosen Anfragen genutzt 🌙\nMorgen geht es weiter — oder schalte jetzt den vollen Zugang frei.",
@@ -674,7 +674,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             increment_usage(user_id, section)
             daily_after = get_daily_usage(user_id)
             total_after = sum(daily_after.get(s, 0) for s in ["me", "year", "month", "day"])
-            remaining = 4 - total_after
+            remaining = 5 - total_after
             free_tokens = {"me": 1000, "year": 900, "month": 900, "day": 800}
             prompt = get_free_prompt(lang, user, section)
             response = client.messages.create(model="claude-sonnet-4-6", max_tokens=free_tokens[section], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
