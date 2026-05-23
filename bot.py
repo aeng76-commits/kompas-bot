@@ -1246,13 +1246,19 @@ if __name__ == "__main__":
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").rstrip("/")
     PORT = int(os.environ.get("PORT", 10000))
     if WEBHOOK_URL:
-        print(f"Starting webhook on port {PORT}, url: {WEBHOOK_URL}/webhook", flush=True)
-        app.run_webhook(
-            listen="0.0.0.0",
-            port=PORT,
-            url_path="/webhook",
-            webhook_url=f"{WEBHOOK_URL}/webhook",
-            drop_pending_updates=True
-        )
+        import asyncio
+        async def main():
+            async with app:
+                await app.bot.delete_webhook(drop_pending_updates=True)
+                await app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
+                await app.start()
+                await app.updater.start_webhook(
+                    listen="0.0.0.0",
+                    port=PORT,
+                    url_path="/webhook"
+                )
+                print(f"Webhook started on port {PORT}", flush=True)
+                await asyncio.Event().wait()
+        asyncio.run(main())
     else:
         app.run_polling(stop_signals=None, drop_pending_updates=True)
