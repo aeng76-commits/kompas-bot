@@ -718,6 +718,21 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
         is_trial = is_trial_active(user) and not is_paid(user)
+        if is_trial:
+            daily = get_daily_usage(user_id)
+            total_today = sum(daily.get(s, 0) for s in ["me", "year", "month", "day", "compass"])
+            if total_today >= 5:
+                day_limit_msg = {
+                    "ru": "На сегодня все разделы уже открыты 🌙\nВозвращайся завтра — или открой полный доступ.",
+                    "de": "Alle Bereiche für heute bereits geöffnet 🌙\nKomm morgen wieder — oder schalte den vollen Zugang frei.",
+                    "en": "All sections opened for today 🌙\nCome back tomorrow — or unlock full access."
+                }
+                await query.edit_message_text(day_limit_msg.get(lang, day_limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                return
+            if daily.get("compass", 0) >= 1:
+                await query.edit_message_text({"ru": "Этот раздел уже открыт сегодня — загляни завтра 🌙", "de": "Diesen Bereich hast du heute schon geöffnet — schau morgen wieder rein 🌙", "en": "You've already opened this section today — come back tomorrow 🌙"}.get(lang, ""))
+                return
+            increment_usage(user_id, "compass")
         compass_state[user_id] = {"stage": "initial", "q_count": 0, "clarify_count": 0, "topic": "", "trial": is_trial}
         user_sessions[user_id] = []
         start_q = {
