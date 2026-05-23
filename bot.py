@@ -706,8 +706,21 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(no_date_msg.get(lang, no_date_msg["ru"]))
             return
         if not has_access(user):
+            had_trial = user.get("trial_started_at") is not None
+            if had_trial:
+                expired_msg = {
+                    "ru": "✨ Твои 72 часа бесплатного доступа завершились.\n\nЕсли было полезно — можешь продолжить. Полный доступ открывает все разделы без ограничений.",
+                    "de": "✨ Deine 72 Stunden kostenlosen Zugangs sind abgelaufen.\n\nWenn es hilfreich war — du kannst weitermachen. Voller Zugang öffnet alle Bereiche ohne Einschränkungen.",
+                    "en": "✨ Your 72 hours of free access have ended.\n\nIf it was helpful — you can continue. Full access opens all sections without limits."
+                }
+            else:
+                expired_msg = {
+                    "ru": "Этот раздел доступен по подписке.",
+                    "de": "Dieser Bereich ist nur mit Abonnement verfügbar.",
+                    "en": "This section requires a subscription."
+                }
             await query.edit_message_text(
-                {"ru": "Этот раздел доступен по подписке.", "de": "Dieser Bereich ist nur mit Abonnement verfuegbar.", "en": "This section requires a subscription."}.get(lang, ""),
+                expired_msg.get(lang, expired_msg["ru"]),
                 reply_markup=get_upgrade_keyboard(lang)
             )
             return
