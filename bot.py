@@ -1262,7 +1262,9 @@ if __name__ == "__main__":
         async def run():
             await app.initialize()
             await app.bot.delete_webhook(drop_pending_updates=True)
-            await app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
+            wh_url = f"{WEBHOOK_URL}/webhook"
+            print(f"Setting webhook: [{wh_url}]", flush=True)
+            await app.bot.set_webhook(url=wh_url)
             await app.start()
             print(f"Webhook set: {WEBHOOK_URL}/webhook", flush=True)
             server = web.Application()
