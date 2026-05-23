@@ -1235,6 +1235,8 @@ async def send_daily_messages(context):
             print(f"Daily msg error {uid}: {e}", flush=True)
 
 if __name__ == "__main__":
+    import time
+    time.sleep(5)
     init_db()
     try:
         import urllib.request
