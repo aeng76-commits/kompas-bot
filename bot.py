@@ -1246,12 +1246,35 @@ if __name__ == "__main__":
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").rstrip("/")
     PORT = int(os.environ.get("PORT", 10000))
     if WEBHOOK_URL:
-        app.run_webhook(
-            listen="0.0.0.0",
-            port=PORT,
-            url_path="/webhook",
-            drop_pending_updates=True,
-            allowed_updates=["message", "callback_query"]
-        )
+        import asyncio
+        from aiohttp import web
+        from telegram import Update
+
+        async def handle(request):
+            data = await request.json()
+            update = Update.de_json(data, app.bot)
+            await app.process_update(update)
+            return web.Response(text="ok")
+
+        async def health(request):
+            return web.Response(text="ok")
+
+        async def run():
+            await app.initialize()
+            await app.bot.delete_webhook(drop_pending_updates=True)
+            await app.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
+            await app.start()
+            print(f"Webhook set: {WEBHOOK_URL}/webhook", flush=True)
+            server = web.Application()
+            server.router.add_post("/webhook", handle)
+            server.router.add_get("/health", health)
+            runner = web.AppRunner(server)
+            await runner.setup()
+            site = web.TCPSite(runner, "0.0.0.0", PORT)
+            await site.start()
+            print(f"Server started on port {PORT}", flush=True)
+            await asyncio.Event().wait()
+
+        asyncio.run(run())
     else:
         app.run_polling(stop_signals=None, drop_pending_updates=True)
