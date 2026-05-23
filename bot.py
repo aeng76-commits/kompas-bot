@@ -685,25 +685,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "en": "✨ This is the short version. The full analysis goes much deeper."
             }
             await context.bot.send_message(user_id, brief_note.get(lang, brief_note["ru"]))
-            if remaining > 0:
-                sections_map = {
-                    "ru": {"me": "основа личности", "year": "личный год", "month": "личный месяц", "day": "личный день", "compass": "поговорим о главном"},
-                    "de": {"me": "Persönlichkeit", "year": "Jahr", "month": "Monat", "day": "Tag", "compass": "Hauptthema"},
-                    "en": {"me": "personality", "year": "year", "month": "month", "day": "day", "compass": "let's talk"}
-                }
-                all_sections = ["me", "year", "month", "day", "compass"]
-                daily_now = get_daily_usage(user_id)
-                used = [sections_map.get(lang, sections_map["ru"])[s] for s in all_sections if daily_now.get(s, 0) > 0]
-                left = [sections_map.get(lang, sections_map["ru"])[s] for s in all_sections if daily_now.get(s, 0) == 0]
-                if left:
-                    left_str = ", ".join(left)
-                    limit_info = {
-                        "ru": f"📊 Сегодня ещё доступно: {left_str}",
-                        "de": f"📊 Heute noch verfügbar: {left_str}",
-                        "en": f"📊 Still available today: {left_str}"
-                    }
-                    await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]))
-            else:
+            if remaining <= 0:
                 limit_info = {
                     "ru": "📊 Запросы на сегодня исчерпаны. Возвращайся завтра 🌙\n\nЕсли хочешь продолжить прямо сейчас — можно открыть полный доступ.",
                     "de": "📊 Anfragen für heute aufgebraucht. Bis morgen 🌙\n\nWenn du jetzt weitermachen möchtest — du kannst den vollen Zugang freischalten.",
@@ -1104,7 +1086,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if m:
             save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now())
             welcome_info = {
-                "ru": "🌿 Всё готово! Каждый день тебе доступно:\n\n• Личность — 1 раз\n• Личный год — 1 раз\n• Личный месяц — 1 раз\n• Личный день — 1 раз\n• Поговорим о главном — 1 раз\n\nЗавтра всё обновится.",
+                "ru": "🌿 Всё готово! Каждый день тебе доступно:\n\n• Основа моей личности — 1 раз\n• Личный год — 1 раз\n• Личный месяц — 1 раз\n• Личный день — 1 раз\n• Поговорим о главном — 1 раз\n\nЗавтра всё обновится.",
                 "de": "🌿 Alles bereit! Täglich stehen dir zur Verfügung:\n\n• Persönlichkeit — 1x\n• Persönliches Jahr — 1x\n• Persönlicher Monat — 1x\n• Persönlicher Tag — 1x\n• Hauptthema besprechen — 1x\n\nMorgen wird alles erneuert.",
                 "en": "🌿 All set! Each day you have access to:\n\n• Personality — 1 time\n• Personal year — 1 time\n• Personal month — 1 time\n• Personal day — 1 time\n• Let's talk — 1 time\n\nEverything resets tomorrow."
             }
