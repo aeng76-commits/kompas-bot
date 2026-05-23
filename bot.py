@@ -528,7 +528,7 @@ def get_free_prompt(lang, user, section):
     gender_rule = "женские окончания" if gender == "f" else "мужские окончания"
     lang_force = {"ru": "", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}
     hints = {
-        "me": f"Напиши {name} живой и точный портрет личности — 6-8 предложений. Покажи главную силу и главное внутреннее противоречие. Последнее предложение — открытый вопрос который заставит задуматься.",
+        "me": f"Напиши {name} тёплый и точный портрет личности — 6-8 предложений. Покажи главную силу и как она проявляется в жизни. Без оценок, без слов 'тяжесть', 'трудно', 'противоречие', 'насилие'. Последнее предложение — живой вопрос который приглашает к размышлению.",
         "year": f"Напиши {name} о главной теме и задаче этого года — 6-8 предложений. Конкретно, без общих слов. Последнее предложение — намёк что полная картина гораздо глубже.",
         "month": f"Напиши {name} о тактике и фокусе этого месяца — 5-6 предложений. Один конкретный совет что делать прямо сейчас. Закончи намёком на то что упускается без полного анализа.",
         "day": f"Напиши {name} об энергии сегодняшнего дня — 4-5 предложений. Один очень конкретный совет на сегодня. Тон тёплый, как от друга который тебя хорошо знает."
@@ -632,7 +632,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     no_date_msg = {"ru": "Сначала введи дату рождения — напиши /start", "de": "Bitte gib dein Geburtsdatum ein — schreibe /start", "en": "Please enter your birthdate — write /start"}
     upsell_msg = {"ru": "Это лишь начало. Полный анализ — в подписке.", "de": "Das ist nur der Anfang. Vollstaendige Analyse mit Abonnement.", "en": "This is just the beginning. Full analysis with subscription."}
-    limit_msg = {"ru": "Сегодня ты уже открывала этот раздел. Загляни завтра или открой полный доступ.", "de": "Du hast diesen Bereich heute schon geoeffnet.", "en": "You've already opened this section today."}
+    limit_msg = {"ru": "Этот раздел уже открыт сегодня — загляни завтра 🌙", "de": "Diesen Bereich hast du heute schon geöffnet — schau morgen wieder rein 🌙", "en": "You've already opened this section today — come back tomorrow 🌙"}
 
     if data in ("btn_me", "btn_year", "btn_month", "btn_day"):
         section = data.replace("btn_", "")
@@ -668,7 +668,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await show_menu(context, user_id, lang)
                 return
             if not check_free_limit(user_id, section):
-                await context.bot.send_message(user_id, limit_msg.get(lang, limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                await context.bot.send_message(user_id, limit_msg.get(lang, limit_msg["ru"]))
                 await show_menu(context, user_id, lang)
                 return
             increment_usage(user_id, section)
@@ -687,11 +687,11 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, brief_note.get(lang, brief_note["ru"]))
             if remaining > 0:
                 sections_map = {
-                    "ru": {"me": "личность", "year": "год", "month": "месяц", "day": "день"},
-                    "de": {"me": "Persönlichkeit", "year": "Jahr", "month": "Monat", "day": "Tag"},
-                    "en": {"me": "personality", "year": "year", "month": "month", "day": "day"}
+                    "ru": {"me": "личность", "year": "год", "month": "месяц", "day": "день", "compass": "поговорим о главном"},
+                    "de": {"me": "Persönlichkeit", "year": "Jahr", "month": "Monat", "day": "Tag", "compass": "Hauptthema"},
+                    "en": {"me": "personality", "year": "year", "month": "month", "day": "day", "compass": "let's talk"}
                 }
-                all_sections = ["me", "year", "month", "day"]
+                all_sections = ["me", "year", "month", "day", "compass"]
                 daily_now = get_daily_usage(user_id)
                 used = [sections_map.get(lang, sections_map["ru"])[s] for s in all_sections if daily_now.get(s, 0) > 0]
                 left = [sections_map.get(lang, sections_map["ru"])[s] for s in all_sections if daily_now.get(s, 0) == 0]
@@ -1102,6 +1102,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
         if m:
             save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now())
+            welcome_info = {
+                "ru": "🌿 Всё готово! Каждый день тебе доступно:\n\n• Личность — 1 раз\n• Личный год — 1 раз\n• Личный месяц — 1 раз\n• Личный день — 1 раз\n• Поговорим о главном — 1 раз\n\nЗавтра всё обновится.",
+                "de": "🌿 Alles bereit! Täglich stehen dir zur Verfügung:\n\n• Persönlichkeit — 1x\n• Persönliches Jahr — 1x\n• Persönlicher Monat — 1x\n• Persönlicher Tag — 1x\n• Hauptthema besprechen — 1x\n\nMorgen wird alles erneuert.",
+                "en": "🌿 All set! Each day you have access to:\n\n• Personality — 1 time\n• Personal year — 1 time\n• Personal month — 1 time\n• Personal day — 1 time\n• Let's talk — 1 time\n\nEverything resets tomorrow."
+            }
+            await update.message.reply_text(welcome_info.get(lang, welcome_info["ru"]))
             welcome = {"ru": "Готово! Выбери с чего начнём:", "de": "Fertig! Waehle, womit wir beginnen:", "en": "Done! Choose where to start:"}
             await update.message.reply_text(welcome.get(lang, welcome["ru"]), reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"])))
         else:
