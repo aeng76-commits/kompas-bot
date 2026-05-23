@@ -1246,12 +1246,12 @@ if __name__ == "__main__":
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").rstrip("/")
     PORT = int(os.environ.get("PORT", 10000))
     if WEBHOOK_URL:
-        print(f"Starting webhook on port {PORT}, url: {WEBHOOK_URL}/{TELEGRAM_TOKEN}", flush=True)
+        print(f"Starting webhook on port {PORT}, url: {WEBHOOK_URL}/webhook", flush=True)
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
-            url_path=f"/{TELEGRAM_TOKEN}",
-            webhook_url=f"{WEBHOOK_URL}/{TELEGRAM_TOKEN}",
+            url_path="/webhook",
+            webhook_url=f"{WEBHOOK_URL}/webhook",
             drop_pending_updates=True
         )
     else:
