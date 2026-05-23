@@ -1010,8 +1010,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     )
                     analysis_text = clean_text(resp.content[0].text)
                     print(f"Analysis generated: {len(analysis_text)} chars", flush=True)
-                    await update.message.reply_text(analysis_text)
-                    print("Analysis sent", flush=True)
+                    msg = update.message or update.edited_message
+                    if msg:
+                        await msg.reply_text(analysis_text)
+                        print("Analysis sent", flush=True)
+                    else:
+                        await context.bot.send_message(user_id, analysis_text)
+                        print("Analysis sent via bot.send_message", flush=True)
                 except Exception as e:
                     print(f"Analysis error: {e}", flush=True)
                     await update.message.reply_text("Произошла ошибка при генерации анализа. Попробуй ещё раз.")
