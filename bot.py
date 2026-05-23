@@ -705,8 +705,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await show_menu(context, user_id, lang)
                 return
             if not check_free_limit(user_id, section):
-                await context.bot.send_message(user_id, limit_msg.get(lang, limit_msg["ru"]))
-                await show_menu(context, user_id, lang)
+                menu_kb = InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]])
+                await query.edit_message_text(limit_msg.get(lang, limit_msg["ru"]), reply_markup=menu_kb)
                 return
             increment_usage(user_id, section)
             daily_after = get_daily_usage(user_id)
@@ -771,7 +771,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.edit_message_text(day_limit_msg.get(lang, day_limit_msg["ru"]), reply_markup=limit_kb)
                 return
             if daily.get("compass", 0) >= 1:
-                await query.edit_message_text({"ru": "Этот раздел уже открыт сегодня — загляни завтра 🌙", "de": "Diesen Bereich hast du heute schon geöffnet — schau morgen wieder rein 🌙", "en": "You've already opened this section today — come back tomorrow 🌙"}.get(lang, ""))
+                menu_kb = InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]])
+                await query.edit_message_text({"ru": "Этот раздел уже открыт сегодня — загляни завтра 🌙", "de": "Diesen Bereich hast du heute schon geöffnet — schau morgen wieder rein 🌙", "en": "You've already opened this section today — come back tomorrow 🌙"}.get(lang, ""), reply_markup=menu_kb)
                 return
             increment_usage(user_id, "compass")
         compass_state[user_id] = {"stage": "initial", "q_count": 0, "clarify_count": 0, "topic": "", "trial": is_trial}
