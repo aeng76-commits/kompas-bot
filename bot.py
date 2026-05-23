@@ -1243,7 +1243,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
     app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").rstrip("/")
+    WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
     PORT = int(os.environ.get("PORT", 10000))
     if WEBHOOK_URL:
         import asyncio
