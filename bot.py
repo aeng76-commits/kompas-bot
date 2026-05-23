@@ -477,7 +477,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>✨ Где ты сейчас сильнее всего</b>
+Напиши ТОЛЬКО этот блок: {"<b>✨ Где ты сейчас сильнее всего</b>" if lang=="ru" else ("<b>✨ Wo du jetzt am stärksten bist</b>" if lang=="de" else "<b>✨ Where You Are Strongest Right Now</b>")}
 Начни с этого тега на первой строке.
 Говори ТОЛЬКО о годе — без упоминания месяца и дня.
 Что открывается именно для {name} в этот год с учётом её модели мышления.
@@ -485,7 +485,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🔺 Что может тянуть назад</b>
+Напиши ТОЛЬКО этот блок: {"<b>🔺 Что может тянуть назад</b>" if lang=="ru" else ("<b>🔺 Was dich zurückhalten kann</b>" if lang=="de" else "<b>🔺 What Can Hold You Back</b>")}
 Начни с этого тега на первой строке.
 Говори ТОЛЬКО о годе — без упоминания месяца и дня.
 Где особенности {name} могут создать сложности именно в этот год.
@@ -493,7 +493,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🌱 Что важно прямо сейчас</b>
+Напиши ТОЛЬКО этот блок: {"<b>🌱 Что важно прямо сейчас</b>" if lang=="ru" else ("<b>🌱 Was jetzt wichtig ist</b>" if lang=="de" else "<b>🌱 What Matters Right Now</b>")}
 Начни с этого тега на первой строке.
 Говори ТОЛЬКО о годе — без упоминания месяца и дня.
 3-4 конкретных простых рекомендации для {name} на этот год — подходящих именно её модели мышления.
@@ -502,7 +502,7 @@ def get_profile_prompts_list(lang, user, section):
         "month": [
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🧭 Тактика этого месяца</b>
+Напиши ТОЛЬКО этот блок: {"<b>🧭 Тактика этого месяца</b>" if lang=="ru" else ("<b>🧭 Taktik dieses Monats</b>" if lang=="de" else "<b>🧭 This Month's Strategy</b>")}
 Начни с этого тега на первой строке.
 Говори ТОЛЬКО о месяце — без упоминания конкретного дня.
 Покажи как тема этого месяца ложится на вектор года для {name}.
@@ -510,7 +510,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>✨ Возможности месяца</b>
+Напиши ТОЛЬКО этот блок: {"<b>✨ Возможности месяца</b>" if lang=="ru" else ("<b>✨ Möglichkeiten des Monats</b>" if lang=="de" else "<b>✨ Opportunities of the Month</b>")}
 Начни с этого тега на первой строке.
 Говори ТОЛЬКО о месяце — без упоминания конкретного дня.
 Что открывается именно для {name} в этом месяце с учётом её модели.
@@ -518,7 +518,7 @@ def get_profile_prompts_list(lang, user, section):
 
             base_period + f"""
 
-Напиши ТОЛЬКО этот блок: <b>🔺 Риски месяца</b>
+Напиши ТОЛЬКО этот блок: {"<b>🔺 Риски месяца</b>" if lang=="ru" else ("<b>🔺 Risiken des Monats</b>" if lang=="de" else "<b>🔺 Risks of the Month</b>")}
 Начни с этого тега на первой строке.
 Говори ТОЛЬКО о месяце — без упоминания конкретного дня.
 Где особенности {name} могут создать сложности именно в этом месяце.
