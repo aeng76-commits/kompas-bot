@@ -24,6 +24,33 @@ compass_state = {}
 def get_db():
     return psycopg2.connect(DATABASE_URL)
 
+def get_session(user_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT session_data, compass_data FROM users WHERE user_id=%s", (user_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return [], {}
+    return row[0] or [], row[1] or {}
+
+def save_session(user_id, session=None, compass=None):
+    conn = get_db()
+    cur = conn.cursor()
+    if session is not None and compass is not None:
+        cur.execute("UPDATE users SET session_data=%s, compass_data=%s WHERE user_id=%s",
+                    (json.dumps(session), json.dumps(compass), user_id))
+    elif session is not None:
+        cur.execute("UPDATE users SET session_data=%s WHERE user_id=%s",
+                    (json.dumps(session), user_id))
+    elif compass is not None:
+        cur.execute("UPDATE users SET compass_data=%s WHERE user_id=%s",
+                    (json.dumps(compass), user_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def init_db():
     conn = get_db()
     cur = conn.cursor()
@@ -39,9 +66,19 @@ def init_db():
             agreed BOOLEAN DEFAULT FALSE,
             trial_started_at TIMESTAMP,
             paid_until TIMESTAMP,
-            daily_usage JSONB DEFAULT '{}'
+            daily_usage JSONB DEFAULT '{}',
+            session_data JSONB DEFAULT '[]',
+            compass_data JSONB DEFAULT '{}'
         )
     """)
+    # Добавляем колонки если не существуют
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS session_data JSONB DEFAULT '[]'")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS compass_data JSONB DEFAULT '{}'")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS data_changes INT DEFAULT 0")
+        conn.commit()
+    except:
+        conn.rollback()
     conn.commit()
     cur.close()
     conn.close()
@@ -914,12 +951,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Пожалуйста, начни с /start" if lang=="ru" else ("Bitte beginne mit /start" if lang=="de" else "Please start with /start"))
         return
 
-    if user_id not in user_sessions:
-        user_sessions[user_id] = []
+    db_session, db_compass = get_session(user_id)
+    if not isinstance(db_session, list):
+        db_session = []
+    user_sessions[user_id] = db_session
     user_sessions[user_id].append({"role": "user", "content": user_text})
+    if db_compass:
+        compass_state[user_id] = db_compass
 
     # Компас: режим диалога
-    if user_id in compass_state:
+    if user_id in compass_state and compass_state[user_id]:
         state = compass_state[user_id]
         stage = state.get("stage", "initial")
         ctx = build_profile_context(user) if user.get("day") else {}
@@ -970,6 +1011,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 compass_state.pop(user_id, None)
                 user_sessions[user_id] = []
+                save_session(user_id, session=[], compass={})
+                await show_menu(context, user_id, lang)
                 return
 
             # Задаём следующий вопрос
@@ -996,6 +1039,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             state["q_count"] = q_count + 1
             compass_state[user_id] = state
             user_sessions[user_id].append({"role": "assistant", "content": reply})
+            save_session(user_id, session=user_sessions[user_id], compass=compass_state.get(user_id, {}))
             await update.message.reply_text(reply)
             return
 
@@ -1025,6 +1069,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             state["q_count"] = 1
             compass_state[user_id] = state
             user_sessions[user_id].append({"role": "assistant", "content": reply})
+            save_session(user_id, session=user_sessions[user_id], compass=compass_state.get(user_id, {}))
             await update.message.reply_text(reply)
             return
 
