@@ -1004,9 +1004,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 try:
                     print(f"Generating analysis, session len: {len(user_sessions[user_id])}", flush=True)
+                    analysis_messages = user_sessions[user_id] + [{"role": "user", "content": "Дай полный персональный анализ этой ситуации с рекомендациями."}]
                     resp = client.messages.create(
                         model="claude-sonnet-4-6", max_tokens=1500,
-                        system=analysis_sys, messages=user_sessions[user_id]
+                        system=analysis_sys, messages=analysis_messages
                     )
                     raw = resp.content[0].text
                     print(f"RAW analysis: {raw[:200]}", flush=True)
