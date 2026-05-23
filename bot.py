@@ -616,7 +616,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     if user and user.get("agreed") and user.get("day"):
         lang = user.get("lang", "ru")
-        await show_menu(update._bot, user_id, lang)
+        await update.message.reply_text(
+            {"ru": "Выбери раздел:", "de": "Wähle einen Bereich:", "en": "Choose a section:"}.get(lang, "Выбери раздел:"),
+            reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"]))
+        )
         return
     keyboard = [
         [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
