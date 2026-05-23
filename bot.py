@@ -637,6 +637,14 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user(user_id, lang=lang)
     user_sessions[user_id] = []
     compass_state.pop(user_id, None)
+    save_session(user_id, session=[], compass={})
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("day"):
+        await query.edit_message_text(
+            {"ru": "Выбери раздел:", "de": "Wähle einen Bereich:", "en": "Choose a section:"}.get(lang, "Выбери раздел:"),
+            reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"]))
+        )
+        return
     agree_btns = [
         [InlineKeyboardButton("✅ Принимаю" if lang=="ru" else ("✅ Ich stimme zu" if lang=="de" else "✅ I agree"), callback_data="agree")],
         [InlineKeyboardButton("❌ Не принимаю" if lang=="ru" else ("❌ Ich lehne ab" if lang=="de" else "❌ I decline"), callback_data="disagree")],
