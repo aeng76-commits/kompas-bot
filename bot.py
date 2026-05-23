@@ -612,6 +612,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_sessions[user_id] = []
     compass_state.pop(user_id, None)
+    save_session(user_id, session=[], compass={})
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("day"):
+        lang = user.get("lang", "ru")
+        await show_menu(update._bot, user_id, lang)
+        return
     keyboard = [
         [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
         [InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],
