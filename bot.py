@@ -646,7 +646,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, no_date_msg.get(lang, no_date_msg["ru"]))
             return
-        if has_access(user):
+        if is_paid(user):
             prompts = get_profile_prompts_list(lang, user, section)
             for p in prompts:
                 resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=800, system=p, messages=[{"role": "user", "content": "Напиши"}])
