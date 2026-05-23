@@ -648,16 +648,49 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if txt:
                     await context.bot.send_message(user_id, txt, parse_mode="HTML")
         else:
+            # Проверяем общий лимит: max 2 запроса в день
+            daily = get_daily_usage(user_id)
+            total_today = sum(daily.get(s, 0) for s in ["me", "year", "month", "day"])
+            if total_today >= 2:
+                day_limit_msg = {
+                    "ru": "На сегодня ты использовала оба бесплатных запроса 🌙\nЗавтра снова будет доступно — или открой полный доступ прямо сейчас.",
+                    "de": "Du hast heute beide kostenlosen Anfragen genutzt 🌙\nMorgen geht es weiter — oder schalte jetzt den vollen Zugang frei.",
+                    "en": "You've used both free requests for today 🌙\nCome back tomorrow — or unlock full access now."
+                }
+                await context.bot.send_message(user_id, day_limit_msg.get(lang, day_limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                await show_menu(context, user_id, lang)
+                return
             if not check_free_limit(user_id, section):
                 await context.bot.send_message(user_id, limit_msg.get(lang, limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
                 await show_menu(context, user_id, lang)
                 return
             increment_usage(user_id, section)
-            free_tokens = {"me": 600, "year": 500, "month": 500, "day": 400}
+            daily_after = get_daily_usage(user_id)
+            total_after = sum(daily_after.get(s, 0) for s in ["me", "year", "month", "day"])
+            remaining = 2 - total_after
+            free_tokens = {"me": 1000, "year": 900, "month": 900, "day": 800}
             prompt = get_free_prompt(lang, user, section)
-            response = client.messages.create(model="claude-haiku-4-5", max_tokens=free_tokens[section], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
+            response = client.messages.create(model="claude-sonnet-4-6", max_tokens=free_tokens[section], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
             await context.bot.send_message(user_id, clean_text(response.content[0].text))
-            await context.bot.send_message(user_id, upsell_msg.get(lang, upsell_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
+            soft_upsell = {
+                "ru": "✨ Это была краткая версия.\n\nЕсли хочешь увидеть полный анализ — он в несколько раз глубже и детальнее.",
+                "de": "✨ Das war die Kurzversion.\n\nWenn du die vollstaendige Analyse sehen moechtest — sie ist deutlich tiefer und detaillierter.",
+                "en": "✨ This was the short version.\n\nIf you'd like to see the full analysis — it goes much deeper."
+            }
+            await context.bot.send_message(user_id, soft_upsell.get(lang, soft_upsell["ru"]), reply_markup=get_upgrade_keyboard(lang))
+            if remaining > 0:
+                limit_info = {
+                    "ru": f"📊 Осталось бесплатных запросов сегодня: {remaining}",
+                    "de": f"📊 Verbleibende kostenlose Anfragen heute: {remaining}",
+                    "en": f"📊 Free requests remaining today: {remaining}"
+                }
+            else:
+                limit_info = {
+                    "ru": "📊 Бесплатные запросы на сегодня исчерпаны. Возвращайся завтра 🌙",
+                    "de": "📊 Kostenlose Anfragen fuer heute aufgebraucht. Bis morgen 🌙",
+                    "en": "📊 No more free requests for today. See you tomorrow 🌙"
+                }
+            await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]))
         await show_menu(context, user_id, lang)
 
     elif data == "btn_compass":
@@ -1023,7 +1056,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Обычный диалог
     sys_prompt = get_system_prompt(lang, user)
-    response = client.messages.create(model="claude-haiku-4-5", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
+    response = client.messages.create(model="claude-sonnet-4-6", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
     reply = clean_text(response.content[0].text)
     user_sessions[user_id].append({"role": "assistant", "content": reply})
     await update.message.reply_text(reply, parse_mode="HTML")
@@ -1117,10 +1150,10 @@ async def send_daily_messages(context):
 Каждый риск — отдельный абзац. Мягко, с пониманием.
 ТЫ. {g}. Без markdown звёздочек."""
 
-            r1 = client.messages.create(model="claude-haiku-4-5", max_tokens=500, system=sys1, messages=[{"role": "user", "content": "Напиши"}])
+            r1 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys1, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r1.content[0].text), parse_mode="HTML")
 
-            r2 = client.messages.create(model="claude-haiku-4-5", max_tokens=500, system=sys2, messages=[{"role": "user", "content": "Напиши"}])
+            r2 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys2, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r2.content[0].text), parse_mode="HTML")
 
             await show_menu(context, uid, lang)
