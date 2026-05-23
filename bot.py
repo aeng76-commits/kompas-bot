@@ -1008,7 +1008,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         model="claude-sonnet-4-6", max_tokens=1500,
                         system=analysis_sys, messages=user_sessions[user_id]
                     )
-                    analysis_text = clean_text(resp.content[0].text)
+                    raw = resp.content[0].text
+                    print(f"RAW analysis: {raw[:200]}", flush=True)
+                    analysis_text = clean_text(raw)
                     print(f"Analysis generated: {len(analysis_text)} chars", flush=True)
                     print(f"Sending analysis to user_id={user_id}, text[:50]={analysis_text[:50]}", flush=True)
                     await context.bot.send_message(user_id, analysis_text)
