@@ -674,7 +674,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             increment_usage(user_id, section)
             daily_after = get_daily_usage(user_id)
             total_after = sum(daily_after.get(s, 0) for s in ["me", "year", "month", "day"])
-            remaining = 2 - total_after
+            remaining = 4 - total_after
             free_tokens = {"me": 1000, "year": 900, "month": 900, "day": 800}
             prompt = get_free_prompt(lang, user, section)
             response = client.messages.create(model="claude-sonnet-4-6", max_tokens=free_tokens[section], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
@@ -686,12 +686,23 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             }
             await context.bot.send_message(user_id, brief_note.get(lang, brief_note["ru"]))
             if remaining > 0:
-                limit_info = {
-                    "ru": f"📊 Осталось бесплатных запросов сегодня: {remaining}",
-                    "de": f"📊 Verbleibende kostenlose Anfragen heute: {remaining}",
-                    "en": f"📊 Free requests remaining today: {remaining}"
+                sections_map = {
+                    "ru": {"me": "личность", "year": "год", "month": "месяц", "day": "день"},
+                    "de": {"me": "Persönlichkeit", "year": "Jahr", "month": "Monat", "day": "Tag"},
+                    "en": {"me": "personality", "year": "year", "month": "month", "day": "day"}
                 }
-                await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]))
+                all_sections = ["me", "year", "month", "day"]
+                daily_now = get_daily_usage(user_id)
+                used = [sections_map.get(lang, sections_map["ru"])[s] for s in all_sections if daily_now.get(s, 0) > 0]
+                left = [sections_map.get(lang, sections_map["ru"])[s] for s in all_sections if daily_now.get(s, 0) == 0]
+                if left:
+                    left_str = ", ".join(left)
+                    limit_info = {
+                        "ru": f"📊 Сегодня ещё доступно: {left_str}",
+                        "de": f"📊 Heute noch verfügbar: {left_str}",
+                        "en": f"📊 Still available today: {left_str}"
+                    }
+                    await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]))
             else:
                 limit_info = {
                     "ru": "📊 Запросы на сегодня исчерпаны. Возвращайся завтра 🌙\n\nЕсли хочешь продолжить прямо сейчас — можно открыть полный доступ.",
