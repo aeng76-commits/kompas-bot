@@ -687,7 +687,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, brief_note.get(lang, brief_note["ru"]))
             if remaining > 0:
                 sections_map = {
-                    "ru": {"me": "личность", "year": "год", "month": "месяц", "day": "день", "compass": "поговорим о главном"},
+                    "ru": {"me": "основа личности", "year": "личный год", "month": "личный месяц", "day": "личный день", "compass": "поговорим о главном"},
                     "de": {"me": "Persönlichkeit", "year": "Jahr", "month": "Monat", "day": "Tag", "compass": "Hauptthema"},
                     "en": {"me": "personality", "year": "year", "month": "month", "day": "day", "compass": "let's talk"}
                 }
@@ -968,7 +968,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     system=analysis_sys, messages=user_sessions[user_id]
                 )
                 analysis_text = clean_text(resp.content[0].text)
-                await update.message.reply_text(analysis_text, parse_mode="HTML")
+                await update.message.reply_text(analysis_text)
 
                 understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
                 btns = [[
@@ -1052,7 +1052,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     model="claude-sonnet-4-6", max_tokens=800,
                     system=final_sys, messages=user_sessions[user_id]
                 )
-                await update.message.reply_text(clean_text(resp_final.content[0].text), parse_mode="HTML")
+                await update.message.reply_text(clean_text(resp_final.content[0].text))
                 compass_state.pop(user_id, None)
                 user_sessions[user_id] = []
                 await show_menu(context, user_id, lang)
