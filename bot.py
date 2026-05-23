@@ -535,12 +535,13 @@ def get_free_prompt(lang, user, section):
     }
     return f"""Ты ассистент системы Внутренний Компас. Сегодня {ctx['today']}.
 {lang_force.get(lang, '')}
-Модель мышления {name}:
+Имя: {name}. {gender_rule}.
+Модель мышления:
 {mi}.
 Личный год: {ctx['year_text'][:120]}
 Личный месяц: {ctx['month_text'][:120]}
 {hints.get(section, hints['me'])}
-ПРАВИЛА: ТЫ, {gender_rule}, живой стиль, чистый текст, без markdown, без нумерологии."""
+ПРАВИЛА: ТЫ, {gender_rule}, живой стиль, чистый текст, без markdown, без нумерологии. Обращайся по имени {name}."""
 
 def get_system_prompt(lang, user):
     name = user.get("name", "") if user else ""
@@ -607,9 +608,9 @@ async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     save_user(user_id, agreed=True)
     trial_msg = {
-        "ru": "🌟 У тебя есть <b>3 дня бесплатного доступа</b> ко всем разделам.\n\nПосле этого доступ можно продлить по подписке от 15€/месяц.",
-        "de": "🌟 Du hast <b>3 Tage kostenlosen Zugang</b> zu allen Bereichen.\n\nDanach kannst du den Zugang ab 15€/Monat verlängern.",
-        "en": "🌟 You have <b>3 days of free access</b> to all sections.\n\nAfterwards you can continue with a subscription from 15€/month."
+        "ru": "🌟 У тебя есть <b>72 часа бесплатного доступа</b> ко всем разделам.\n\nПосле этого доступ можно продлить по подписке от 15€/месяц.",
+        "de": "🌟 Du hast <b>72 Stunden kostenlosen Zugang</b> zu allen Bereichen.\n\nDanach kannst du den Zugang ab 15€/Monat verlängern.",
+        "en": "🌟 You have <b>72 hours of free access</b> to all sections.\n\nAfterwards you can continue with a subscription from 15€/month."
     }
     trial_btns = InlineKeyboardMarkup([
         [InlineKeyboardButton("🆓 Продолжить бесплатно" if lang=="ru" else ("🆓 Kostenlos weitermachen" if lang=="de" else "🆓 Continue for free"), callback_data="trial_start")],
@@ -654,10 +655,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if txt:
                     await context.bot.send_message(user_id, txt, parse_mode="HTML")
         else:
-            # Проверяем общий лимит: max 2 запроса в день
+            # Проверяем общий лимит: max 1 раз каждый раздел в день
             daily = get_daily_usage(user_id)
             total_today = sum(daily.get(s, 0) for s in ["me", "year", "month", "day"])
-            if total_today >= 2:
+            if total_today >= 4:
                 day_limit_msg = {
                     "ru": "На сегодня ты использовала оба бесплатных запроса 🌙\nЗавтра снова будет доступно — или открой полный доступ прямо сейчас.",
                     "de": "Du hast heute beide kostenlosen Anfragen genutzt 🌙\nMorgen geht es weiter — oder schalte jetzt den vollen Zugang frei.",
@@ -678,25 +679,26 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             prompt = get_free_prompt(lang, user, section)
             response = client.messages.create(model="claude-sonnet-4-6", max_tokens=free_tokens[section], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
             await context.bot.send_message(user_id, clean_text(response.content[0].text))
-            soft_upsell = {
-                "ru": "✨ Это была краткая версия.\n\nЕсли хочешь увидеть полный анализ — он в несколько раз глубже и детальнее.",
-                "de": "✨ Das war die Kurzversion.\n\nWenn du die vollstaendige Analyse sehen moechtest — sie ist deutlich tiefer und detaillierter.",
-                "en": "✨ This was the short version.\n\nIf you'd like to see the full analysis — it goes much deeper."
+            brief_note = {
+                "ru": "✨ Это краткая версия. Полный анализ — значительно глубже и детальнее.",
+                "de": "✨ Das ist die Kurzversion. Die vollständige Analyse geht deutlich tiefer.",
+                "en": "✨ This is the short version. The full analysis goes much deeper."
             }
-            await context.bot.send_message(user_id, soft_upsell.get(lang, soft_upsell["ru"]), reply_markup=get_upgrade_keyboard(lang))
+            await context.bot.send_message(user_id, brief_note.get(lang, brief_note["ru"]))
             if remaining > 0:
                 limit_info = {
                     "ru": f"📊 Осталось бесплатных запросов сегодня: {remaining}",
                     "de": f"📊 Verbleibende kostenlose Anfragen heute: {remaining}",
                     "en": f"📊 Free requests remaining today: {remaining}"
                 }
+                await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]))
             else:
                 limit_info = {
-                    "ru": "📊 Бесплатные запросы на сегодня исчерпаны. Возвращайся завтра 🌙",
-                    "de": "📊 Kostenlose Anfragen fuer heute aufgebraucht. Bis morgen 🌙",
-                    "en": "📊 No more free requests for today. See you tomorrow 🌙"
+                    "ru": "📊 Запросы на сегодня исчерпаны. Возвращайся завтра 🌙\n\nЕсли хочешь продолжить прямо сейчас — можно открыть полный доступ.",
+                    "de": "📊 Anfragen für heute aufgebraucht. Bis morgen 🌙\n\nWenn du jetzt weitermachen möchtest — du kannst den vollen Zugang freischalten.",
+                    "en": "📊 No more free requests for today. See you tomorrow 🌙\n\nIf you'd like to continue now — you can unlock full access."
                 }
-            await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]))
+                await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]), reply_markup=get_upgrade_keyboard(lang))
         await show_menu(context, user_id, lang)
 
     elif data == "btn_compass":
@@ -709,7 +711,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=get_upgrade_keyboard(lang)
             )
             return
-        compass_state[user_id] = {"stage": "initial", "q_count": 0, "clarify_count": 0, "topic": ""}
+        is_trial = is_trial_active(user) and not is_paid(user)
+        compass_state[user_id] = {"stage": "initial", "q_count": 0, "clarify_count": 0, "topic": "", "trial": is_trial}
         user_sessions[user_id] = []
         start_q = {
             "ru": "Расскажи — что сейчас занимает твои мысли больше всего? Какую ситуацию или вопрос ты хочешь прояснить?",
@@ -917,8 +920,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             q_count = state.get("q_count", 0)
             topic = state.get("topic", "")
 
-            if q_count >= 5:
-                # Анализ после 5 вопросов
+            max_q = 3 if state.get("trial") else 5
+            if q_count >= max_q:
+                # Анализ после вопросов
                 analysis_sys = f"""{lf}
 Ты ассистент Внутренний Компас.
 {context_block}
@@ -959,7 +963,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 {context_block}
 
 Тема: {topic}
-Это вопрос {q_count + 1} из 5.
+Это вопрос {q_count + 1} из {max_q}.
 
 Задай ОДИН глубокий вопрос который поможет человеку самому осознать что происходит.
 Вопрос должен быть таким чтобы человек думал перед ответом и отвечал развёрнуто.
@@ -1012,7 +1016,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Уточняющие вопросы после "нет"
             clarify_count = state.get("clarify_count", 0)
 
-            if clarify_count >= 3:
+            max_clarify = 1 if state.get("trial") else 3
+            if clarify_count >= max_clarify:
                 # Финальный анализ после уточнений
                 final_sys = f"""{lf}
 Ты ассистент Внутренний Компас.
@@ -1034,7 +1039,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 {context_block}
 
 Человек сказал что что-то не понятно: "{user_text}"
-Это уточняющий вопрос {clarify_count + 1} из 3.
+Это уточняющий вопрос {clarify_count + 1} из {max_clarify}.
 
 Задай ОДИН вопрос чтобы прояснить что именно не понятно.
 Коротко и тепло. ТЫ. {g}."""
