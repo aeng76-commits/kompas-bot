@@ -764,7 +764,11 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "de": "Alle Bereiche für heute bereits geöffnet 🌙\nKomm morgen wieder — oder schalte den vollen Zugang frei.",
                     "en": "All sections opened for today 🌙\nCome back tomorrow — or unlock full access."
                 }
-                await query.edit_message_text(day_limit_msg.get(lang, day_limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                limit_kb = InlineKeyboardMarkup([
+                    [InlineKeyboardButton("💳 Открыть полный доступ" if lang=="ru" else ("💳 Vollzugang freischalten" if lang=="de" else "💳 Unlock full access"), callback_data="btn_pay")],
+                    [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]
+                ])
+                await query.edit_message_text(day_limit_msg.get(lang, day_limit_msg["ru"]), reply_markup=limit_kb)
                 return
             if daily.get("compass", 0) >= 1:
                 await query.edit_message_text({"ru": "Этот раздел уже открыт сегодня — загляни завтра 🌙", "de": "Diesen Bereich hast du heute schon geöffnet — schau morgen wieder rein 🌙", "en": "You've already opened this section today — come back tomorrow 🌙"}.get(lang, ""))
@@ -781,6 +785,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_sessions[user_id].append({"role": "assistant", "content": msg})
         await query.edit_message_text(msg)
 
+
+    elif data == "btn_menu":
+        await show_menu(context, user_id, lang)
+        return
 
     elif data == "btn_settings":
         if not user:
@@ -1290,7 +1298,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(gender_cb, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
-    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice)"))
+    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
     PORT = int(os.environ.get("PORT", 10000))
