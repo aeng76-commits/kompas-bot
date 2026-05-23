@@ -944,7 +944,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             q_count = state.get("q_count", 0)
             topic = state.get("topic", "")
 
-            max_q = 3 if state.get("trial") else 5
+            max_q = 3 if (is_trial_active(user) and not is_paid(user)) else 5
             if q_count >= max_q:
                 # Анализ после вопросов
                 analysis_sys = f"""{lf}
@@ -1040,7 +1040,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Уточняющие вопросы после "нет"
             clarify_count = state.get("clarify_count", 0)
 
-            max_clarify = 1 if state.get("trial") else 3
+            max_clarify = 1 if (is_trial_active(user) and not is_paid(user)) else 3
             if clarify_count >= max_clarify:
                 # Финальный анализ после уточнений
                 final_sys = f"""{lf}
