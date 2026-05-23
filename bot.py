@@ -606,10 +606,16 @@ async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(texts.get(lang, texts["ru"]))
         return
     save_user(user_id, agreed=True)
-    greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Das ist der Innere Kompass. Wie heisst du?", "en": "Hi! This is Inner Compass. What is your name?"}
-    msg = greet[lang]
-    user_sessions[user_id] = [{"role": "assistant", "content": msg}]
-    await query.edit_message_text(msg)
+    trial_msg = {
+        "ru": "🌟 У тебя есть <b>3 дня бесплатного доступа</b> ко всем разделам.\n\nПосле этого доступ можно продлить по подписке от 15€/месяц.",
+        "de": "🌟 Du hast <b>3 Tage kostenlosen Zugang</b> zu allen Bereichen.\n\nDanach kannst du den Zugang ab 15€/Monat verlängern.",
+        "en": "🌟 You have <b>3 days of free access</b> to all sections.\n\nAfterwards you can continue with a subscription from 15€/month."
+    }
+    trial_btns = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🆓 Продолжить бесплатно" if lang=="ru" else ("🆓 Kostenlos weitermachen" if lang=="de" else "🆓 Continue for free"), callback_data="trial_start")],
+        [InlineKeyboardButton("💳 Купить сразу" if lang=="ru" else ("💳 Jetzt kaufen" if lang=="de" else "💳 Buy now"), callback_data="btn_pay")],
+    ])
+    await query.edit_message_text(trial_msg.get(lang, trial_msg["ru"]), reply_markup=trial_btns, parse_mode="HTML")
 
 async def show_menu(context, user_id, lang, text=None):
     texts = {"ru": "Выбери раздел:", "de": "Waehle einen Bereich:", "en": "Choose a section:"}
@@ -763,6 +769,13 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")],
         ]
         await query.edit_message_text("Выберите язык / Sprache / Language:", reply_markup=InlineKeyboardMarkup(keyboard))
+
+    elif data == "trial_start":
+        greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Das ist der Innere Kompass. Wie heisst du?", "en": "Hi! This is Inner Compass. What is your name?"}
+        msg = greet.get(lang, greet["ru"])
+        user_sessions[user_id] = [{"role": "assistant", "content": msg}]
+        await query.edit_message_text(msg)
+        return
 
     elif data == "btn_pay":
         descriptions = {
