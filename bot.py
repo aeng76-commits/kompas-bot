@@ -942,6 +942,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             topic = state.get("topic", "")
 
             max_q = 3 if (is_trial_active(user) and not is_paid(user)) else 5
+            print(f"DEBUG compass: q_count={q_count}, max_q={max_q}, trial={is_trial_active(user)}, paid={is_paid(user)}", flush=True)
             if q_count >= max_q:
                 # Анализ после вопросов
                 analysis_sys = f"""{lf}
