@@ -1143,16 +1143,22 @@ async def admin_grant(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def send_daily_messages(context):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
     users_list = cur.fetchall()
     cur.close()
     conn.close()
     for row in users_list:
-        uid, name, day, month, year, lang, gender = row
+        uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
         if not day:
             continue
         try:
-            user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
+            user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
+            # Вычисляем оставшиеся часы триала
+            trial_hours_left = None
+            if trial_started_at and not (paid_until and paid_until.replace(tzinfo=None) > datetime.datetime.now()):
+                delta = datetime.datetime.now() - trial_started_at.replace(tzinfo=None)
+                hours_passed = delta.total_seconds() / 3600
+                trial_hours_left = max(0, round(72 - hours_passed))
             ctx = build_profile_context(user)
             mi = ctx["mi"]
             model_name = mi.get("name", "") if isinstance(mi, dict) else ""
@@ -1187,6 +1193,14 @@ async def send_daily_messages(context):
             r2 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys2, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r2.content[0].text), parse_mode="HTML")
 
+            # Часы триала
+            if trial_hours_left is not None and trial_hours_left > 0:
+                hours_msg = {
+                    "ru": f"⏱ У тебя осталось {trial_hours_left} ч. бесплатного доступа.",
+                    "de": f"⏱ Du hast noch {trial_hours_left} Std. kostenlosen Zugang.",
+                    "en": f"⏱ You have {trial_hours_left} hrs of free access left."
+                }
+                await context.bot.send_message(uid, hours_msg.get(lang, hours_msg["ru"]))
             await show_menu(context, uid, lang)
         except Exception as e:
             print(f"Daily msg error {uid}: {e}", flush=True)
