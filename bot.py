@@ -1002,12 +1002,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 СТИЛЬ: тёплый, глубокий, без диагнозов. Говори как умный друг который хорошо тебя знает.
 ЗАПРЕЩЕНО: клише, оценки, слова напряжение/хаос/нестабильность, markdown."""
 
-                resp = client.messages.create(
-                    model="claude-sonnet-4-6", max_tokens=1500,
-                    system=analysis_sys, messages=user_sessions[user_id]
-                )
-                analysis_text = clean_text(resp.content[0].text)
-                await update.message.reply_text(analysis_text)
+                try:
+                    print(f"Generating analysis, session len: {len(user_sessions[user_id])}", flush=True)
+                    resp = client.messages.create(
+                        model="claude-sonnet-4-6", max_tokens=1500,
+                        system=analysis_sys, messages=user_sessions[user_id]
+                    )
+                    analysis_text = clean_text(resp.content[0].text)
+                    print(f"Analysis generated: {len(analysis_text)} chars", flush=True)
+                    await update.message.reply_text(analysis_text)
+                    print("Analysis sent", flush=True)
+                except Exception as e:
+                    print(f"Analysis error: {e}", flush=True)
+                    await update.message.reply_text("Произошла ошибка при генерации анализа. Попробуй ещё раз.")
 
                 compass_state.pop(user_id, None)
                 user_sessions[user_id] = []
