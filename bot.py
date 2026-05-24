@@ -903,7 +903,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         label = descriptions[lang][plan]
         paypal_url = PAYPAL_LINKS[plan]
-        header = {"ru": "Тариф: " + label + "\n\nВыбери способ оплаты:", "de": "Tarif: " + label + "\n\nWähle die Zahlungsmethode:", "en": "Plan: " + label + "\n\nChoose payment method:"}
+        header = {"ru": "Тариф: " + label + "\n\nВыбери способ оплаты:\n\n⚠️ При оплате укажи своё имя и дату рождения в комментарии.", "de": "Tarif: " + label + "\n\nWähle die Zahlungsmethode:\n\n⚠️ Bitte gib bei der Zahlung deinen Namen und dein Geburtsdatum an.", "en": "Plan: " + label + "\n\nChoose payment method:\n\n⚠️ Please include your name and date of birth when paying."}
         btns = [
             [InlineKeyboardButton("💳 PayPal", url=paypal_url)],
             [InlineKeyboardButton("🏦 Банковский перевод (SEPA)" if lang=="ru" else ("🏦 Banküberweisung (SEPA)" if lang=="de" else "🏦 Bank transfer (SEPA)"), callback_data=f"sepa_{plan}")],
