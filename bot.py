@@ -86,13 +86,13 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes FROM users WHERE user_id=%s", (user_id,))
+    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by FROM users WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return None
-    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes"]
+    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by"]
     return dict(zip(keys, row))
 
 def save_user(user_id, **kwargs):
@@ -101,7 +101,7 @@ def save_user(user_id, **kwargs):
     cur.execute("INSERT INTO users(user_id) VALUES(%s) ON CONFLICT(user_id) DO NOTHING", (user_id,))
     col_map = {"name":"name","gender":"gender","lang":"lang","birth_day":"birth_day","birth_month":"birth_month",
                "birth_year":"birth_year","agreed":"agreed","trial_started_at":"trial_started_at",
-               "paid_until":"paid_until","daily_usage":"daily_usage"}
+               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by"}
     for k, v in kwargs.items():
         col = col_map.get(k, k)
         if col == "daily_usage" and isinstance(v, dict):
@@ -616,6 +616,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_sessions[user_id] = []
     compass_state.pop(user_id, None)
     save_session(user_id, session=[], compass={})
+    # Сохраняем реферера если есть
+    if context.args:
+        arg = context.args[0]
+        if arg.startswith("ref_"):
+            ref_name = arg[4:]
+            try:
+                conn = get_db()
+                cur = conn.cursor()
+                cur.execute("SELECT user_id FROM users WHERE name ILIKE %s LIMIT 1", (ref_name,))
+                row = cur.fetchone()
+                cur.close()
+                conn.close()
+                if row and row[0] != user_id:
+                    save_user(user_id, referred_by=row[0])
+            except:
+                pass
     user = get_user(user_id)
     if user and user.get("agreed") and user.get("day"):
         lang = user.get("lang", "ru")
@@ -1199,6 +1215,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_sessions[user_id].append({"role": "assistant", "content": reply})
     await update.message.reply_text(reply, parse_mode="HTML")
 
+async def my_ref(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    if not user or not user.get("name"):
+        await update.message.reply_text("Сначала зарегистрируйся — напиши /start")
+        return
+    lang = user.get("lang", "ru")
+    name = user.get("name", "")
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM users WHERE referred_by=%s", (user_id,))
+    count = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    link = f"https://t.me/innercompass_ai_bot?start=ref_{name}"
+    msgs = {
+        "ru": f"Твоя реферальная ссылка:\n{link}\n\nПо ней зарегистрировалось: {count} чел.",
+        "de": f"Dein Empfehlungslink:\n{link}\n\nRegistriert über deinen Link: {count} Personen.",
+        "en": f"Your referral link:\n{link}\n\nRegistered via your link: {count} people."
+    }
+    await update.message.reply_text(msgs.get(lang, msgs["ru"]))
+
 async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -1319,6 +1357,7 @@ if __name__ == "__main__":
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("myref", my_ref))
     app.add_handler(CommandHandler("users", admin_users))
     app.add_handler(CommandHandler("reset_user", admin_reset))
     app.add_handler(CommandHandler("grant_access", admin_grant))
