@@ -1172,6 +1172,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
         if m:
             save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now())
+            # Уведомление админу
+            try:
+                tg_name = update.effective_user.username or update.effective_user.first_name or "?"
+                reg_name = user_sessions[user_id][0]["content"] if user_sessions.get(user_id) else "?"
+                await context.bot.send_message(ADMIN_ID, f"🆕 Новый пользователь:\nИмя: {reg_name}\nTelegram: @{tg_name}\nID: {user_id}\nЯзык: {lang}")
+            except:
+                pass
             welcome_info = {
                 "ru": "🌿 Всё готово! Каждый день тебе доступно:\n\n• Основа моей личности — 1 раз\n• Личный год — 1 раз\n• Личный месяц — 1 раз\n• Личный день — 1 раз\n• Поговорим о главном — 1 раз\n\nЗавтра всё обновится.",
                 "de": "🌿 Alles bereit! Täglich stehen dir zur Verfügung:\n\n• Persönlichkeit — 1x\n• Persönliches Jahr — 1x\n• Persönlicher Monat — 1x\n• Persönlicher Tag — 1x\n• Hauptthema besprechen — 1x\n\nMorgen wird alles erneuert.",
