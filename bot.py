@@ -920,9 +920,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         label = descriptions[lang][plan]
         sepa_text = {
-            "ru": "Банковский перевод (SEPA)\n\nСумма: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nПолучатель: Alexandra Engel\nНазначение: Внутренний Компас " + label + "\n\nПосле оплаты напиши администратору для активации доступа.",
-            "de": "Bankueberweisung (SEPA)\n\nBetrag: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra Engel\nVerwendungszweck: Innerer Kompass " + label + "\n\nNach der Zahlung schreibe dem Administrator zur Aktivierung.",
-            "en": "Bank transfer (SEPA)\n\nAmount: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: Inner Compass " + label + "\n\nAfter payment write to the administrator for activation."
+            "ru": "Банковский перевод (SEPA)\n\nСумма: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nПолучатель: Alexandra Engel\nНазначение: Внутренний Компас " + label + "\n\n⚠️ В комментарии к переводу укажи своё имя и дату рождения.\n\nПосле оплаты напиши администратору для активации доступа.",
+            "de": "Banküberweisung (SEPA)\n\nBetrag: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra Engel\nVerwendungszweck: Innerer Kompass " + label + "\n\n⚠️ Bitte gib in der Überweisung deinen Namen und dein Geburtsdatum an.\n\nNach der Zahlung schreibe dem Administrator zur Aktivierung.",
+            "en": "Bank transfer (SEPA)\n\nAmount: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: Inner Compass " + label + "\n\n⚠️ Please include your name and date of birth in the transfer note.\n\nAfter payment write to the administrator for activation."
         }
         btns = [
             [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
