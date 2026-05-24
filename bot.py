@@ -1273,7 +1273,7 @@ async def send_daily_messages(context):
 Личный месяц: {ctx['month_text'][:150]}
 
 Напиши ровно 3 рекомендации на сегодня для {name}.
-Начни с тега <b>🌿 Рекомендации на сегодня</b>.
+Начни с тега {"<b>🌿 Рекомендации на сегодня</b>" if lang=="ru" else ("<b>🌿 Empfehlungen für heute</b>" if lang=="de" else "<b>🌿 Recommendations for Today</b>")}.
 Формат: 1. 2. 3. — каждый пункт максимум 1-2 предложения. Конкретно и применимо прямо сегодня.
 ТЫ. {g}. Без markdown звёздочек."""
 
@@ -1283,7 +1283,7 @@ async def send_daily_messages(context):
 Личный день: {ctx['day_text']}
 
 Напиши ровно 3 риска на сегодня для {name}.
-Начни с тега <b>🔺 Риски на сегодня</b>.
+Начни с тега {"<b>🔺 Риски на сегодня</b>" if lang=="ru" else ("<b>🔺 Risiken für heute</b>" if lang=="de" else "<b>🔺 Risks for Today</b>")}.
 Формат: 1. 2. 3. — каждый пункт максимум 1-2 предложения. Мягко, конкретно.
 ТЫ. {g}. Без markdown звёздочек."""
 
