@@ -1237,6 +1237,16 @@ async def my_ref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     await update.message.reply_text(msgs.get(lang, msgs["ru"]))
 
+async def admin_makeref(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    if not context.args:
+        await update.message.reply_text("Использование: /makeref Имя")
+        return
+    name = " ".join(context.args)
+    link = f"https://t.me/innercompass_ai_bot?start=ref_{name}"
+    await update.message.reply_text("Реферальная ссылка для " + name + ":\n" + link)
+
 async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -1358,6 +1368,7 @@ if __name__ == "__main__":
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("myref", my_ref))
+    app.add_handler(CommandHandler("makeref", admin_makeref))
     app.add_handler(CommandHandler("users", admin_users))
     app.add_handler(CommandHandler("reset_user", admin_reset))
     app.add_handler(CommandHandler("grant_access", admin_grant))
