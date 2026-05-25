@@ -168,6 +168,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
+        [InlineKeyboardButton("❓ Помощь", callback_data="btn_help")],
     ],
     "de": [
         [InlineKeyboardButton("🌟 Meine Persönlichkeit", callback_data="btn_me")],
@@ -176,6 +177,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Persönlicher Tag", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
+        [InlineKeyboardButton("❓ Hilfe", callback_data="btn_help")],
     ],
     "en": [
         [InlineKeyboardButton("🌟 My Personality", callback_data="btn_me")],
@@ -184,6 +186,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Personal Day", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
+        [InlineKeyboardButton("❓ Help", callback_data="btn_help")],
     ],
 }
 
@@ -822,6 +825,17 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_sessions[user_id].append({"role": "assistant", "content": msg})
         await query.edit_message_text(msg)
 
+
+    elif data == "btn_help":
+        help_ru = "❓ Помощь\n\n🆓 Пробный доступ\n72 часа бесплатно — все разделы открыты. Просто перестань пользоваться — ничего отменять не нужно.\n\n💳 Платная подписка\nЧтобы отменить — напиши администратору @aeng0. Доступ останется до конца оплаченного периода.\n\n✏️ Изменить имя или дату рождения\nНастройки → Изменить данные. Можно 1 раз самостоятельно.\n\n💬 Остались вопросы?\nНапиши администратору @aeng0"
+        help_de = "❓ Hilfe\n\n🆓 Testzugang\n72 Stunden kostenlos — alle Bereiche verfügbar. Einfach aufhören zu nutzen — nichts kündigen nötig.\n\n💳 Bezahltes Abonnement\nZum Kündigen schreibe dem Administrator @aeng0. Der Zugang bleibt bis zum Ende des bezahlten Zeitraums.\n\n✏️ Name oder Geburtsdatum ändern\nEinstellungen → Daten ändern. Einmal selbst möglich.\n\n💬 Noch Fragen?\nSchreibe dem Administrator @aeng0"
+        help_en = "❓ Help\n\n🆓 Trial access\n72 hours free — all sections available. Just stop using it — no cancellation needed.\n\n💳 Paid subscription\nTo cancel — write to the administrator @aeng0. Access remains until the end of the paid period.\n\n✏️ Change name or date of birth\nSettings → Change data. Once self-service allowed.\n\n💬 Still have questions?\nWrite to the administrator @aeng0"
+        help_text = {"ru": help_ru, "de": help_de, "en": help_en}
+        btns = InlineKeyboardMarkup([[
+            InlineKeyboardButton("✍️ @aeng0", url="https://t.me/aeng0"),
+            InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")
+        ]])
+        await query.edit_message_text(help_text.get(lang, help_text["ru"]), reply_markup=btns)
 
     elif data == "btn_menu":
         await show_menu(context, user_id, lang)
