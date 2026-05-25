@@ -656,8 +656,9 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     lang = query.data.replace("lang_", "")
     save_user(user_id, lang=lang)
-    user_sessions[user_id] = []
-    compass_state.pop(user_id, None)
+    # Не сбрасываем сессию если идёт активный диалог
+    if user_id not in compass_state:
+        user_sessions[user_id] = []
     save_session(user_id, session=[], compass={})
     user = get_user(user_id)
     if user and user.get("agreed") and user.get("day"):
