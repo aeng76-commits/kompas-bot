@@ -346,7 +346,7 @@ def get_profile_prompts_list(lang, user, section):
     name = user.get("name", "")
     gender = user.get("gender", "f")
     g = "женские окончания" if gender == "f" else "мужские окончания"
-    lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES.")
+    lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
 
     model_name = mi.get("name", "") if isinstance(mi, dict) else ""
     model_profile = mi.get("profile", "") if isinstance(mi, dict) else str(mi)
@@ -1028,7 +1028,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         model_name = mi.get("name", "") if isinstance(mi, dict) else ""
         model_profile = mi.get("profile", "") if isinstance(mi, dict) else str(mi)
         model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
-        lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES.")
+        lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
         g = "женские окончания" if user.get("gender","f") == "f" else "мужские окончания"
 
         context_block = f"""Имя: {user.get('name','')}. {g}.
@@ -1333,7 +1333,7 @@ async def send_daily_messages(context):
             mi = ctx["mi"]
             model_name = mi.get("name", "") if isinstance(mi, dict) else ""
             model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
-            lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES.")
+            lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
             g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
 
             sys1 = f"""{lf}
