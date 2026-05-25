@@ -1266,7 +1266,7 @@ async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     conn = get_db()
     cur = conn.cursor()
-    cur.execute('SELECT user_id, name, lang, trial_started_at, paid_until FROM users ORDER BY trial_started_at DESC LIMIT 20')
+    cur.execute('SELECT user_id, name, lang, trial_started_at, paid_until FROM users ORDER BY trial_started_at DESC LIMIT 100')
     rows = cur.fetchall()
     cur.close()
     conn.close()
