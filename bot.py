@@ -1319,6 +1319,54 @@ async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f.write(text)
     await update.message.reply_document(document=open("/tmp/users_export.txt", "rb"), filename="users.txt")
 
+async def cmd_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("day"):
+        await update.message.reply_text("🌟", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")]]))
+    else:
+        await update.message.reply_text("Напиши /start")
+
+async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("day"):
+        await update.message.reply_text("🧭", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🧭 Личный год", callback_data="btn_year")]]))
+    else:
+        await update.message.reply_text("Напиши /start")
+
+async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("day"):
+        await update.message.reply_text("📍", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📍 Личный месяц", callback_data="btn_month")]]))
+    else:
+        await update.message.reply_text("Напиши /start")
+
+async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("day"):
+        await update.message.reply_text("☀️", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")]]))
+    else:
+        await update.message.reply_text("Напиши /start")
+
+async def cmd_compass(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    if user and user.get("agreed") and user.get("day"):
+        await update.message.reply_text("💡", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")]]))
+    else:
+        await update.message.reply_text("Напиши /start")
+
+async def cmd_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
+        [InlineKeyboardButton("🇩🇪 Deutsch", callback_data="lang_de")],
+        [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")],
+    ]
+    await update.message.reply_text("Выберите язык / Sprache / Language:", reply_markup=InlineKeyboardMarkup(keyboard))
+
 async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -1439,6 +1487,12 @@ if __name__ == "__main__":
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("me", cmd_me))
+    app.add_handler(CommandHandler("year", cmd_year))
+    app.add_handler(CommandHandler("month", cmd_month))
+    app.add_handler(CommandHandler("day", cmd_day))
+    app.add_handler(CommandHandler("compass", cmd_compass))
+    app.add_handler(CommandHandler("language", cmd_language))
     app.add_handler(CommandHandler("export", admin_export))
     app.add_handler(CommandHandler("myref", my_ref))
     app.add_handler(CommandHandler("makeref", admin_makeref))
