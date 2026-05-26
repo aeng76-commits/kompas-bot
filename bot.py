@@ -1078,6 +1078,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     )
                     analysis_text = clean_text(resp.content[0].text)
                     await context.bot.send_message(user_id, analysis_text)
+                    understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
+                    btns = [[
+                        InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="compass_yes"),
+                        InlineKeyboardButton("❓ Нет" if lang=="ru" else ("❓ Nein" if lang=="de" else "❓ No"), callback_data="compass_no")
+                    ]]
+                    await context.bot.send_message(user_id, understood.get(lang, understood["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+                    state["stage"] = "after_analysis"
+                    compass_state[user_id] = state
+                    save_session(user_id, session=user_sessions[user_id], compass=compass_state.get(user_id, {}))
+                    return
                 except Exception as e:
                     print(f"Analysis error: {e}", flush=True)
                     await update.message.reply_text("Произошла ошибка при генерации анализа. Попробуй ещё раз.")
