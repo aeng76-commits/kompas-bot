@@ -86,13 +86,13 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by FROM users WHERE user_id=%s", (user_id,))
+    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username FROM users WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return None
-    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by"]
+    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username"]
     return dict(zip(keys, row))
 
 def save_user(user_id, **kwargs):
@@ -101,7 +101,7 @@ def save_user(user_id, **kwargs):
     cur.execute("INSERT INTO users(user_id) VALUES(%s) ON CONFLICT(user_id) DO NOTHING", (user_id,))
     col_map = {"name":"name","gender":"gender","lang":"lang","birth_day":"birth_day","birth_month":"birth_month",
                "birth_year":"birth_year","agreed":"agreed","trial_started_at":"trial_started_at",
-               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by"}
+               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username"}
     for k, v in kwargs.items():
         col = col_map.get(k, k)
         if col == "daily_usage" and isinstance(v, dict):
@@ -1211,7 +1211,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user.get("day"):
         m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
         if m:
-            save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now())
+            tg_username = update.effective_user.username or ""
+            save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now(), username=tg_username)
             # Уведомление админу
             try:
                 tg_name = update.effective_user.username or update.effective_user.first_name or "?"
@@ -1302,7 +1303,8 @@ async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
             status = "Пробный (активен)"
         else:
             status = "Истёк"
-        lines.append(f"{uid} | {name} | {lang} | {dob} | {reg} | {status} | t.me/{uid}")
+        uname = "@" + r[8] if len(r) > 8 and r[8] else "—"
+        lines.append(f"{uid} | {name} | {uname} | {lang} | {dob} | {reg} | {status}")
     text = "\n".join(lines)
     with open("/tmp/users_export.txt", "w", encoding="utf-8") as f:
         f.write(text)
