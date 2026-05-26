@@ -1516,7 +1516,6 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
     app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.add_handler(MessageHandler(filters.ANIMATION | filters.Document.GIF, lambda u, c: print(f"GIF file_id: {u.message.animation.file_id if u.message.animation else u.message.document.file_id}", flush=True) or None))
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
     PORT = int(os.environ.get("PORT", 10000))
     if WEBHOOK_URL:
