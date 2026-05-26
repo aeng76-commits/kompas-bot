@@ -1422,11 +1422,22 @@ async def send_daily_messages(context):
     users_list = cur.fetchall()
     cur.close()
     conn.close()
+    today = datetime.datetime.now()
     for row in users_list:
         uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
         if not day:
             continue
         try:
+            # Поздравление с днём рождения
+            if day == today.day and month == today.month:
+                bday_text = {
+                    "ru": f"🎂 С днём рождения, {name}!\n\nПусть этот день принесёт тебе радость, тепло и всё что ты хочешь.",
+                    "de": f"🎂 Herzlichen Glückwunsch zum Geburtstag, {name}!\n\nMöge dieser Tag dir Freude, Wärme und alles bringen, was du dir wünschst.",
+                    "en": f"🎂 Happy Birthday, {name}!\n\nMay this day bring you joy, warmth and everything you wish for."
+                }
+                await context.bot.send_animation(uid, animation="CgACAgIAAxkDAAIQtmoV2C1332tJt-TwcooI1sFi1CDQAAKAmQACbEiwSFxl2P1fOg9kOwQ")
+                await context.bot.send_message(uid, bday_text.get(lang, bday_text["ru"]))
+                continue
             user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
             # Вычисляем оставшиеся часы триала
             trial_hours_left = None
