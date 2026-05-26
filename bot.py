@@ -1286,24 +1286,23 @@ async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT u.user_id, u.name, u.lang, u.birth_day, u.birth_month, u.birth_year, u.trial_started_at, u.paid_until FROM users u ORDER BY u.trial_started_at DESC")
+    cur.execute("SELECT u.user_id, u.name, u.lang, u.birth_day, u.birth_month, u.birth_year, u.trial_started_at, u.paid_until, u.username FROM users u ORDER BY u.trial_started_at DESC")
     rows = cur.fetchall()
     cur.close()
     conn.close()
     now = datetime.datetime.now()
     lines = ["ID | Имя | Язык | Дата рождения | Регистрация | Статус\n" + "="*70]
     for r in rows:
-        uid, name, lang, d, m, y, trial, paid = r
+        uid, name, lang, d, m, y, trial, paid, uname = r
         dob = f"{d:02d}.{m:02d}.{y}" if d else "—"
         reg = trial.strftime("%d.%m.%Y %H:%M") if trial else "—"
-        tg_url = f"https://t.me/{uid}"
+        uname = "@" + uname if uname else "—"
         if paid and paid.replace(tzinfo=None) > now:
             status = f"Платный до {paid.strftime('%d.%m.%Y')}"
         elif trial and (now - trial.replace(tzinfo=None)).total_seconds() < 259200:
             status = "Пробный (активен)"
         else:
             status = "Истёк"
-        uname = "@" + r[8] if len(r) > 8 and r[8] else "—"
         lines.append(f"{uid} | {name} | {uname} | {lang} | {dob} | {reg} | {status}")
     text = "\n".join(lines)
     with open("/tmp/users_export.txt", "w", encoding="utf-8") as f:
