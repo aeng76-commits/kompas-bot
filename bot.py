@@ -1280,6 +1280,33 @@ async def admin_makeref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Пользователь " + name + " не найден в базе.")
 
+async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, lang, birth_day, birth_month, birth_year, trial_started_at, paid_until FROM users ORDER BY trial_started_at DESC")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    now = datetime.datetime.now()
+    lines = ["ID | Имя | Язык | Дата рождения | Регистрация | Статус\n" + "="*70]
+    for r in rows:
+        uid, name, lang, d, m, y, trial, paid = r
+        dob = f"{d:02d}.{m:02d}.{y}" if d else "—"
+        reg = trial.strftime("%d.%m.%Y %H:%M") if trial else "—"
+        if paid and paid.replace(tzinfo=None) > now:
+            status = f"Платный до {paid.strftime('%d.%m.%Y')}"
+        elif trial and (now - trial.replace(tzinfo=None)).total_seconds() < 259200:
+            status = "Пробный (активен)"
+        else:
+            status = "Истёк"
+        lines.append(f"{uid} | {name} | {lang} | {dob} | {reg} | {status}")
+    text = "\n".join(lines)
+    with open("/tmp/users_export.txt", "w", encoding="utf-8") as f:
+        f.write(text)
+    await update.message.reply_document(document=open("/tmp/users_export.txt", "rb"), filename="users.txt")
+
 async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -1400,6 +1427,7 @@ if __name__ == "__main__":
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("export", admin_export))
     app.add_handler(CommandHandler("myref", my_ref))
     app.add_handler(CommandHandler("makeref", admin_makeref))
     app.add_handler(CommandHandler("users", admin_users))
