@@ -842,7 +842,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         help_en = "❓ Help\n\n🆓 Trial access\n72 hours free — all sections available. Just stop using it — no cancellation needed.\n\n💳 Paid subscription\nTo cancel — write to the administrator @aeng0. Access remains until the end of the paid period.\n\n✏️ Change name or date of birth\nSettings → Change data. Once self-service allowed.\n\n💬 Still have questions?\nWrite to the administrator @aeng0"
         help_text = {"ru": help_ru, "de": help_de, "en": help_en}
         btns = InlineKeyboardMarkup([[
-            InlineKeyboardButton("✍️ @aeng0", url="https://t.me/aeng0"),
+            InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Administrator schreiben" if lang=="de" else "✍️ Contact administrator"), url="https://t.me/aeng0"),
             InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")
         ]])
         await query.edit_message_text(help_text.get(lang, help_text["ru"]), reply_markup=btns)
