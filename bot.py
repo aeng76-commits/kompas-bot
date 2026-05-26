@@ -1437,6 +1437,30 @@ async def send_daily_messages(context):
                 }
                 await context.bot.send_animation(uid, animation="CgACAgIAAxkDAAIQtmoV2C1332tJt-TwcooI1sFi1CDQAAKAmQACbEiwSFxl2P1fOg9kOwQ")
                 await context.bot.send_message(uid, bday_text.get(lang, bday_text["ru"]))
+                try:
+                    bday_user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
+                    ctx = build_profile_context(bday_user)
+                    lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
+                    g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
+                    bday_sys = f"""{lf}
+Ты ассистент Salveris. День рождения {name}.
+Модель мышления: {ctx["mi"]}
+
+Напиши ровно 3 предложения по шаблону — меняй только качества:
+1. "[Одно сильное качество этого человека образно и точно, начни с Ты] — и это редкий дар."
+2. "[Второе сильное качество, начни с Твоя/Твоё/Твой] заслуживает уважения."
+3. "Пусть рядом с тобой будут те кто ценит тебя."
+
+ЗАПРЕЩЕНО: слова "год", "день", "сегодня", "время", "проект", "успех", "достижение", "суперсила", "рождена чтобы".
+ТЫ. {g}. Без markdown."""
+                    resp = client.messages.create(
+                        model="claude-sonnet-4-6", max_tokens=200,
+                        system=bday_sys,
+                        messages=[{{"role": "user", "content": "Поздравь"}}]
+                    )
+                    await context.bot.send_message(uid, clean_text(resp.content[0].text))
+                except Exception as e:
+                    print(f"Birthday personal error: {{e}}", flush=True)
                 continue
             user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
             # Вычисляем оставшиеся часы триала
