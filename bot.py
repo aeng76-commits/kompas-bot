@@ -569,7 +569,7 @@ def get_free_prompt(lang, user, section):
     name = user.get("name", "")
     gender = user.get("gender", "f")
     gender_rule = "женские окончания" if gender == "f" else "мужские окончания"
-    lang_force = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}
+    lang_force = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH. KEINE RUSSISCHEN WOERTER.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES. ENGLISH ONLY."}
     hints = {
         "me": f"Напиши {name} тёплый и точный портрет личности — 6-8 предложений. Покажи главную силу и как она проявляется в жизни. Без оценок, без слов 'тяжесть', 'трудно', 'противоречие', 'насилие'. Последнее предложение — живой вопрос который приглашает к размышлению.",
         "year": f"Напиши {name} о главной теме и задаче этого года — 6-8 предложений. Конкретно, без общих слов. Последнее предложение — намёк что полная картина гораздо глубже.",
@@ -577,8 +577,8 @@ def get_free_prompt(lang, user, section):
         "day": f"Напиши {name} об энергии сегодняшнего дня — 4-5 предложений. Один очень конкретный совет на сегодня. Тон тёплый, как от друга который тебя хорошо знает."
     }
     return f"""Ты ассистент системы Внутренний Компас. Сегодня {ctx['today']}.
-{lang_force.get(lang, '')}
-Имя: {name}. {gender_rule}.
+{lang_force.get(lang, lang_force["ru"])}
+Имя: {name}.
 Модель мышления:
 {mi}.
 Личный год: {ctx['year_text'][:120]}
