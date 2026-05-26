@@ -622,9 +622,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Сохраняем реферера если есть
     if context.args:
         arg = context.args[0]
-        if arg.startswith("ref_"):
+        if arg.startswith("refid_"):
+            try:
+                ref_id = int(arg[6:])
+                if ref_id != user_id:
+                    save_user(user_id, referred_by=ref_id)
+            except:
+                pass
+        elif arg.startswith("ref_"):
             ref_name = arg[4:]
             try:
+                import urllib.parse
+                ref_name = urllib.parse.unquote(ref_name)
                 conn = get_db()
                 cur = conn.cursor()
                 cur.execute("SELECT user_id FROM users WHERE name ILIKE %s LIMIT 1", (ref_name,))
@@ -1259,8 +1268,17 @@ async def admin_makeref(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Использование: /makeref Имя")
         return
     name = " ".join(context.args)
-    link = f"https://t.me/innercompass_ai_bot?start=ref_{name}"
-    await update.message.reply_text("Реферальная ссылка для " + name + ":\n" + link)
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id FROM users WHERE name ILIKE %s LIMIT 1", (name,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if row:
+        link = "https://t.me/innercompass_ai_bot?start=refid_" + str(row[0])
+        await update.message.reply_text("Реферальная ссылка для " + name + ":\n" + link)
+    else:
+        await update.message.reply_text("Пользователь " + name + " не найден в базе.")
 
 async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
