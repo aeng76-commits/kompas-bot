@@ -837,7 +837,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
     elif data == "btn_help":
-        help_ru = "❓ Помощь\n\n🆓 Пробный доступ\n72 часа бесплатно — все разделы открыты. Просто перестань пользоваться — ничего отменять не нужно.\n\n💳 Платная подписка\nЧтобы отменить — напиши администратору @aeng0. Доступ останется до конца оплаченного периода.\n\n✏️ Изменить имя или дату рождения\nНастройки → Изменить данные. Можно 1 раз самостоятельно.\n\n💬 Остались вопросы?\nНапиши администратору"
+        help_ru = "❓ Помощь\n\n🆓 Пробный доступ\n72 часа бесплатно — все разделы открыты. Просто перестань пользоваться — ничего отменять не нужно.\n\n💳 Платная подписка\nЧтобы отменить — напиши администратору. Доступ останется до конца оплаченного периода.\n\n✏️ Изменить имя или дату рождения\nНастройки → Изменить данные. Можно 1 раз самостоятельно.\n\n💬 Остались вопросы?\nНапиши администратору"
         help_de = "❓ Hilfe\n\n🆓 Testzugang\n72 Stunden kostenlos — alle Bereiche verfügbar. Keine Kündigung notwendig.\n\n💳 Bezahltes Abonnement\nZum Kündigen schreibe dem Administrator. Der Zugang bleibt bis zum Ende des bezahlten Zeitraums.\n\n✏️ Name oder Geburtsdatum ändern\nEinstellungen → Daten ändern. Einmal selbst möglich.\n\n💬 Noch Fragen?\nSchreibe dem Administrator @aeng0"
         help_en = "❓ Help\n\n🆓 Trial access\n72 hours free — all sections available. Just stop using it — no cancellation needed.\n\n💳 Paid subscription\nTo cancel — write to the administrator. Access remains until the end of the paid period.\n\n✏️ Change name or date of birth\nSettings → Change data. Once self-service allowed.\n\n💬 Still have questions?\nWrite to the administrator @aeng0"
         help_text = {"ru": help_ru, "de": help_de, "en": help_en}
