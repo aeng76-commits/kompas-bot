@@ -715,8 +715,8 @@ async def age_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         await query.edit_message_text(RULES[lang], reply_markup=InlineKeyboardMarkup(agree_btns))
     else:
-        # Несовершеннолетний — показываем правила но запомним что нужна проверка
-        save_user(user_id, lang=lang)
+        # Несовершеннолетний — показываем правила с пометкой minor
+        save_user(user_id, lang=lang, is_minor=True)
         agree_btns = [
             [InlineKeyboardButton("✅ Принимаю" if lang=="ru" else ("✅ Ich stimme zu" if lang=="de" else "✅ I agree"), callback_data="agree_minor")],
             [InlineKeyboardButton("❌ Не принимаю" if lang=="ru" else ("❌ Ich lehne ab" if lang=="de" else "❌ I decline"), callback_data="disagree")],
@@ -730,33 +730,15 @@ async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     lang = user.get("lang", "ru") if user else "ru"
     if query.data == "agree_minor":
-        parent_msg = {
-            "ru": "Ты действуешь с согласия родителей?",
-            "de": "Handelst du mit Zustimmung deiner Eltern?",
-            "en": "Do you have your parents consent?"
+        save_user(user_id, agreed=True, is_minor=True)
+        minor_msg = {
+            "ru": "Привет! Это Salveris. Как тебя зовут?",
+            "de": "Hallo! Das ist Salveris. Wie heißt du?",
+            "en": "Hi! This is Salveris. What is your name?"
         }
-        parent_btns = [
-            [InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="parent_yes")],
-            [InlineKeyboardButton("❌ Нет" if lang=="ru" else ("❌ Nein" if lang=="de" else "❌ No"), callback_data="parent_no")],
-        ]
-        await query.edit_message_text(parent_msg.get(lang, parent_msg["ru"]), reply_markup=InlineKeyboardMarkup(parent_btns))
-        return
-
-    if query.data == "parent_yes":
-        save_user(user_id, agreed=True)
-        greet = {"ru": "Привет! Это Salveris. Как тебя зовут?", "de": "Hallo! Das ist Salveris. Wie heisst du?", "en": "Hi! This is Salveris. What is your name?"}
-        msg = greet[lang]
+        msg = minor_msg.get(lang, minor_msg["ru"])
         user_sessions[user_id] = [{"role": "assistant", "content": msg}]
         await query.edit_message_text(msg)
-        return
-
-    if query.data == "parent_no":
-        blocked_msg = {
-            "ru": "К сожалению без согласия родителей мы не можем предоставить доступ. Возвращайся когда тебе исполнится 18 🌟",
-            "de": "Leider können wir ohne Zustimmung der Eltern keinen Zugang gewähren. Komm wieder wenn du 18 bist 🌟",
-            "en": "Unfortunately without parental consent we cannot provide access. Come back when you turn 18 🌟"
-        }
-        await query.edit_message_text(blocked_msg.get(lang, blocked_msg["ru"]))
         return
 
     if query.data == "disagree":
