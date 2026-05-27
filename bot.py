@@ -947,6 +947,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("✏️ Изменить данные" if lang=="ru" else ("✏️ Daten ändern" if lang=="de" else "✏️ Change data"), callback_data="btn_change_data")],
             [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache ändern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
             [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
+            [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
         ]
         await query.edit_message_text(info.get(lang, info["ru"]), reply_markup=InlineKeyboardMarkup(btns))
 
@@ -1041,6 +1042,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         btns = [
             [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
+            [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
             [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data=f"pay_{plan}")],
             [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
         ]
