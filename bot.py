@@ -570,12 +570,27 @@ def get_free_prompt(lang, user, section):
     gender = user.get("gender", "f")
     gender_rule = "женские окончания" if gender == "f" else "мужские окончания"
     lang_force = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH. KEINE RUSSISCHEN WOERTER.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES. ENGLISH ONLY."}
-    hints = {
-        "me": f"Напиши {name} тёплый и точный портрет личности — 6-8 предложений. Покажи главную силу и как она проявляется в жизни. Без оценок, без слов 'тяжесть', 'трудно', 'противоречие', 'насилие'. Последнее предложение — живой вопрос который приглашает к размышлению.",
-        "year": f"Напиши {name} о главной теме и задаче этого года — 6-8 предложений. Конкретно, без общих слов. Последнее предложение — намёк что полная картина гораздо глубже.",
-        "month": f"Напиши {name} о тактике и фокусе этого месяца — 5-6 предложений. Один конкретный совет что делать прямо сейчас. Закончи намёком на то что упускается без полного анализа.",
-        "day": f"Напиши {name} об энергии сегодняшнего дня — 4-5 предложений. Один очень конкретный совет на сегодня. Тон тёплый, как от друга который тебя хорошо знает."
-    }
+    if lang == "de":
+        hints = {
+            "me": f"Schreibe {name} ein warmes und genaues Persönlichkeitsportrait — 6-8 Sätze. Zeige die Hauptstärke und wie sie sich im Leben zeigt. Letzter Satz — eine offene Frage die zum Nachdenken einlädt.",
+            "year": f"Schreibe {name} über das Hauptthema dieses Jahres — 6-8 Sätze. Konkret, ohne allgemeine Worte. Letzter Satz — ein Hinweis dass das vollständige Bild viel tiefer geht.",
+            "month": f"Schreibe {name} über die Taktik dieses Monats — 5-6 Sätze. Ein konkreter Rat was jetzt zu tun ist.",
+            "day": f"Schreibe {name} über die Energie des heutigen Tages — 4-5 Sätze. Ein sehr konkreter Rat für heute."
+        }
+    elif lang == "en":
+        hints = {
+            "me": f"Write {name} a warm and precise personality portrait — 6-8 sentences. Show the main strength and how it shows in life. Last sentence — an open question that invites reflection.",
+            "year": f"Write {name} about the main theme of this year — 6-8 sentences. Concrete, no general words. Last sentence — a hint that the full picture goes much deeper.",
+            "month": f"Write {name} about the tactics of this month — 5-6 sentences. One concrete advice on what to do right now.",
+            "day": f"Write {name} about the energy of today — 4-5 sentences. One very concrete advice for today."
+        }
+    else:
+        hints = {
+            "me": f"Напиши {name} тёплый и точный портрет личности — 6-8 предложений. Покажи главную силу и как она проявляется в жизни. Без оценок, без слов 'тяжесть', 'трудно', 'противоречие', 'насилие'. Последнее предложение — живой вопрос который приглашает к размышлению.",
+            "year": f"Напиши {name} о главной теме и задаче этого года — 6-8 предложений. Конкретно, без общих слов. Последнее предложение — намёк что полная картина гораздо глубже.",
+            "month": f"Напиши {name} о тактике и фокусе этого месяца — 5-6 предложений. Один конкретный совет что делать прямо сейчас. Закончи намёком на то что упускается без полного анализа.",
+            "day": f"Напиши {name} об энергии сегодняшнего дня — 4-5 предложений. Один очень конкретный совет на сегодня. Тон тёплый, как от друга который тебя хорошо знает."
+        }
     return f"""Ты ассистент системы Внутренний Компас. Сегодня {ctx['today']}.
 {lang_force.get(lang, lang_force["ru"])}
 Имя: {name}.
