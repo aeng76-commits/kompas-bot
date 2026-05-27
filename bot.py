@@ -86,13 +86,13 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username FROM users WHERE user_id=%s", (user_id,))
+    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor FROM users WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return None
-    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username"]
+    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor"]
     return dict(zip(keys, row))
 
 def save_user(user_id, **kwargs):
@@ -101,7 +101,7 @@ def save_user(user_id, **kwargs):
     cur.execute("INSERT INTO users(user_id) VALUES(%s) ON CONFLICT(user_id) DO NOTHING", (user_id,))
     col_map = {"name":"name","gender":"gender","lang":"lang","birth_day":"birth_day","birth_month":"birth_month",
                "birth_year":"birth_year","agreed":"agreed","trial_started_at":"trial_started_at",
-               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username"}
+               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username","is_minor":"is_minor"}
     for k, v in kwargs.items():
         col = col_map.get(k, k)
         if col == "daily_usage" and isinstance(v, dict):
