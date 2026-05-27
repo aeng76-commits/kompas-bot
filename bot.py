@@ -970,7 +970,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     elif data == "trial_start":
-        greet = {"ru": "Привет! Это Внутренний Компас. Как тебя зовут?", "de": "Hallo! Das ist der Innere Kompass. Wie heisst du?", "en": "Hi! This is Inner Compass. What is your name?"}
+        greet = {"ru": "Привет! Это Salveris. Как тебя зовут?", "de": "Hallo! Das ist Salveris. Wie heißt du?", "en": "Hi! This is Salveris. What is your name?"}
         msg = greet.get(lang, greet["ru"])
         user_sessions[user_id] = [{"role": "assistant", "content": msg}]
         await query.edit_message_text(msg)
