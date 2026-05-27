@@ -981,9 +981,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "btn_pay":
         if user and user.get("is_minor"):
             minor_pay_msg = {
-                "ru": "Эта функция доступна с 18 лет. Возвращайся позже 🌟",
-                "de": "Diese Funktion ist ab 18 Jahren verfügbar. Komm später wieder 🌟",
-                "en": "This feature is available from age 18. Come back later 🌟"
+                "ru": "Эта функция доступна с 18 лет 🌟",
+                "de": "Diese Funktion ist ab 18 Jahren verfügbar 🌟",
+                "en": "This feature is available from age 18 🌟"
             }
             await query.edit_message_text(minor_pay_msg.get(lang, minor_pay_msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]]))
             return
