@@ -1492,6 +1492,22 @@ async def send_daily_messages(context):
     cur.close()
     conn.close()
     today = datetime.datetime.now()
+    # Проверка окончания подписки за 24 часа
+    for row in users_list:
+        uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
+        if paid_until:
+            hours_left = (paid_until.replace(tzinfo=None) - today).total_seconds() / 3600
+            if 23 <= hours_left <= 25:
+                expire_msg = {
+                    "ru": f"⏰ Через 24 часа твой доступ закроется.\n\nЧтобы продолжить — напиши администратору заранее.",
+                    "de": f"⏰ In 24 Stunden wird dein Zugang geschlossen.\n\nUm fortzufahren — schreibe dem Administrator rechtzeitig.",
+                    "en": f"⏰ In 24 hours your access will close.\n\nTo continue — contact the administrator in advance."
+                }
+                try:
+                    await context.bot.send_message(uid, expire_msg.get(lang, expire_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                except:
+                    pass
+
     for row in users_list:
         uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
         if not day:
