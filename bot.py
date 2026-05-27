@@ -148,9 +148,9 @@ def increment_usage(user_id, section):
     save_user(user_id, daily_usage=usage)
 
 RULES = {
-    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Твои имя и дата рождения сохраняются и используются только для твоего анализа. Изменить можно самостоятельно 1 раз, после этого только через администратора.\n4. Твои данные никому не передаются.\n5. Подписка продлевается автоматически. Отменить можно в любой момент.",
+    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Твои имя и дата рождения сохраняются и используются только для твоего анализа. Изменить можно самостоятельно 1 раз, после этого только через администратора.\n4. Твои данные никому не передаются.\n5. Подписка не продлевается автоматически. Для продления напиши администратору.",
     "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung für Entscheidungen liegt bei dir.\n3. Dein Name und Geburtsdatum werden gespeichert und nur für deine Analyse verwendet. Du kannst sie einmal selbst ändern, danach nur durch den Administrator.\n4. Deine Daten werden nicht weitergegeben.\n5. Das Abonnement verlängert sich automatisch. Du kannst jederzeit kündigen.",
-    "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your name and date of birth are stored and used only for your analysis. You can change them once yourself, after that only through the administrator.\n4. Your data is not shared with anyone.\n5. Subscription renews automatically. You can cancel at any time."
+    "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your name and date of birth are stored and used only for your analysis. You can change them once yourself, after that only through the administrator.\n4. Your data is not shared with anyone.\n5. Subscription does not renew automatically. To renew contact the administrator."
 }
 
 PAYPAL_LINKS = {
@@ -1469,7 +1469,20 @@ async def admin_grant(update: Update, context: ContextTypes.DEFAULT_TYPE):
     days = int(args[1])
     paid_until = datetime.datetime.now() + datetime.timedelta(days=days)
     save_user(target_id, paid_until=paid_until)
-    await update.message.reply_text(f"OK: доступ для {target_id} на {days} дней до {paid_until.strftime('%d.%m.%Y')}.")
+    await update.message.reply_text(f"OK: доступ для {target_id} на {days} дней до {paid_until.strftime('%d.%m.%Y %H:%M')}.")
+    # Уведомление пользователю
+    target_user = get_user(target_id)
+    if target_user:
+        target_lang = target_user.get("lang", "ru")
+        notify_msg = {
+            "ru": f"✅ Твой доступ открыт до {paid_until.strftime('%d.%m.%Y %H:%M')}\n\nЕсли хочешь продлить — напиши администратору заранее.",
+            "de": f"✅ Dein Zugang ist geöffnet bis {paid_until.strftime('%d.%m.%Y %H:%M')}\n\nWenn du verlängern möchtest — schreibe dem Administrator rechtzeitig.",
+            "en": f"✅ Your access is open until {paid_until.strftime('%d.%m.%Y %H:%M')}\n\nIf you want to renew — contact the administrator in advance."
+        }
+        try:
+            await context.bot.send_message(target_id, notify_msg.get(target_lang, notify_msg["ru"]))
+        except:
+            pass
 
 async def send_daily_messages(context):
     conn = get_db()
