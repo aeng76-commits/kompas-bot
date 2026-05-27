@@ -1628,6 +1628,7 @@ async def send_daily_messages(context):
         uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
         if not day:
             continue
+        user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
         try:
             # Поздравление с днём рождения
             if day == today.day and month == today.month:
