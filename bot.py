@@ -1460,7 +1460,20 @@ async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
             status = f"Истёк {expired.strftime('%d.%m.%Y') if expired else '—'}"
         reg = trial.strftime('%d.%m.%Y') if trial else '—'
         text += f"{name} ({lang}) — {uid} — {status} — рег. {reg}\n"
-    await update.message.reply_text(text)
+    # Разбиваем на части если длинно
+    if len(text) <= 4000:
+        await update.message.reply_text(text)
+    else:
+        lines = text.split("\n")
+        chunk = ""
+        for line in lines:
+            if len(chunk) + len(line) + 1 > 4000:
+                await update.message.reply_text(chunk)
+                chunk = line + "\n"
+            else:
+                chunk += line + "\n"
+        if chunk:
+            await update.message.reply_text(chunk)
 
 async def admin_reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
