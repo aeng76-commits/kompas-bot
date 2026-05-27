@@ -1665,6 +1665,9 @@ async def send_daily_messages(context):
                     print(f"Birthday personal error: {{e}}", flush=True)
                 continue
             user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
+            # Только активным пользователям
+            if not (is_trial_active(user_obj) or is_paid(user_obj)):
+                continue
             # Вычисляем оставшиеся часы триала
             trial_hours_left = None
             if trial_started_at and not (paid_until and paid_until.replace(tzinfo=None) > datetime.datetime.now()):
