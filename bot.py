@@ -907,6 +907,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(msg)
 
 
+    elif data == "remind_no":
+        no_msg = {"ru": "Хорошо! Если передумаешь — я здесь 🌟", "de": "Alles klar! Wenn du es dir anders überlegst — ich bin hier 🌟", "en": "Alright! If you change your mind — I'm here 🌟"}
+        await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
+
     elif data == "btn_help":
         help_ru = "❓ Помощь\n\n🆓 Пробный доступ\n72 часа бесплатно — все разделы открыты. Просто перестань пользоваться — ничего отменять не нужно.\n\n💳 Платная подписка\nПодписка не продлевается автоматически. Для продления напиши администратору заранее.\n\n✏️ Изменить имя или дату рождения\nНастройки → Изменить данные. Можно 1 раз самостоятельно.\n\n💬 Остались вопросы?\nНапиши администратору"
         help_de = "❓ Hilfe\n\n🆓 Testzugang\n72 Stunden kostenlos — alle Bereiche verfügbar. Keine Kündigung notwendig.\n\n💳 Bezahltes Abonnement\nDas Abonnement verlängert sich nicht automatisch. Für eine Verlängerung schreibe dem Administrator rechtzeitig.\n\n✏️ Name oder Geburtsdatum ändern\nEinstellungen → Daten ändern. Einmal selbst möglich.\n\n💬 Noch Fragen?\nSchreibe dem Administrator @aeng0"
@@ -1548,6 +1552,59 @@ async def send_daily_messages(context):
                 await context.bot.send_message(uid, clean_text(resp.content[0].text))
             except Exception as e:
                 print(f"Monthly overview error {{uid}}: {{e}}", flush=True)
+
+    # Напоминание неактивным 1-го числа
+    if today.day == 1:
+        conn2 = get_db()
+        cur2 = conn2.cursor()
+        cur2.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+        all_users = cur2.fetchall()
+        cur2.close()
+        conn2.close()
+        for row in all_users:
+            uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
+            user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
+            if is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today):
+                continue
+            if not day:
+                continue
+            try:
+                ctx = build_profile_context(user_obj)
+                lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
+                g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
+                remind_sys = f"""{lf}
+Ты ассистент Salveris. Имя: {name}. {g}.
+Личный месяц: {ctx["month_text"][:150]}
+
+Напиши одно предложение — название этого периода в 2-3 словах. Только название, без пояснений. Например: "период внутреннего переосмысления" или "время новых контактов". Без кавычек."""
+                resp = client.messages.create(
+                    model="claude-sonnet-4-6", max_tokens=30,
+                    system=remind_sys,
+                    messages=[{{"role": "user", "content": "Назови период"}}]
+                )
+                period = clean_text(resp.content[0].text).strip()
+                remind_text = {
+                    "ru": f"Привет, {name}! В этом месяце для тебя начинается {period}. Ежедневные персональные рекомендации помогут использовать эту энергию максимально эффективно.",
+                    "de": f"Hallo, {name}! Diesen Monat beginnt für dich {period}. Tägliche persönliche Empfehlungen helfen dir, diese Energie optimal zu nutzen.",
+                    "en": f"Hi, {name}! This month marks the beginning of {period} for you. Daily personal recommendations will help you make the most of this energy."
+                }
+                sub_btn = {
+                    "ru": "✨ Узнать подробнее",
+                    "de": "✨ Mehr erfahren",
+                    "en": "✨ Learn more"
+                }
+                no_btn = {
+                    "ru": "❌ Спасибо, не сейчас",
+                    "de": "❌ Danke, nicht jetzt",
+                    "en": "❌ Thanks, not now"
+                }
+                btns = InlineKeyboardMarkup([[
+                    InlineKeyboardButton(sub_btn.get(lang, sub_btn["ru"]), callback_data="btn_subscribe"),
+                    InlineKeyboardButton(no_btn.get(lang, no_btn["ru"]), callback_data="remind_no")
+                ]])
+                await context.bot.send_message(uid, remind_text.get(lang, remind_text["ru"]), reply_markup=btns)
+            except Exception as e:
+                print(f"Remind error {{uid}}: {{e}}", flush=True)
 
     # Проверка окончания подписки за 24 часа
     for row in users_list:
