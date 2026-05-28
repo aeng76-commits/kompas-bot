@@ -1731,6 +1731,7 @@ async def send_daily_messages(context):
             await show_menu(context, uid, lang)
         except Exception as e:
             print(f"Daily msg error {uid}: {e}", flush=True)
+            await asyncio.sleep(1)
 
 if __name__ == "__main__":
     import os
