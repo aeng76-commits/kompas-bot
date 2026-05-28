@@ -1466,12 +1466,11 @@ async def admin_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     now = datetime.datetime.now()
     for row in rows:
         uid, name, lang, trial, paid = row
-        u = {"trial_started_at": trial, "paid_until": paid}
         expires = trial.replace(tzinfo=None) + datetime.timedelta(hours=72) if trial else None
         if paid and paid.replace(tzinfo=None) > now:
             status = f"Платный до {paid.strftime('%d.%m.%Y')}"
-        elif is_trial_active(u):
-            status = f"Пробный до {expires.strftime('%d.%m %H:%M') if expires else '—'}"
+        elif expires and expires > now:
+            status = f"Пробный до {expires.strftime('%d.%m %H:%M')}"
         else:
             status = f"Истёк {expires.strftime('%d.%m.%Y') if expires else '—'}"
         reg = trial.strftime('%d.%m.%Y') if trial else '—'
