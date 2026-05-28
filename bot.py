@@ -1273,6 +1273,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
 
+    # Если регистрация завершена и нет активного компаса — показываем меню
+    if user.get("name") and user.get("day") and user.get("agreed"):
+        menu_msg = {
+            "ru": "Выбери раздел — я здесь 🧭",
+            "de": "Wähle einen Bereich — ich bin hier 🧭",
+            "en": "Choose a section — I'm here 🧭"
+        }
+        await show_menu(context, user_id, lang, menu_msg.get(lang, menu_msg["ru"]))
+        return
+
     # Имя
     if not user.get("name"):
         name = user_text.strip()
