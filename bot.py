@@ -889,6 +889,16 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(msg)
 
 
+    elif data == "feedback_yes":
+        q1 = {"ru": "Что понравилось или зацепило в Salveris?", "de": "Was hat dir an Salveris gefallen oder dich berührt?", "en": "What did you like or found interesting in Salveris?"}
+        compass_state[user_id] = {"stage": "feedback", "q_num": 1}
+        save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
+        await query.edit_message_text(q1.get(lang, q1["ru"]))
+
+    elif data == "feedback_no":
+        no_msg = {"ru": "Хорошо 🌟", "de": "Alles klar 🌟", "en": "Alright 🌟"}
+        await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
+
     elif data == "remind_no":
         no_msg = {"ru": "Хорошо! Если передумаешь — я здесь 🌟", "de": "Alles klar! Wenn du es dir anders überlegst — ich bin hier 🌟", "en": "Alright! If you change your mind — I'm here 🌟"}
         await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
@@ -1521,6 +1531,38 @@ async def admin_grant(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(target_id, notify_msg.get(target_lang, notify_msg["ru"]))
         except:
             pass
+
+def is_last_sunday_of_month(dt):
+    # Проверяем что сегодня воскресенье
+    if dt.weekday() != 6:
+        return False
+    # Проверяем что следующее воскресенье уже в следующем месяце
+    next_sunday = dt + datetime.timedelta(days=7)
+    return next_sunday.month != dt.month
+
+async def send_feedback_request(context):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, lang FROM users WHERE agreed=TRUE AND birth_day IS NOT NULL")
+    users_list = cur.fetchall()
+    cur.close()
+    conn.close()
+    for row in users_list:
+        uid, name, lang = row
+        feedback_msg = {
+            "ru": f"Привет, {name}! Ты попробовал(а) Salveris. Чтобы он становился лучше — мне важно твоё мнение. Буду признательна если найдёшь 2 минуты и ответишь на 3 вопроса 🙏",
+            "de": f"Hallo, {name}! Du hast Salveris ausprobiert. Damit er besser wird — ist mir deine Meinung wichtig. Ich wäre dankbar wenn du 2 Minuten findest und 3 Fragen beantwortest 🙏",
+            "en": f"Hi, {name}! You've tried Salveris. To make it better — your opinion matters to me. I'd be grateful if you find 2 minutes to answer 3 questions 🙏"
+        }
+        btns = InlineKeyboardMarkup([[
+            InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="feedback_yes"),
+            InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="feedback_no")
+        ]])
+        try:
+            await context.bot.send_message(uid, feedback_msg.get(lang, feedback_msg["ru"]), reply_markup=btns)
+            await asyncio.sleep(1)
+        except Exception as e:
+            print(f"Feedback error {uid}: {e}", flush=True)
 
 async def send_daily_messages(context):
     conn = get_db()
