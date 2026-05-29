@@ -1867,6 +1867,10 @@ async def send_daily_messages(context):
             await show_menu(context, uid, lang)
         except Exception as e:
             print(f"Daily msg error {uid}: {e}", flush=True)
+            try:
+                await context.bot.send_message(ADMIN_ID, "Не доставлено: " + str(name) + " (" + str(uid) + ")")
+            except:
+                pass
             await asyncio.sleep(1)
 
 if __name__ == "__main__":
