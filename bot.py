@@ -162,6 +162,7 @@ SEPA = "IBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra
 
 MENU_BUTTONS = {
     "ru": [
+        [InlineKeyboardButton("💳 Подписка", callback_data="btn_pay")],
         [InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Личный год", callback_data="btn_year")],
         [InlineKeyboardButton("📍 Личный месяц", callback_data="btn_month")],
@@ -172,6 +173,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
     ],
     "de": [
+        [InlineKeyboardButton("💳 Abonnement", callback_data="btn_pay")],
         [InlineKeyboardButton("🌟 Meine Persönlichkeit", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Persönliches Jahr", callback_data="btn_year")],
         [InlineKeyboardButton("📍 Persönlicher Monat", callback_data="btn_month")],
@@ -182,6 +184,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
     ],
     "en": [
+        [InlineKeyboardButton("💳 Subscription", callback_data="btn_pay")],
         [InlineKeyboardButton("🌟 My Personality", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Personal Year", callback_data="btn_year")],
         [InlineKeyboardButton("📍 Personal Month", callback_data="btn_month")],
@@ -1352,7 +1355,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "de": "🌿 Dies ist die Kurzversion — sie gibt dir eine allgemeine Orientierung.\n\nHeute stehen dir zur Verfügung:\n• 🌟 Meine Persönlichkeit — 1x\n• 🧭 Persönliches Jahr — 1x\n• 📍 Persönlicher Monat — 1x\n• ☀️ Persönlicher Tag — 1x\n• 💡 Lass uns reden — 1x\n\nAlles wird morgen erneuert.\n\n💎 Mit dem Abonnement arbeiten alle Bereiche tiefer, detaillierter und ohne Einschränkungen:\n• 🌟 Meine Persönlichkeit\n• 🧭 Persönliches Jahr\n• 📍 Persönlicher Monat\n• ☀️ Persönlicher Tag\n• 💡 Lass uns reden\n• 🗓 Individuelle Monatsübersicht am Anfang jeden Monats",
                 "en": "🌿 This is the short version — it gives you a general direction.\n\nToday you have access to:\n• 🌟 My Personality — 1 time\n• 🧭 Personal Year — 1 time\n• 📍 Personal Month — 1 time\n• ☀️ Personal Day — 1 time\n• 💡 Let's talk — 1 time\n\nEverything resets tomorrow.\n\n💎 With a subscription all sections work deeper, more detailed and without limits:\n• 🌟 My Personality\n• 🧭 Personal Year\n• 📍 Personal Month\n• ☀️ Personal Day\n• 💡 Let's talk\n• 🗓 Individual monthly overview at the beginning of each month"
             }
-            await update.message.reply_text(welcome_info.get(lang, welcome_info["ru"]))
+            sub_btns = InlineKeyboardMarkup([[
+                InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay"),
+                InlineKeyboardButton("◀️ Не сейчас" if lang=="ru" else ("◀️ Nicht jetzt" if lang=="de" else "◀️ Not now"), callback_data="btn_menu")
+            ]])
+            await update.message.reply_text(welcome_info.get(lang, welcome_info["ru"]), reply_markup=sub_btns)
             welcome = {"ru": "Готово! Выбери с чего начнём:", "de": "Fertig! Wähle, womit wir beginnen:", "en": "Done! Choose where to start:"}
             await update.message.reply_text(welcome.get(lang, welcome["ru"]), reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"])))
         else:
