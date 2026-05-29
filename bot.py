@@ -1442,6 +1442,7 @@ async def admin_news(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     sent = 0
     errors = 0
+    failed = []
     texts = {"ru": text_ru, "de": text_de, "en": text_en}
     for uid, lang in users:
         try:
@@ -1450,7 +1451,17 @@ async def admin_news(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await asyncio.sleep(0.5)
         except Exception:
             errors += 1
-    await update.message.reply_text(f"Отправлено: {sent}, ошибок: {errors}")
+    result = "Отправлено: " + str(sent) + ", ошибок: " + str(errors)
+    if failed:
+        conn2 = get_db()
+        cur2 = conn2.cursor()
+        cur2.execute("SELECT user_id, name FROM users WHERE user_id = ANY(%s)", (failed,))
+        failed_users = cur2.fetchall()
+        cur2.close()
+        conn2.close()
+        failed_names = [str(name) + " (" + str(uid) + ")" for uid, name in failed_users]
+        result += "\nНе доставлено:\n" + "\n".join(failed_names)
+    await update.message.reply_text(result)
 
 async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
