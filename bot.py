@@ -903,10 +903,14 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(q1)
 
     elif data == "feedback_yes":
-        q1 = {"ru": "Что понравилось или зацепило в Salveris?", "de": "Was hat dir an Salveris gefallen oder dich berührt?", "en": "What did you like or found interesting in Salveris?"}
+        fb_text = {
+            "ru": "Спасибо что нашёл(а) время! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что понравилось или зацепило?\n2. Что можно улучшить?\n3. Порекомендуешь Salveris другу?",
+            "de": "Danke dass du dir Zeit nimmst! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat dir gefallen oder dich berührt?\n2. Was kann verbessert werden?\n3. Würdest du Salveris einem Freund empfehlen?",
+            "en": "Thank you for taking the time! Your opinion matters a lot.\n\nPlease answer three questions in one message:\n\n1. What did you like or found interesting?\n2. What could be improved?\n3. Would you recommend Salveris to a friend?"
+        }
         compass_state[user_id] = {"stage": "feedback", "q_num": 1}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
-        await query.edit_message_text(q1.get(lang, q1["ru"]))
+        await query.edit_message_text(fb_text.get(lang, fb_text["ru"]))
 
     elif data == "feedback_no":
         no_msg = {"ru": "Спасибо, может в другой раз 🌟", "de": "Danke, vielleicht ein anderes Mal 🌟", "en": "Thank you, maybe another time 🌟"}
