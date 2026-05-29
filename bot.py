@@ -169,6 +169,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
         [InlineKeyboardButton("❓ Помощь", callback_data="btn_help")],
+        [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
     ],
     "de": [
         [InlineKeyboardButton("🌟 Meine Persönlichkeit", callback_data="btn_me")],
@@ -178,6 +179,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
         [InlineKeyboardButton("❓ Hilfe", callback_data="btn_help")],
+        [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
     ],
     "en": [
         [InlineKeyboardButton("🌟 My Personality", callback_data="btn_me")],
@@ -187,6 +189,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
         [InlineKeyboardButton("❓ Help", callback_data="btn_help")],
+        [InlineKeyboardButton("✍️ Leave feedback", callback_data="btn_feedback")],
     ],
 }
 
@@ -888,6 +891,13 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_sessions[user_id].append({"role": "assistant", "content": msg})
         await query.edit_message_text(msg)
 
+
+    elif data == "btn_feedback":
+        questions = {"ru": ["Что понравилось или зацепило в Salveris?", "Что не понравилось или показалось непонятным?", "Чего не хватало?"], "de": ["Was hat dir an Salveris gefallen oder dich beruehrt?", "Was hat dir nicht gefallen oder war unklar?", "Was hat gefehlt?"], "en": ["What did you like or found interesting in Salveris?", "What didn't you like or found confusing?", "What was missing?"]}
+        q1 = questions.get(lang, questions["ru"])[0]
+        compass_state[user_id] = {"stage": "feedback", "q_num": 1}
+        save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
+        await query.edit_message_text(q1)
 
     elif data == "feedback_yes":
         q1 = {"ru": "Что понравилось или зацепило в Salveris?", "de": "Was hat dir an Salveris gefallen oder dich berührt?", "en": "What did you like or found interesting in Salveris?"}
