@@ -906,8 +906,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(q1.get(lang, q1["ru"]))
 
     elif data == "feedback_no":
-        no_msg = {"ru": "Хорошо 🌟", "de": "Alles klar 🌟", "en": "Alright 🌟"}
+        no_msg = {"ru": "Спасибо что нашёл(а) время! Если захочешь поделиться — я здесь 🌟", "de": "Danke fuer deine Zeit! Wenn du teilen moechtest — ich bin hier 🌟", "en": "Thank you for your time! If you want to share — I'm here 🌟"}
         await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
+        await show_menu(context, user_id, lang)
 
     elif data == "remind_no":
         no_msg = {"ru": "Хорошо! Если передумаешь — я здесь 🌟", "de": "Alles klar! Wenn du es dir anders überlegst — ich bin hier 🌟", "en": "Alright! If you change your mind — I'm here 🌟"}
