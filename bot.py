@@ -1408,6 +1408,50 @@ async def admin_makeref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Пользователь " + name + " не найден в базе.")
 
+async def admin_news(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    if not context.args:
+        await update.message.reply_text("Использование: /news Текст новости")
+        return
+    text_ru = " ".join(context.args)
+    await update.message.reply_text("Перевожу и рассылаю...")
+    # Переводим через Claude
+    try:
+        resp_de = client.messages.create(
+            model="claude-sonnet-4-6", max_tokens=500,
+            system="Переведи текст на немецкий язык. Только перевод без пояснений.",
+            messages=[{"role": "user", "content": text_ru}]
+        )
+        text_de = resp_de.content[0].text.strip()
+        resp_en = client.messages.create(
+            model="claude-sonnet-4-6", max_tokens=500,
+            system="Переведи текст на английский язык. Только перевод без пояснений.",
+            messages=[{"role": "user", "content": text_ru}]
+        )
+        text_en = resp_en.content[0].text.strip()
+    except Exception as e:
+        await update.message.reply_text(f"Ошибка перевода: {e}")
+        return
+    # Рассылаем
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, lang FROM users WHERE agreed=TRUE")
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+    sent = 0
+    errors = 0
+    texts = {"ru": text_ru, "de": text_de, "en": text_en}
+    for uid, lang in users:
+        try:
+            await context.bot.send_message(uid, texts.get(lang, text_ru))
+            sent += 1
+            await asyncio.sleep(0.5)
+        except Exception:
+            errors += 1
+    await update.message.reply_text(f"Отправлено: {sent}, ошибок: {errors}")
+
 async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -1828,6 +1872,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("day", cmd_day))
     app.add_handler(CommandHandler("compass", cmd_compass))
     app.add_handler(CommandHandler("language", cmd_language))
+    app.add_handler(CommandHandler("news", admin_news))
     app.add_handler(CommandHandler("export", admin_export))
     app.add_handler(CommandHandler("myref", my_ref))
     app.add_handler(CommandHandler("makeref", admin_makeref))
