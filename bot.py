@@ -1786,6 +1786,7 @@ if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
+    app.job_queue.run_daily(send_feedback_request, time=dt.time(hour=10, minute=0, tzinfo=dt.timezone.utc), days=(6,))
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("me", cmd_me))
     app.add_handler(CommandHandler("year", cmd_year))
