@@ -368,6 +368,13 @@ def get_profile_prompts_list(lang, user, section):
     month_text = ctx["month_text"]
     day_text = ctx["day_text"]
 
+    about_parts = []
+    if user.get("about_work"): about_parts.append("Работа: " + user["about_work"])
+    if user.get("about_finance"): about_parts.append("Финансы: " + user["about_finance"])
+    if user.get("about_relations"): about_parts.append("Отношения: " + user["about_relations"])
+    if user.get("about_personal"): about_parts.append("Личное: " + user["about_personal"])
+    about_block = ("\n\nКОНТЕКСТ ЖИЗНИ (учитывай при анализе):\n" + "\n".join(about_parts)) if about_parts else ""
+
     base_personality = f"""{lf}
 Ты пишешь для системы Внутренний Компас.
 Имя: {name}. {g}.
@@ -401,7 +408,7 @@ def get_profile_prompts_list(lang, user, section):
 - Markdown звёздочки решётки
 
 Обращение: ТЫ. {g}.
-ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ."""
+ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ.{about_block}"""
 
     base_period = f"""{lf}
 Ты пишешь для системы Внутренний Компас.
@@ -431,7 +438,7 @@ def get_profile_prompts_list(lang, user, section):
 - Обрезанные и неполные формы слов: "зафикси" вместо "зафиксируй", "форсажа" и подобные
 - Разговорные сокращения глаголов в повелительном наклонении
 Обращение: ТЫ. {g}.
-ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ."""
+ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ.{about_block}"""
 
     b = {
         "me": [
