@@ -86,13 +86,13 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor FROM users WHERE user_id=%s", (user_id,))
+    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor,about_work,about_finance,about_relations,about_personal FROM users WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return None
-    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor"]
+    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor","about_work","about_finance","about_relations","about_personal"]
     return dict(zip(keys, row))
 
 def save_user(user_id, **kwargs):
@@ -101,7 +101,7 @@ def save_user(user_id, **kwargs):
     cur.execute("INSERT INTO users(user_id) VALUES(%s) ON CONFLICT(user_id) DO NOTHING", (user_id,))
     col_map = {"name":"name","gender":"gender","lang":"lang","birth_day":"birth_day","birth_month":"birth_month",
                "birth_year":"birth_year","agreed":"agreed","trial_started_at":"trial_started_at",
-               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username","is_minor":"is_minor"}
+               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username","is_minor":"is_minor","about_work":"about_work","about_finance":"about_finance","about_relations":"about_relations","about_personal":"about_personal"}
     for k, v in kwargs.items():
         col = col_map.get(k, k)
         if col == "daily_usage" and isinstance(v, dict):
@@ -163,6 +163,7 @@ SEPA = "IBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra
 MENU_BUTTONS = {
     "ru": [
         [InlineKeyboardButton("💳 Подписка", callback_data="btn_pay")],
+        [InlineKeyboardButton("👤 Обо мне", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Личный год", callback_data="btn_year")],
         [InlineKeyboardButton("📍 Личный месяц", callback_data="btn_month")],
@@ -174,6 +175,7 @@ MENU_BUTTONS = {
     ],
     "de": [
         [InlineKeyboardButton("💳 Abonnement", callback_data="btn_pay")],
+        [InlineKeyboardButton("👤 Über mich", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Meine Persönlichkeit", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Persönliches Jahr", callback_data="btn_year")],
         [InlineKeyboardButton("📍 Persönlicher Monat", callback_data="btn_month")],
@@ -185,6 +187,7 @@ MENU_BUTTONS = {
     ],
     "en": [
         [InlineKeyboardButton("💳 Subscription", callback_data="btn_pay")],
+        [InlineKeyboardButton("👤 About me", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 My Personality", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Personal Year", callback_data="btn_year")],
         [InlineKeyboardButton("📍 Personal Month", callback_data="btn_month")],
@@ -895,17 +898,42 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(msg)
 
 
+    elif data == "about_skip":
+        skip_msg = {"ru": "Хорошо! Ты всегда можешь добавить информацию о себе в разделе 👤 Обо мне 🌟", "de": "Alles klar! Du kannst jederzeit Informationen über dich im Bereich 👤 Über mich hinzufügen 🌟", "en": "Alright! You can always add information about yourself in the 👤 About me section 🌟"}
+        await query.edit_message_text(skip_msg.get(lang, skip_msg["ru"]))
+        await show_menu(context, user_id, lang)
+
+    elif data == "about_start":
+        compass_state[user_id] = {"stage": "about", "about_step": "work"}
+        save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
+        q = {"ru": "💼 Работа/карьера\n\nРасскажи о своей работе или занятии — что сейчас происходит в этой сфере и как ты себя в ней чувствуешь?", "de": "💼 Arbeit/Karriere\n\nErzähl mir von deiner Arbeit oder Tätigkeit — was passiert gerade in diesem Bereich und wie fühlst du dich dabei?", "en": "💼 Work/Career\n\nTell me about your work or occupation — what is happening in this area right now and how do you feel about it?"}
+        await query.edit_message_text(q.get(lang, q["ru"]))
+
+    elif data == "btn_about":
+        work = user.get("about_work") or "—"
+        finance = user.get("about_finance") or "—"
+        relations = user.get("about_relations") or "—"
+        personal = user.get("about_personal") or "—"
+        filled = any(user.get(k) for k in ["about_work","about_finance","about_relations","about_personal"])
+        if filled:
+            about_text = "👤 " + ("" if lang!="ru" else "Обо мне") + ("" if lang!="de" else "Über mich") + ("" if lang!="en" else "About me") + "\n\n💼 " + ("" if lang!="ru" else "Работа") + ("" if lang!="de" else "Arbeit") + ("" if lang!="en" else "Work") + ": " + work + "\n\n💰 " + ("" if lang!="ru" else "Финансы") + ("" if lang!="de" else "Finanzen") + ("" if lang!="en" else "Finances") + ": " + finance + "\n\n💑 " + ("" if lang!="ru" else "Отношения") + ("" if lang!="de" else "Beziehungen") + ("" if lang!="en" else "Relationships") + ": " + relations + "\n\n🌱 " + ("" if lang!="ru" else "Личное") + ("" if lang!="de" else "Persönliches") + ("" if lang!="en" else "Personal") + ": " + personal
+        else:
+            about_text = ("Секция пуста — нажми Обновить чтобы рассказать о себе" if lang=="ru" else ("Noch keine Angaben — drücke Aktualisieren um mehr über dich zu erzählen" if lang=="de" else "No information yet — press Update to tell about yourself"))
+        edit_btns = InlineKeyboardMarkup([[InlineKeyboardButton("✏️ " + ("Обновить" if lang=="ru" else ("Aktualisieren" if lang=="de" else "Update")), callback_data="about_start"), InlineKeyboardButton("◄️ " + ("Меню" if lang=="ru" else ("Menü" if lang=="de" else "Menu")), callback_data="btn_menu")]])
+        await query.edit_message_text(about_text, reply_markup=edit_btns)
+
     elif data == "btn_feedback":
-        fb_text = {"ru": "Спасибо что нашёл(а) время! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что понравилось или зацепило?\n2. Что можно улучшить?\n3. Порекомендуешь Salveris другу?", "de": "Danke dass du dir Zeit nimmst! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat dir gefallen?\n2. Was kann verbessert werden?\n3. Wuerdest du Salveris empfehlen?", "en": "Thank you for taking the time! Your opinion matters.\n\nPlease answer three questions in one message:\n\n1. What did you like?\n2. What could be improved?\n3. Would you recommend Salveris?"}
+        questions = {"ru": ["Что понравилось или зацепило в Salveris?", "Что не понравилось или показалось непонятным?", "Чего не хватало?"], "de": ["Was hat dir an Salveris gefallen oder dich beruehrt?", "Was hat dir nicht gefallen oder war unklar?", "Was hat gefehlt?"], "en": ["What did you like or found interesting in Salveris?", "What didn't you like or found confusing?", "What was missing?"]}
+        q1 = questions.get(lang, questions["ru"])[0]
         compass_state[user_id] = {"stage": "feedback", "q_num": 1}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
-        await query.edit_message_text(fb_text.get(lang, fb_text["ru"]))
+        await query.edit_message_text(q1)
 
     elif data == "feedback_yes":
-        fb_text = {"ru": "Спасибо что нашёл(а) время! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что понравилось или зацепило?\n2. Что можно улучшить?\n3. Порекомендуешь Salveris другу?", "de": "Danke dass du dir Zeit nimmst! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat dir gefallen?\n2. Was kann verbessert werden?\n3. Wuerdest du Salveris empfehlen?", "en": "Thank you for taking the time! Your opinion matters.\n\nPlease answer three questions in one message:\n\n1. What did you like?\n2. What could be improved?\n3. Would you recommend Salveris?"}
+        q1 = {"ru": "Что понравилось или зацепило в Salveris?", "de": "Was hat dir an Salveris gefallen oder dich berührt?", "en": "What did you like or found interesting in Salveris?"}
         compass_state[user_id] = {"stage": "feedback", "q_num": 1}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
-        await query.edit_message_text(fb_text.get(lang, fb_text["ru"]))
+        await query.edit_message_text(q1.get(lang, q1["ru"]))
 
     elif data == "feedback_no":
         no_msg = {"ru": "Спасибо, может в другой раз 🌟", "de": "Danke, vielleicht ein anderes Mal 🌟", "en": "Thank you, maybe another time 🌟"}
@@ -1252,14 +1280,61 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(reply)
             return
 
-        elif stage == "feedback":
-            await context.bot.send_message(ADMIN_ID, "Отзыв от " + str(user.get("name")) + " (" + lang + "):\n" + user_text)
-            thanks = {"ru": "Спасибо большое! Твоё мнение очень важно для развития Salveris 🙏🌟", "de": "Vielen Dank! Deine Meinung ist sehr wichtig fuer die Entwicklung von Salveris 🙏🌟", "en": "Thank you so much! Your opinion matters a lot 🙏🌟"}
-            compass_state.pop(user_id, None)
-            save_session(user_id, session=[], compass={})
-            await update.message.reply_text(thanks.get(lang, thanks["ru"]))
-            await show_menu(context, user_id, lang)
+        elif stage == "about":
+            about_step = state.get("about_step", "work")
+            if about_step == "work":
+                save_user(user_id, about_work=user_text)
+                state["about_step"] = "finance"
+                compass_state[user_id] = state
+                save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
+                q = {"ru": "💰 Финансы\n\nКак выглядит твоя финансовая ситуация сейчас — что стабильно, что беспокоит, к чему стремишься?", "de": "💰 Finanzen\n\nWie sieht deine finanzielle Situation gerade aus — was ist stabil, was bereitet dir Sorgen, wonach strebst du?", "en": "💰 Finances\n\nHow does your financial situation look right now — what is stable, what concerns you, what are you aiming for?"}
+                await update.message.reply_text(q.get(lang, q["ru"]))
+            elif about_step == "finance":
+                save_user(user_id, about_finance=user_text)
+                state["about_step"] = "relations"
+                compass_state[user_id] = state
+                save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
+                q = {"ru": "💑 Отношения\n\nРасскажи о своих близких отношениях — что сейчас радует и что даётся непросто?", "de": "💑 Beziehungen\n\nErzähl mir von deinen engen Beziehungen — was freut dich gerade und was fällt schwer?", "en": "💑 Relationships\n\nTell me about your close relationships — what makes you happy right now and what is challenging?"}
+                await update.message.reply_text(q.get(lang, q["ru"]))
+            elif about_step == "relations":
+                save_user(user_id, about_relations=user_text)
+                state["about_step"] = "personal"
+                compass_state[user_id] = state
+                save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
+                q = {"ru": "🌱 Личное\n\nЕсть ли что-то важное что сейчас занимает твои мысли больше всего — цель, вопрос, ситуация?", "de": "🌱 Persönliches\n\nGibt es etwas Wichtiges das dich gerade am meisten beschäftigt — ein Ziel, eine Frage, eine Situation?", "en": "🌱 Personal\n\nIs there something important that occupies your mind the most right now — a goal, a question, a situation?"}
+                await update.message.reply_text(q.get(lang, q["ru"]))
+            elif about_step == "personal":
+                save_user(user_id, about_personal=user_text)
+                compass_state.pop(user_id, None)
+                save_session(user_id, session=[], compass={})
+                thanks = {"ru": "Спасибо! Теперь Salveris знает тебя лучше и будет давать более точный анализ 🌟", "de": "Danke! Jetzt kennt Salveris dich besser und wird genauere Analysen erstellen 🌟", "en": "Thank you! Now Salveris knows you better and will provide more accurate analysis 🌟"}
+                await update.message.reply_text(thanks.get(lang, thanks["ru"]))
+                await show_menu(context, user_id, lang)
             return
+
+        elif stage == "feedback":
+            q_num = state.get("q_num", 1)
+            questions = {
+                "ru": ["Что понравилось или зацепило в Salveris?", "Что не понравилось или показалось непонятным?", "Чего не хватало?"],
+                "de": ["Was hat dir an Salveris gefallen oder dich berührt?", "Was hat dir nicht gefallen oder war unklar?", "Was hat gefehlt?"],
+                "en": ["What did you like or found interesting in Salveris?", "What didn't you like or found confusing?", "What was missing?"]
+            }
+            # Сохраняем ответ и отправляем администратору
+            await context.bot.send_message(ADMIN_ID, "📝 Отзыв от " + str(user.get("name")) + " (" + lang + "). Вопрос " + str(q_num) + ": " + user_text)
+            if q_num < 3:
+                next_q = questions.get(lang, questions["ru"])[q_num]
+                state["q_num"] = q_num + 1
+                compass_state[user_id] = state
+                save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
+                await update.message.reply_text(next_q)
+            else:
+                thanks = {"ru": "Спасибо большое! Твоё мнение очень важно для развития Salveris 🙏🌟", "de": "Vielen Dank! Deine Meinung ist sehr wichtig für die Entwicklung von Salveris 🙏🌟", "en": "Thank you so much! Your opinion is very important for the development of Salveris 🙏🌟"}
+                compass_state.pop(user_id, None)
+                save_session(user_id, session=[], compass={})
+                await update.message.reply_text(thanks.get(lang, thanks["ru"]))
+                await show_menu(context, user_id, lang)
+            return
+
         elif stage == "clarify":
             # Уточняющие вопросы после "нет"
             clarify_count = state.get("clarify_count", 0)
@@ -1341,9 +1416,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             }
             sub_btns = InlineKeyboardMarkup([[
                 InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay"),
-                InlineKeyboardButton("◀️ Не сейчас" if lang=="ru" else ("◀️ Nicht jetzt" if lang=="de" else "◀️ Not now"), callback_data="btn_menu")
+                InlineKeyboardButton("◄️ Не сейчас" if lang=="ru" else ("◄️ Nicht jetzt" if lang=="de" else "◄️ Not now"), callback_data="btn_menu")
             ]])
             await update.message.reply_text(welcome_info.get(lang, welcome_info["ru"]), reply_markup=sub_btns)
+            about_invite = {
+                "ru": "Хочешь рассказать о себе подробнее? Твои ответы помогут Salveris давать более точный и индивидуальный анализ.",
+                "de": "Möchtest du mehr über dich erzählen? Deine Antworten helfen Salveris noch genauere Analysen zu erstellen.",
+                "en": "Would you like to tell more about yourself? Your answers will help Salveris provide more accurate analysis."
+            }
+            about_btns = InlineKeyboardMarkup([[
+                InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="about_start"),
+                InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="about_skip")
+            ]])
+            await context.bot.send_message(user_id, about_invite.get(lang, about_invite["ru"]), reply_markup=about_btns)
             welcome = {"ru": "Готово! Выбери с чего начнём:", "de": "Fertig! Wähle, womit wir beginnen:", "en": "Done! Choose where to start:"}
             await update.message.reply_text(welcome.get(lang, welcome["ru"]), reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"])))
         else:
