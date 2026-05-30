@@ -170,9 +170,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
-        [InlineKeyboardButton("❓ Помощь", callback_data="btn_help")],
         [InlineKeyboardButton("ℹ️ Навигация", callback_data="btn_info")],
-        [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
     ],
     "de": [
         [InlineKeyboardButton("💳 Abonnement", callback_data="btn_pay")],
@@ -183,9 +181,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Persönlicher Tag", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
-        [InlineKeyboardButton("❓ Hilfe", callback_data="btn_help")],
         [InlineKeyboardButton("ℹ️ Navigation", callback_data="btn_info")],
-        [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
     ],
     "en": [
         [InlineKeyboardButton("💳 Subscription", callback_data="btn_pay")],
@@ -196,9 +192,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Personal Day", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
-        [InlineKeyboardButton("❓ Help", callback_data="btn_help")],
         [InlineKeyboardButton("ℹ️ Navigation", callback_data="btn_info")],
-        [InlineKeyboardButton("✍️ Leave feedback", callback_data="btn_feedback")],
     ],
 }
 
