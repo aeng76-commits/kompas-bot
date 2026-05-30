@@ -2032,7 +2032,6 @@ if __name__ == "__main__":
                 BotCommand("compass", "Поговорим о главном / Hauptthema"),
             ], scope=BotCommandScopeDefault())
             from telegram import BotCommandScopeAllPrivateChats
-            from telegram.constants import LanguageCode
             await app.bot.set_my_commands([
                 BotCommand("start", "Начать"),
                 BotCommand("me", "Основа моей личности"),
