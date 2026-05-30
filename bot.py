@@ -957,6 +957,78 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
         await show_menu(context, user_id, lang)
 
+    elif data == "announce_nav_open":
+        gender = user.get("gender", "f") if user else "f"
+        info_ru = (
+            "<b>ℹ️ Как устроен Salveris</b>\n\n"
+            "<b>🌟 Основа моей личности</b>\n"
+            "Как ты думаешь, принимаешь решения и реагируешь на давление. Это твой фундамент.\n\n"
+            "<b>🧭 Личный год / 📍 Месяц / ☀️ День</b>\n"
+            "Что сейчас происходит в твоей жизни, на что обратить внимание и чего избегать. Год — общий вектор, месяц — тактика, день — фокус на сегодня.\n\n"
+            "<b>💡 Поговорим о главном</b>\n"
+            "Расскажи о любой ситуации — в работе, отношениях, жизни. Salveris задаст вопросы и даст персональный анализ именно для тебя.\n\n"
+            "<b>👤 Обо мне</b>\n"
+            "Расскажи о своей жизни подробнее — работе, финансах, отношениях. Чем больше Salveris знает о тебе, тем точнее каждый анализ.\n\n"
+            "<b>💳 Подписка</b>\n"
+            "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений, глубже и детальнее — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
+            "<b>⚙️ Настройки</b>\n"
+            "🌐 Сменить язык\n"
+            "✏️ Изменить имя или дату рождения\n"
+            "📋 Правила\n"
+            "❓ Помощь\n"
+            "✍️ Написать администратору\n"
+            "✍️ Оставить отзыв"
+        )
+        info_de = (
+            "<b>ℹ️ Wie Salveris funktioniert</b>\n\n"
+            "<b>🌟 Meine Persönlichkeit</b>\n"
+            "Wie du denkst, Entscheidungen triffst und auf Druck reagierst. Das ist dein Fundament.\n\n"
+            "<b>🧭 Persönliches Jahr / 📍 Monat / ☀️ Tag</b>\n"
+            "Was gerade in deinem Leben passiert, worauf du achten solltest und was du vermeiden solltest. Jahr — Gesamtvektor, Monat — Taktik, Tag — Fokus für heute.\n\n"
+            "<b>💡 Lass uns reden</b>\n"
+            "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Salveris stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
+            "<b>👤 Über mich</b>\n"
+            "Erzähl mehr über dein Leben — Arbeit, Finanzen, Beziehungen. Je mehr Salveris über dich weiß, desto präziser wird jede Analyse.\n\n"
+            "<b>💳 Abonnement</b>\n"
+            "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen, tiefer und detaillierter — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
+            "<b>⚙️ Einstellungen</b>\n"
+            "🌐 Sprache ändern\n"
+            "✏️ Name oder Geburtsdatum ändern\n"
+            "📋 Regeln\n"
+            "❓ Hilfe\n"
+            "✍️ Administrator schreiben\n"
+            "✍️ Feedback hinterlassen"
+        )
+        info_en = (
+            "<b>ℹ️ How Salveris works</b>\n\n"
+            "<b>🌟 My Personality</b>\n"
+            "How you think, make decisions and respond to pressure. This is your foundation.\n\n"
+            "<b>🧭 Personal Year / 📍 Month / ☀️ Day</b>\n"
+            "What is happening in your life right now, what to pay attention to and what to avoid. Year — overall vector, month — tactics, day — focus for today.\n\n"
+            "<b>💡 Let\'s talk</b>\n"
+            "Tell about any situation — work, relationships, life. Salveris will ask questions and give a personal analysis just for you.\n\n"
+            "<b>👤 About me</b>\n"
+            "Tell more about your life — work, finances, relationships. The more Salveris knows about you, the more precise each analysis.\n\n"
+            "<b>💳 Subscription</b>\n"
+            "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits, deeper and more detailed — including an individual monthly overview. From 15€/month.\n\n"
+            "<b>⚙️ Settings</b>\n"
+            "🌐 Change language\n"
+            "✏️ Change name or date of birth\n"
+            "📋 Rules\n"
+            "❓ Help\n"
+            "✍️ Contact administrator\n"
+            "✍️ Leave feedback"
+        )
+        info_text = {"ru": info_ru, "de": info_de, "en": info_en}
+        menu_btn = InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]])
+        await query.edit_message_text(info_text.get(lang, info_text["ru"]), reply_markup=menu_btn, parse_mode="HTML")
+        await show_menu(context, user_id, lang)
+
+    elif data == "announce_nav_no":
+        no_msg = {"ru": "Хорошо! Найдёшь в меню когда понадобится 🌟", "de": "Alles klar! Du findest es im Menü wenn du es brauchst 🌟", "en": "Alright! You'll find it in the menu when you need it 🌟"}
+        await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
+        await show_menu(context, user_id, lang)
+
     elif data == "remind_no":
         no_msg = {"ru": "Хорошо! Если передумаешь — я здесь 🌟", "de": "Alles klar! Wenn du es dir anders überlegst — ich bin hier 🌟", "en": "Alright! If you change your mind — I'm here 🌟"}
         await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
@@ -1629,6 +1701,74 @@ async def admin_news(update: Update, context: ContextTypes.DEFAULT_TYPE):
         result += "\nНе доставлено:\n" + "\n".join(failed_names)
     await update.message.reply_text(result)
 
+async def admin_announce_nav(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, lang FROM users WHERE agreed=TRUE AND birth_day IS NOT NULL")
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+    msg_ru = "🌟 Salveris обновился!\n\nВ меню появилась новая кнопка — ℹ️ Знакомство с Salveris.\n\nТам коротко описано для чего каждый раздел и что находится в настройках. Если ещё не разобрался(лась) как всё устроено — загляни туда."
+    msg_de = "🌟 Salveris wurde aktualisiert!\n\nIm Menü gibt es eine neue Schaltfläche — ℹ️ Salveris kennenlernen.\n\nDort wird kurz beschrieben, wofür jeder Bereich da ist. Schau gerne rein."
+    msg_en = "🌟 Salveris has been updated!\n\nA new button appeared in the menu — ℹ️ Get to know Salveris.\n\nIt briefly describes what each section is for. Feel free to check it out."
+    msgs = {"ru": msg_ru, "de": msg_de, "en": msg_en}
+    sent = 0
+    failed = []
+    for uid, name, lang in users:
+        try:
+            btns = InlineKeyboardMarkup([[
+                InlineKeyboardButton("ℹ️ Открыть" if lang=="ru" else ("ℹ️ Öffnen" if lang=="de" else "ℹ️ Open"), callback_data="announce_nav_open"),
+                InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="announce_nav_no")
+            ]])
+            await context.bot.send_message(uid, msgs.get(lang, msg_ru), reply_markup=btns)
+            sent += 1
+            await asyncio.sleep(0.5)
+        except Exception as e:
+            failed.append(str(uid))
+            print(f"announce_nav error {uid}: {e}", flush=True)
+    result = f"✅ Отправлено: {sent}\nОшибок: {len(failed)}"
+    if failed:
+        result += "\nНе доставлено ID: " + ", ".join(failed)
+    await update.message.reply_text(result)
+
+
+async def admin_announce_about(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""SELECT user_id, name, lang FROM users
+        WHERE agreed=TRUE AND birth_day IS NOT NULL
+        AND (about_work IS NULL AND about_finance IS NULL AND about_relations IS NULL AND about_personal IS NULL)""")
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+    msg_ru = "👤 В Salveris появился новый раздел — Обо мне.\n\nЧем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n🔒 Эти данные используются только для твоего анализа. Посмотреть и изменить их можешь только ты.\n\nХочешь попробовать?"
+    msg_de = "👤 In Salveris gibt es einen neuen Bereich — Über mich.\n\nJe mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n🔒 Diese Daten werden nur für deine Analyse verwendet. Ansehen und ändern kannst nur du.\n\nMöchtest du es ausprobieren?"
+    msg_en = "👤 A new section appeared in Salveris — About me.\n\nThe more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n🔒 This data is used only for your analysis. Only you can view and change it.\n\nWant to try?"
+    msgs = {"ru": msg_ru, "de": msg_de, "en": msg_en}
+    sent = 0
+    failed = []
+    for uid, name, lang in users:
+        try:
+            btns = InlineKeyboardMarkup([[
+                InlineKeyboardButton("✅ Да, заполнить" if lang=="ru" else ("✅ Ja, ausfüllen" if lang=="de" else "✅ Yes, fill in"), callback_data="about_start"),
+                InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="about_announce_skip")
+            ]])
+            await context.bot.send_message(uid, msgs.get(lang, msg_ru), reply_markup=btns)
+            sent += 1
+            await asyncio.sleep(0.5)
+        except Exception as e:
+            failed.append(str(uid))
+            print(f"announce_about error {uid}: {e}", flush=True)
+    result = f"✅ Отправлено: {sent}\nОшибок: {len(failed)}"
+    if failed:
+        result += "\nНе доставлено ID: " + ", ".join(failed)
+    await update.message.reply_text(result)
+
+
 async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -2053,6 +2193,8 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("day", cmd_day))
     app.add_handler(CommandHandler("compass", cmd_compass))
     app.add_handler(CommandHandler("language", cmd_language))
+    app.add_handler(CommandHandler("announce_nav", admin_announce_nav))
+    app.add_handler(CommandHandler("announce_about", admin_announce_about))
     app.add_handler(CommandHandler("news", admin_news))
     app.add_handler(CommandHandler("export", admin_export))
     app.add_handler(CommandHandler("myref", my_ref))
@@ -2065,7 +2207,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(gender_cb, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
-    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu|about_|feedback_yes|feedback_no|remind_no)"))
+    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu|about_|feedback_yes|feedback_no|remind_no|announce_nav_)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
     PORT = int(os.environ.get("PORT", 10000))
