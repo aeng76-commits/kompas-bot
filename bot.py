@@ -2022,6 +2022,41 @@ if __name__ == "__main__":
         async def run():
             await app.initialize()
             await app.bot.delete_webhook(drop_pending_updates=True)
+            from telegram import BotCommand, BotCommandScopeDefault
+            await app.bot.set_my_commands([
+                BotCommand("start", "Начать / Start"),
+                BotCommand("me", "Основа моей личности / Persönlichkeit"),
+                BotCommand("year", "Личный год / Persönliches Jahr"),
+                BotCommand("month", "Личный месяц / Persönlicher Monat"),
+                BotCommand("day", "Личный день / Persönlicher Tag"),
+                BotCommand("compass", "Поговорим о главном / Hauptthema"),
+            ], scope=BotCommandScopeDefault())
+            from telegram import BotCommandScopeAllPrivateChats
+            from telegram.constants import LanguageCode
+            await app.bot.set_my_commands([
+                BotCommand("start", "Начать"),
+                BotCommand("me", "Основа моей личности"),
+                BotCommand("year", "Личный год"),
+                BotCommand("month", "Личный месяц"),
+                BotCommand("day", "Личный день"),
+                BotCommand("compass", "Поговорим о главном"),
+            ], scope=BotCommandScopeAllPrivateChats(), language_code="ru")
+            await app.bot.set_my_commands([
+                BotCommand("start", "Start"),
+                BotCommand("me", "Meine Persönlichkeit"),
+                BotCommand("year", "Persönliches Jahr"),
+                BotCommand("month", "Persönlicher Monat"),
+                BotCommand("day", "Persönlicher Tag"),
+                BotCommand("compass", "Hauptthema besprechen"),
+            ], scope=BotCommandScopeAllPrivateChats(), language_code="de")
+            await app.bot.set_my_commands([
+                BotCommand("start", "Start"),
+                BotCommand("me", "My Personality"),
+                BotCommand("year", "Personal Year"),
+                BotCommand("month", "Personal Month"),
+                BotCommand("day", "Personal Day"),
+                BotCommand("compass", "Let's talk"),
+            ], scope=BotCommandScopeAllPrivateChats(), language_code="en")
             wh_url = f"{WEBHOOK_URL}/webhook"
             print(f"Setting webhook: [{wh_url}]", flush=True)
             await app.bot.set_webhook(url=wh_url)
