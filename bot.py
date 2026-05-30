@@ -1132,7 +1132,6 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         info = {"ru": ru_info, "de": de_info, "en": en_info}
         btns = [
             [InlineKeyboardButton("📋 Правила" if lang=="ru" else ("📋 Regeln" if lang=="de" else "📋 Rules"), callback_data="btn_rules")],
-            [InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay")],
             [InlineKeyboardButton("✏️ Изменить данные" if lang=="ru" else ("✏️ Daten ändern" if lang=="de" else "✏️ Change data"), callback_data="btn_change_data")],
             [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache ändern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
             [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
