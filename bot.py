@@ -164,6 +164,7 @@ MENU_BUTTONS = {
     "ru": [
         [InlineKeyboardButton("💳 Подписка", callback_data="btn_pay")],
         [InlineKeyboardButton("ℹ️ Знакомство с Salveris", callback_data="btn_info")],
+        [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
         [InlineKeyboardButton("👤 Обо мне", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Личный год", callback_data="btn_year")],
@@ -171,11 +172,11 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
-        [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
     ],
     "de": [
         [InlineKeyboardButton("💳 Abonnement", callback_data="btn_pay")],
         [InlineKeyboardButton("ℹ️ Salveris kennenlernen", callback_data="btn_info")],
+        [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
         [InlineKeyboardButton("👤 Über mich", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Meine Persönlichkeit", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Persönliches Jahr", callback_data="btn_year")],
@@ -183,11 +184,11 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Persönlicher Tag", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
-        [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
     ],
     "en": [
         [InlineKeyboardButton("💳 Subscription", callback_data="btn_pay")],
         [InlineKeyboardButton("ℹ️ Get to know Salveris", callback_data="btn_info")],
+        [InlineKeyboardButton("✍️ Leave feedback", callback_data="btn_feedback")],
         [InlineKeyboardButton("👤 About me", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 My Personality", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Personal Year", callback_data="btn_year")],
@@ -195,7 +196,6 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Personal Day", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
-        [InlineKeyboardButton("✍️ Leave feedback", callback_data="btn_feedback")],
     ],
 }
 
@@ -2231,7 +2231,7 @@ if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
-    app.job_queue.run_daily(send_feedback_request, time=dt.time(hour=10, minute=0, tzinfo=dt.timezone.utc), days=(6,))
+    # feedback рассылка отключена
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("me", cmd_me))
     app.add_handler(CommandHandler("year", cmd_year))
