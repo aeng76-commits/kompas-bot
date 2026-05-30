@@ -978,7 +978,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>💡 Поговорим о главном</b>\n"
             "Расскажи о любой ситуации — в работе, отношениях, жизни. Salveris задаст вопросы и даст персональный анализ именно для тебя.\n\n"
             "<b>👤 Обо мне</b>\n"
-            "Расскажи о своей жизни подробнее — работе, финансах, отношениях. Чем больше Salveris знает о тебе, тем точнее каждый анализ.\n\n"
+            "Чем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
             "<b>💳 Подписка</b>\n"
             "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений, глубже и детальнее — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
             "<b>⚙️ Настройки</b>\n"
@@ -986,7 +986,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Изменить имя или дату рождения\n"
             "📋 Правила\n"
             "❓ Помощь\n"
-            "✍️ Написать администратору\n"
+            "💬 Написать администратору\n"
             "✍️ Оставить отзыв"
         )
         info_de = (
@@ -998,7 +998,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>💡 Lass uns reden</b>\n"
             "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Salveris stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
             "<b>👤 Über mich</b>\n"
-            "Erzähl mehr über dein Leben — Arbeit, Finanzen, Beziehungen. Je mehr Salveris über dich weiß, desto präziser wird jede Analyse.\n\n"
+            "Je mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
             "<b>💳 Abonnement</b>\n"
             "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen, tiefer und detaillierter — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
             "<b>⚙️ Einstellungen</b>\n"
@@ -1006,7 +1006,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Name oder Geburtsdatum ändern\n"
             "📋 Regeln\n"
             "❓ Hilfe\n"
-            "✍️ Administrator schreiben\n"
+            "💬 Administrator schreiben\n"
             "✍️ Feedback hinterlassen"
         )
         info_en = (
@@ -1018,7 +1018,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>💡 Let\'s talk</b>\n"
             "Tell about any situation — work, relationships, life. Salveris will ask questions and give a personal analysis just for you.\n\n"
             "<b>👤 About me</b>\n"
-            "Tell more about your life — work, finances, relationships. The more Salveris knows about you, the more precise each analysis.\n\n"
+            "The more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
             "<b>💳 Subscription</b>\n"
             "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits, deeper and more detailed — including an individual monthly overview. From 15€/month.\n\n"
             "<b>⚙️ Settings</b>\n"
@@ -1026,7 +1026,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Change name or date of birth\n"
             "📋 Rules\n"
             "❓ Help\n"
-            "✍️ Contact administrator\n"
+            "💬 Contact administrator\n"
             "✍️ Leave feedback"
         )
         info_text = {"ru": info_ru, "de": info_de, "en": info_en}
@@ -1053,7 +1053,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>💡 Поговорим о главном</b>\n"
             "Расскажи о любой ситуации — в работе, отношениях, жизни. Salveris задаст вопросы и даст персональный анализ именно для тебя.\n\n"
             "<b>👤 Обо мне</b>\n"
-            "Расскажи о своей жизни подробнее — работе, финансах, отношениях. Чем больше Salveris знает о тебе, тем точнее каждый анализ.\n\n"
+            "Чем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
             "<b>💳 Подписка</b>\n"
             "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений, глубже и детальнее — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
             "<b>⚙️ Настройки</b>\n"
@@ -1061,7 +1061,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Изменить имя или дату рождения\n"
             "📋 Правила\n"
             "❓ Помощь\n"
-            "✍️ Написать администратору\n"
+            "💬 Написать администратору\n"
             "✍️ Оставить отзыв"
         )
         info_de = (
@@ -1073,7 +1073,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>💡 Lass uns reden</b>\n"
             "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Salveris stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
             "<b>👤 Über mich</b>\n"
-            "Erzähl mehr über dein Leben — Arbeit, Finanzen, Beziehungen. Je mehr Salveris über dich weiß, desto präziser wird jede Analyse.\n\n"
+            "Je mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
             "<b>💳 Abonnement</b>\n"
             "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen, tiefer und detaillierter — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
             "<b>⚙️ Einstellungen</b>\n"
@@ -1081,7 +1081,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Name oder Geburtsdatum ändern\n"
             "📋 Regeln\n"
             "❓ Hilfe\n"
-            "✍️ Administrator schreiben\n"
+            "💬 Administrator schreiben\n"
             "✍️ Feedback hinterlassen"
         )
         info_en = (
@@ -1093,7 +1093,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>💡 Let\'s talk</b>\n"
             "Tell about any situation — work, relationships, life. Salveris will ask questions and give a personal analysis just for you.\n\n"
             "<b>👤 About me</b>\n"
-            "Tell more about your life — work, finances, relationships. The more Salveris knows about you, the more precise each analysis.\n\n"
+            "The more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
             "<b>💳 Subscription</b>\n"
             "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits, deeper and more detailed — including an individual monthly overview. From 15€/month.\n\n"
             "<b>⚙️ Settings</b>\n"
@@ -1101,7 +1101,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Change name or date of birth\n"
             "📋 Rules\n"
             "❓ Help\n"
-            "✍️ Contact administrator\n"
+            "💬 Contact administrator\n"
             "✍️ Leave feedback"
         )
         info_text = {"ru": info_ru, "de": info_de, "en": info_en}
