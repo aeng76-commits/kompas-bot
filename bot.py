@@ -171,6 +171,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
         [InlineKeyboardButton("❓ Помощь", callback_data="btn_help")],
+        [InlineKeyboardButton("ℹ️ Навигация", callback_data="btn_info")],
         [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
     ],
     "de": [
@@ -183,6 +184,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
         [InlineKeyboardButton("❓ Hilfe", callback_data="btn_help")],
+        [InlineKeyboardButton("ℹ️ Navigation", callback_data="btn_info")],
         [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
     ],
     "en": [
@@ -195,6 +197,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
         [InlineKeyboardButton("❓ Help", callback_data="btn_help")],
+        [InlineKeyboardButton("ℹ️ Navigation", callback_data="btn_info")],
         [InlineKeyboardButton("✍️ Leave feedback", callback_data="btn_feedback")],
     ],
 }
@@ -963,6 +966,73 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "remind_no":
         no_msg = {"ru": "Хорошо! Если передумаешь — я здесь 🌟", "de": "Alles klar! Wenn du es dir anders überlegst — ich bin hier 🌟", "en": "Alright! If you change your mind — I'm here 🌟"}
         await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
+
+    elif data == "btn_info":
+        info_ru = (
+            "<b>ℹ️ Как устроен Salveris</b>\n\n"
+            "<b>🌟 Основа моей личности</b>\n"
+            "Как ты думаешь, принимаешь решения и реагируешь на давление. Это твой фундамент.\n\n"
+            "<b>🧭 Личный год / 📍 Месяц / ☀️ День</b>\n"
+            "Что сейчас происходит в твоей жизни, на что обратить внимание и чего избегать. Год — общий вектор, месяц — тактика, день — фокус на сегодня.\n\n"
+            "<b>💡 Поговорим о главном</b>\n"
+            "Расскажи о любой ситуации — в работе, отношениях, жизни. Salveris задаст вопросы и даст персональный анализ именно для тебя.\n\n"
+            "<b>👤 Обо мне</b>\n"
+            "Расскажи о своей жизни подробнее — работе, финансах, отношениях. Чем больше Salveris знает о тебе, тем точнее каждый анализ.\n\n"
+            "<b>💳 Подписка</b>\n"
+            "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений, глубже и детальнее — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
+            "<b>⚙️ Настройки</b>\n"
+            "🌐 Сменить язык\n"
+            "✏️ Изменить имя или дату рождения\n"
+            "📋 Правила\n"
+            "❓ Помощь\n"
+            "✍️ Написать администратору\n"
+            "✍️ Оставить отзыв"
+        )
+        info_de = (
+            "<b>ℹ️ Wie Salveris funktioniert</b>\n\n"
+            "<b>🌟 Meine Persönlichkeit</b>\n"
+            "Wie du denkst, Entscheidungen triffst und auf Druck reagierst. Das ist dein Fundament.\n\n"
+            "<b>🧭 Persönliches Jahr / 📍 Monat / ☀️ Tag</b>\n"
+            "Was gerade in deinem Leben passiert, worauf du achten solltest und was du vermeiden solltest. Jahr — Gesamtvektor, Monat — Taktik, Tag — Fokus für heute.\n\n"
+            "<b>💡 Lass uns reden</b>\n"
+            "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Salveris stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
+            "<b>👤 Über mich</b>\n"
+            "Erzähl mehr über dein Leben — Arbeit, Finanzen, Beziehungen. Je mehr Salveris über dich weiß, desto präziser wird jede Analyse.\n\n"
+            "<b>💳 Abonnement</b>\n"
+            "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen, tiefer und detaillierter — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
+            "<b>⚙️ Einstellungen</b>\n"
+            "🌐 Sprache ändern\n"
+            "✏️ Name oder Geburtsdatum ändern\n"
+            "📋 Regeln\n"
+            "❓ Hilfe\n"
+            "✍️ Administrator schreiben\n"
+            "✍️ Feedback hinterlassen"
+        )
+        info_en = (
+            "<b>ℹ️ How Salveris works</b>\n\n"
+            "<b>🌟 My Personality</b>\n"
+            "How you think, make decisions and respond to pressure. This is your foundation.\n\n"
+            "<b>🧭 Personal Year / 📍 Month / ☀️ Day</b>\n"
+            "What is happening in your life right now, what to pay attention to and what to avoid. Year — overall vector, month — tactics, day — focus for today.\n\n"
+            "<b>💡 Let\'s talk</b>\n"
+            "Tell about any situation — work, relationships, life. Salveris will ask questions and give a personal analysis just for you.\n\n"
+            "<b>👤 About me</b>\n"
+            "Tell more about your life — work, finances, relationships. The more Salveris knows about you, the more precise each analysis.\n\n"
+            "<b>💳 Subscription</b>\n"
+            "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits, deeper and more detailed — including an individual monthly overview. From 15€/month.\n\n"
+            "<b>⚙️ Settings</b>\n"
+            "🌐 Change language\n"
+            "✏️ Change name or date of birth\n"
+            "📋 Rules\n"
+            "❓ Help\n"
+            "✍️ Contact administrator\n"
+            "✍️ Leave feedback"
+        )
+        info_text = {"ru": info_ru, "de": info_de, "en": info_en}
+        btns = InlineKeyboardMarkup([[
+            InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")
+        ]])
+        await query.edit_message_text(info_text.get(lang, info_text["ru"]), reply_markup=btns, parse_mode="HTML")
 
     elif data == "btn_help":
         help_ru = "❓ Помощь\n\n🆓 Пробный доступ\n72 часа бесплатно — все разделы открыты. Просто перестань пользоваться — ничего отменять не нужно.\n\n💳 Платная подписка\nПодписка не продлевается автоматически. Для продления напиши администратору заранее.\n\n✏️ Изменить имя или дату рождения\nНастройки → Изменить данные. Можно 1 раз самостоятельно.\n\n💬 Остались вопросы?\nНапиши администратору"
