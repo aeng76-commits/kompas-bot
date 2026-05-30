@@ -171,6 +171,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
+        [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
     ],
     "de": [
         [InlineKeyboardButton("💳 Abonnement", callback_data="btn_pay")],
@@ -182,6 +183,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Persönlicher Tag", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
+        [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
     ],
     "en": [
         [InlineKeyboardButton("💳 Subscription", callback_data="btn_pay")],
@@ -193,6 +195,7 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Personal Day", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
+        [InlineKeyboardButton("✍️ Leave feedback", callback_data="btn_feedback")],
     ],
 }
 
@@ -1011,8 +1014,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Name oder Geburtsdatum ändern\n"
             "📋 Regeln\n"
             "❓ Hilfe\n"
-            "💬 Administrator schreiben\n"
-            "✍️ Feedback hinterlassen"
+            "💬 Administrator schreiben\n\n"
+            "<b>✍️ Feedback hinterlassen</b>\n"
+            "Erzähl uns was dir gefallen hat und was verbessert werden kann — das hilft Salveris besser zu werden."
         )
         info_en = (
             "<b>ℹ️ Get to know Salveris</b>\n\n"
@@ -1032,8 +1036,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Change name or date of birth\n"
             "📋 Rules\n"
             "❓ Help\n"
-            "💬 Contact administrator\n"
-            "✍️ Leave feedback"
+            "💬 Contact administrator\n\n"
+            "<b>✍️ Leave feedback</b>\n"
+            "Tell us what you liked and what can be improved — it helps Salveris get better."
         )
         info_text = {"ru": info_ru, "de": info_de, "en": info_en}
         menu_btn = InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]])
@@ -1089,8 +1094,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Name oder Geburtsdatum ändern\n"
             "📋 Regeln\n"
             "❓ Hilfe\n"
-            "💬 Administrator schreiben\n"
-            "✍️ Feedback hinterlassen"
+            "💬 Administrator schreiben\n\n"
+            "<b>✍️ Feedback hinterlassen</b>\n"
+            "Erzähl uns was dir gefallen hat und was verbessert werden kann — das hilft Salveris besser zu werden."
         )
         info_en = (
             "<b>ℹ️ Get to know Salveris</b>\n\n"
@@ -1110,8 +1116,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✏️ Change name or date of birth\n"
             "📋 Rules\n"
             "❓ Help\n"
-            "💬 Contact administrator\n"
-            "✍️ Leave feedback"
+            "💬 Contact administrator\n\n"
+            "<b>✍️ Leave feedback</b>\n"
+            "Tell us what you liked and what can be improved — it helps Salveris get better."
         )
         info_text = {"ru": info_ru, "de": info_de, "en": info_en}
         btns = InlineKeyboardMarkup([[
@@ -1154,7 +1161,6 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("✏️ Изменить данные" if lang=="ru" else ("✏️ Daten ändern" if lang=="de" else "✏️ Change data"), callback_data="btn_change_data")],
             [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache ändern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
             [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
-            [InlineKeyboardButton("✍️ Оставить отзыв" if lang=="ru" else ("✍️ Feedback geben" if lang=="de" else "✍️ Leave feedback"), callback_data="btn_feedback")],
             [InlineKeyboardButton("💬 Написать администратору" if lang=="ru" else ("💬 Admin schreiben" if lang=="de" else "💬 Contact admin"), url="https://t.me/aeng0")],
             [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
         ]
@@ -1259,7 +1265,6 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         btns = [
             [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
-            [InlineKeyboardButton("✍️ Оставить отзыв" if lang=="ru" else ("✍️ Feedback geben" if lang=="de" else "✍️ Leave feedback"), callback_data="btn_feedback")],
             [InlineKeyboardButton("💬 Написать администратору" if lang=="ru" else ("💬 Admin schreiben" if lang=="de" else "💬 Contact admin"), url="https://t.me/aeng0")],
             [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
             [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data=f"pay_{plan}")],
