@@ -1054,6 +1054,30 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
         await show_menu(context, user_id, lang)
 
+    elif data == "paid_churn_share":
+        gender = user.get("gender", "f") if user else "f"
+        q = {"ru": "Что остановило от продления?", "de": "Was hat dich von der Verlängerung abgehalten?", "en": "What stopped you from renewing?"}
+        btns_ru = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💸 Дорого", callback_data="churn_price")],
+            [InlineKeyboardButton("⏰ Попробую позже", callback_data="churn_later")],
+            [InlineKeyboardButton("🔍 Хочу другой функционал", callback_data="churn_func")],
+            [InlineKeyboardButton("❌ Другое", callback_data="churn_other")],
+        ])
+        btns_de = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💸 Zu teuer", callback_data="churn_price")],
+            [InlineKeyboardButton("⏰ Später versuchen", callback_data="churn_later")],
+            [InlineKeyboardButton("🔍 Andere Funktionen gewünscht", callback_data="churn_func")],
+            [InlineKeyboardButton("❌ Anderes", callback_data="churn_other")],
+        ])
+        btns_en = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💸 Too expensive", callback_data="churn_price")],
+            [InlineKeyboardButton("⏰ Will try later", callback_data="churn_later")],
+            [InlineKeyboardButton("🔍 Want different features", callback_data="churn_func")],
+            [InlineKeyboardButton("❌ Other", callback_data="churn_other")],
+        ])
+        btns = {"ru": btns_ru, "de": btns_de, "en": btns_en}
+        await query.edit_message_text(q.get(lang, q["ru"]), reply_markup=btns.get(lang, btns["ru"]))
+
     elif data == "churn_share":
         gender = user.get("gender", "f") if user else "f"
         q_ru = "Что остановило от подписки?"
@@ -2333,6 +2357,30 @@ async def send_daily_messages(context):
                 await context.bot.send_message(ADMIN_ID, "Не доставлено: " + str(name) + " (" + str(uid) + ")")
             except:
                 pass
+            # Опрос через 24ч после окончания платной подписки
+            try:
+                import datetime
+                paid_until = user_data[8] if len(user_data) > 8 else None
+                if paid_until and not is_paid_flag:
+                    if hasattr(paid_until, 'tzinfo') and paid_until.tzinfo is None:
+                        paid_until = paid_until.replace(tzinfo=datetime.timezone.utc)
+                    hours_since_end = (datetime.datetime.now(datetime.timezone.utc) - paid_until).total_seconds() / 3600
+                    if 24 <= hours_since_end < 48:
+                        gender_val = user_data[6] if len(user_data) > 6 else "f"
+                        paid_churn_msg = {
+                            "ru": name + ", твоя подписка завершилась.\n\nБуду рада видеть тебя снова 🌟 Если что-то остановило от продления — поделись, это важно.",
+                            "de": name + ", dein Abonnement ist abgelaufen.\n\nIch würde mich freuen, dich wiederzusehen 🌟 Wenn etwas dich von der Verlängerung abgehalten hat — teile es mit mir.",
+                            "en": name + ", your subscription has ended.\n\nI'd love to see you again 🌟 If something stopped you from renewing — please share, it's important.",
+                        }
+                        btns_paid = InlineKeyboardMarkup([
+                            [InlineKeyboardButton("💳 Продлить подписку" if lang=="ru" else ("💳 Abonnement verlängern" if lang=="de" else "💳 Renew subscription"), callback_data="btn_pay")],
+                            [InlineKeyboardButton("✍️ Поделиться причиной" if lang=="ru" else ("✍️ Grund mitteilen" if lang=="de" else "✍️ Share reason"), callback_data="paid_churn_share")],
+                            [InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="churn_no")],
+                        ])
+                        await context.bot.send_message(uid, paid_churn_msg.get(lang, paid_churn_msg["ru"]), reply_markup=btns_paid)
+            except Exception as e:
+                print(f"Paid churn survey error {uid}: {e}", flush=True)
+
             # Напоминание тем кто попросил
             try:
                 remind_at = user_data[9] if len(user_data) > 9 else None
@@ -2386,7 +2434,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(gender_cb, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
-    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu|about_|feedback_yes|feedback_no|remind_no|announce_nav_|churn_|btn_info|btn_subscribe)"))
+    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu|about_|feedback_yes|feedback_no|remind_no|announce_nav_|churn_|paid_churn_|btn_info|btn_subscribe)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
     PORT = int(os.environ.get("PORT", 10000))
