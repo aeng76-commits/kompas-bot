@@ -1158,12 +1158,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
         g = "женские окончания" if user.get("gender","f") == "f" else "мужские окончания"
 
+        about_parts = []
+        if user.get("about_work"): about_parts.append("Работа: " + user["about_work"])
+        if user.get("about_finance"): about_parts.append("Финансы: " + user["about_finance"])
+        if user.get("about_relations"): about_parts.append("Отношения: " + user["about_relations"])
+        if user.get("about_personal"): about_parts.append("Личное: " + user["about_personal"])
+        about_block = ("\n\nО человеке:\n" + "\n".join(about_parts)) if about_parts else ""
         context_block = f"""Имя: {user.get('name','')}. {g}.
 Модель мышления: {model_name}. {model_profile}
 Риски: {model_risks}
 Личный год: {ctx.get('year_text','')}
 Личный месяц: {ctx.get('month_text','')}
-Личный день: {ctx.get('day_text','')}"""
+Личный день: {ctx.get('day_text','')}{about_block}"""
 
         if stage == "questions":
             q_count = state.get("q_count", 0)
