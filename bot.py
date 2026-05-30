@@ -970,7 +970,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "announce_nav_open":
         gender = user.get("gender", "f") if user else "f"
         info_ru = (
-            "<b>ℹ️ Как устроен Salveris</b>\n\n"
+            "<b>ℹ️ Знакомство с Salveris</b>\n\n"
+            "Salveris анализирует твою дату рождения — и на её основе определяет модель мышления, сильные стороны и текущие жизненные циклы. Каждый анализ строится индивидуально только для тебя.\n\n"
             "<b>🌟 Основа моей личности</b>\n"
             "Как ты думаешь, принимаешь решения и реагируешь на давление. Это твой фундамент.\n\n"
             "<b>🧭 Личный год / 📍 Месяц / ☀️ День</b>\n"
@@ -990,7 +991,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✍️ Оставить отзыв"
         )
         info_de = (
-            "<b>ℹ️ Wie Salveris funktioniert</b>\n\n"
+            "<b>ℹ️ Salveris kennenlernen</b>\n\n"
+            "Salveris analysiert dein Geburtsdatum — und bestimmt daraus dein Denkmodell, deine Stärken und aktuelle Lebenszyklen. Jede Analyse wird individuell nur für dich erstellt.\n\n"
             "<b>🌟 Meine Persönlichkeit</b>\n"
             "Wie du denkst, Entscheidungen triffst und auf Druck reagierst. Das ist dein Fundament.\n\n"
             "<b>🧭 Persönliches Jahr / 📍 Monat / ☀️ Tag</b>\n"
@@ -1010,7 +1012,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✍️ Feedback hinterlassen"
         )
         info_en = (
-            "<b>ℹ️ How Salveris works</b>\n\n"
+            "<b>ℹ️ Get to know Salveris</b>\n\n"
+            "Salveris analyses your date of birth — and based on it determines your thinking model, strengths and current life cycles. Every analysis is built individually just for you.\n\n"
             "<b>🌟 My Personality</b>\n"
             "How you think, make decisions and respond to pressure. This is your foundation.\n\n"
             "<b>🧭 Personal Year / 📍 Month / ☀️ Day</b>\n"
@@ -1045,7 +1048,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "btn_info":
         info_ru = (
-            "<b>ℹ️ Как устроен Salveris</b>\n\n"
+            "<b>ℹ️ Знакомство с Salveris</b>\n\n"
+            "Salveris анализирует твою дату рождения — и на её основе определяет модель мышления, сильные стороны и текущие жизненные циклы. Каждый анализ строится индивидуально только для тебя.\n\n"
             "<b>🌟 Основа моей личности</b>\n"
             "Как ты думаешь, принимаешь решения и реагируешь на давление. Это твой фундамент.\n\n"
             "<b>🧭 Личный год / 📍 Месяц / ☀️ День</b>\n"
@@ -1065,7 +1069,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✍️ Оставить отзыв"
         )
         info_de = (
-            "<b>ℹ️ Wie Salveris funktioniert</b>\n\n"
+            "<b>ℹ️ Salveris kennenlernen</b>\n\n"
+            "Salveris analysiert dein Geburtsdatum — und bestimmt daraus dein Denkmodell, deine Stärken und aktuelle Lebenszyklen. Jede Analyse wird individuell nur für dich erstellt.\n\n"
             "<b>🌟 Meine Persönlichkeit</b>\n"
             "Wie du denkst, Entscheidungen triffst und auf Druck reagierst. Das ist dein Fundament.\n\n"
             "<b>🧭 Persönliches Jahr / 📍 Monat / ☀️ Tag</b>\n"
@@ -1085,7 +1090,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✍️ Feedback hinterlassen"
         )
         info_en = (
-            "<b>ℹ️ How Salveris works</b>\n\n"
+            "<b>ℹ️ Get to know Salveris</b>\n\n"
+            "Salveris analyses your date of birth — and based on it determines your thinking model, strengths and current life cycles. Every analysis is built individually just for you.\n\n"
             "<b>🌟 My Personality</b>\n"
             "How you think, make decisions and respond to pressure. This is your foundation.\n\n"
             "<b>🧭 Personal Year / 📍 Month / ☀️ Day</b>\n"
