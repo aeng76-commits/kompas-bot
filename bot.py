@@ -940,17 +940,27 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(about_text, reply_markup=edit_btns)
 
     elif data == "btn_feedback":
-        questions = {"ru": ["Что понравилось или зацепило в Salveris?", "Что не понравилось или показалось непонятным?", "Чего не хватало?"], "de": ["Was hat dir an Salveris gefallen oder dich beruehrt?", "Was hat dir nicht gefallen oder war unklar?", "Was hat gefehlt?"], "en": ["What did you like or found interesting in Salveris?", "What didn't you like or found confusing?", "What was missing?"]}
-        q1 = questions.get(lang, questions["ru"])[0]
-        compass_state[user_id] = {"stage": "feedback", "q_num": 1}
-        save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
-        await query.edit_message_text(q1)
+        name = user.get("name", "") if user else ""
+        fb_invite = {
+            "ru": f"Привет, {name}! Чтобы Salveris становился лучше — мне важно твоё мнение. Буду признательна если найдёшь 2 минуты и ответишь на 3 вопроса 🙏",
+            "de": f"Hallo, {name}! Damit Salveris besser wird — ist mir deine Meinung wichtig. Ich wäre dankbar wenn du 2 Minuten findest und 3 Fragen beantwortest 🙏",
+            "en": f"Hi, {name}! To make Salveris better — your opinion matters to me. I'd be grateful if you find 2 minutes to answer 3 questions 🙏"
+        }
+        btns = InlineKeyboardMarkup([[
+            InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="feedback_yes"),
+            InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="feedback_no")
+        ]])
+        await query.edit_message_text(fb_invite.get(lang, fb_invite["ru"]), reply_markup=btns)
 
     elif data == "feedback_yes":
-        q1 = {"ru": "Что понравилось или зацепило в Salveris?", "de": "Was hat dir an Salveris gefallen oder dich berührt?", "en": "What did you like or found interesting in Salveris?"}
+        fb_text = {
+            "ru": "Спасибо что нашёл(а) время! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что понравилось или зацепило?\n2. Что можно улучшить?\n3. Порекомендуешь Salveris другу?",
+            "de": "Danke dass du dir Zeit nimmst! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat dir gefallen?\n2. Was kann verbessert werden?\n3. Würdest du Salveris empfehlen?",
+            "en": "Thank you for taking the time! Your opinion matters.\n\nPlease answer three questions in one message:\n\n1. What did you like?\n2. What could be improved?\n3. Would you recommend Salveris?"
+        }
         compass_state[user_id] = {"stage": "feedback", "q_num": 1}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
-        await query.edit_message_text(q1.get(lang, q1["ru"]))
+        await query.edit_message_text(fb_text.get(lang, fb_text["ru"]))
 
     elif data == "feedback_no":
         no_msg = {"ru": "Спасибо, может в другой раз 🌟", "de": "Danke, vielleicht ein anderes Mal 🌟", "en": "Thank you, maybe another time 🌟"}
@@ -1939,6 +1949,8 @@ def is_last_sunday_of_month(dt):
     return next_sunday.month != dt.month
 
 async def send_feedback_request(context):
+    if not is_last_sunday_of_month(datetime.datetime.now()):
+        return
     conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT user_id, name, lang FROM users WHERE agreed=TRUE AND birth_day IS NOT NULL")
