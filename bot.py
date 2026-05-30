@@ -959,11 +959,13 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(fb_invite.get(lang, fb_invite["ru"]), reply_markup=btns)
 
     elif data == "feedback_yes":
-        fb_text = {
-            "ru": "Спасибо что нашёл(а) время! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что понравилось или зацепило?\n2. Что можно улучшить?\n3. Порекомендуешь Salveris другу?",
-            "de": "Danke dass du dir Zeit nimmst! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat dir gefallen?\n2. Was kann verbessert werden?\n3. Würdest du Salveris empfehlen?",
-            "en": "Thank you for taking the time! Your opinion matters.\n\nPlease answer three questions in one message:\n\n1. What did you like?\n2. What could be improved?\n3. Would you recommend Salveris?"
-        }
+        name = user.get("name", "") if user else ""
+        gender = user.get("gender", "f") if user else "f"
+        thanks_word_ru = "нашла" if gender == "f" else "нашёл"
+        fb_ru = f"Спасибо, {name}, что {thanks_word_ru} время! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что понравилось или зацепило?\n2. Что можно улучшить?\n3. Порекомендуешь Salveris другу?"
+        fb_de = f"Danke, {name}, dass du dir Zeit nimmst! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat dir gefallen?\n2. Was kann verbessert werden?\n3. Würdest du Salveris empfehlen?"
+        fb_en = f"Thank you, {name}, for taking the time! Your opinion matters.\n\nPlease answer three questions in one message:\n\n1. What did you like?\n2. What could be improved?\n3. Would you recommend Salveris?"
+        fb_text = {"ru": fb_ru, "de": fb_de, "en": fb_en}
         compass_state[user_id] = {"stage": "feedback", "q_num": 1}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
         await query.edit_message_text(fb_text.get(lang, fb_text["ru"]))
