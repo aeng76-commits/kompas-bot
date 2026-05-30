@@ -86,13 +86,13 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor,about_work,about_finance,about_relations,about_personal FROM users WHERE user_id=%s", (user_id,))
+    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor,about_work,about_finance,about_relations,about_personal,remind_at FROM users WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return None
-    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor","about_work","about_finance","about_relations","about_personal"]
+    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor","about_work","about_finance","about_relations","about_personal","remind_at"]
     return dict(zip(keys, row))
 
 def save_user(user_id, **kwargs):
@@ -937,7 +937,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         finance = user.get("about_finance") or "—"
         relations = user.get("about_relations") or "—"
         personal = user.get("about_personal") or "—"
-        filled = any(user.get(k) for k in ["about_work","about_finance","about_relations","about_personal"])
+        filled = any(user.get(k) for k in ["about_work","about_finance","about_relations","about_personal","remind_at"])
         if filled:
             about_text = "👤 " + ("" if lang!="ru" else "Обо мне") + ("" if lang!="de" else "Über mich") + ("" if lang!="en" else "About me") + "\n\n💼 " + ("" if lang!="ru" else "Работа") + ("" if lang!="de" else "Arbeit") + ("" if lang!="en" else "Work") + ": " + work + "\n\n💰 " + ("" if lang!="ru" else "Финансы") + ("" if lang!="de" else "Finanzen") + ("" if lang!="en" else "Finances") + ": " + finance + "\n\n💑 " + ("" if lang!="ru" else "Отношения") + ("" if lang!="de" else "Beziehungen") + ("" if lang!="en" else "Relationships") + ": " + relations + "\n\n🌱 " + ("" if lang!="ru" else "Личное") + ("" if lang!="de" else "Persönliches") + ("" if lang!="en" else "Personal") + ": " + personal
         else:
@@ -1051,6 +1051,76 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "announce_nav_no":
         no_msg = {"ru": "Хорошо! Найдёшь в меню когда понадобится 🌟", "de": "Alles klar! Du findest es im Menü wenn du es brauchst 🌟", "en": "Alright! You'll find it in the menu when you need it 🌟"}
         await query.edit_message_text(no_msg.get(lang, no_msg["ru"]))
+        await show_menu(context, user_id, lang)
+
+    elif data == "churn_share":
+        gender = user.get("gender", "f") if user else "f"
+        q_ru = "Что остановило от подписки?"
+        q_de = "Was hat dich von einem Abonnement abgehalten?"
+        q_en = "What stopped you from subscribing?"
+        btns_ru = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💸 Дорого", callback_data="churn_price")],
+            [InlineKeyboardButton("🤔 Не " + ("поняла" if gender=="f" else "понял") + " ценность", callback_data="churn_value")],
+            [InlineKeyboardButton("⏰ Попробую позже", callback_data="churn_later")],
+            [InlineKeyboardButton("🔍 Не хватило функционала", callback_data="churn_func")],
+            [InlineKeyboardButton("❌ Другое", callback_data="churn_other")],
+        ])
+        btns_de = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💸 Zu teuer", callback_data="churn_price")],
+            [InlineKeyboardButton("🤔 Wert nicht verstanden", callback_data="churn_value")],
+            [InlineKeyboardButton("⏰ Später versuchen", callback_data="churn_later")],
+            [InlineKeyboardButton("🔍 Funktionen fehlten", callback_data="churn_func")],
+            [InlineKeyboardButton("❌ Anderes", callback_data="churn_other")],
+        ])
+        btns_en = InlineKeyboardMarkup([
+            [InlineKeyboardButton("💸 Too expensive", callback_data="churn_price")],
+            [InlineKeyboardButton("🤔 Didn't understand the value", callback_data="churn_value")],
+            [InlineKeyboardButton("⏰ Will try later", callback_data="churn_later")],
+            [InlineKeyboardButton("🔍 Missing features", callback_data="churn_func")],
+            [InlineKeyboardButton("❌ Other", callback_data="churn_other")],
+        ])
+        btns = {"ru": btns_ru, "de": btns_de, "en": btns_en}
+        q = {"ru": q_ru, "de": q_de, "en": q_en}
+        await query.edit_message_text(q.get(lang, q["ru"]), reply_markup=btns.get(lang, btns["ru"]))
+
+    elif data == "churn_no":
+        msg = {"ru": "Хорошо! Если передумаешь — кнопка Оставить отзыв всегда в меню 🌟", "de": "Alles klar! Wenn du es dir anders überlegst — die Schaltfläche Feedback ist immer im Menü 🌟", "en": "Alright! If you change your mind — the Leave feedback button is always in the menu 🌟"}
+        await query.edit_message_text(msg.get(lang, msg["ru"]))
+        await show_menu(context, user_id, lang)
+
+    elif data in ("churn_price", "churn_value", "churn_func", "churn_other"):
+        gender = user.get("gender", "f") if user else "f"
+        questions = {
+            "churn_price": {"ru": "Какая сумма была бы комфортной для тебя в месяц?", "de": "Welcher Betrag wäre für dich monatlich angenehm?", "en": "What amount would be comfortable for you per month?"},
+            "churn_value": {"ru": "Что было непонятно или не зацепило?", "de": "Was war unklar oder hat dich nicht angesprochen?", "en": "What was unclear or didn't resonate with you?"},
+            "churn_func": {"ru": "Чего именно не хватило? Это очень важно для развития Salveris.", "de": "Was genau hat gefehlt? Das ist sehr wichtig für die Entwicklung von Salveris.", "en": "What exactly was missing? This is very important for Salveris development."},
+            "churn_other": {"ru": "Расскажи подробнее — что остановило?", "de": "Erzähl mehr — was hat dich aufgehalten?", "en": "Tell me more — what stopped you?"},
+        }
+        q = questions.get(data, {})
+        compass_state[user_id] = {"stage": "churn_answer", "reason": data}
+        save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
+        await query.edit_message_text(q.get(lang, q["ru"]))
+
+    elif data == "churn_later":
+        gender = user.get("gender", "f") if user else "f"
+        remind_q = {"ru": "Напомнить тебе через месяц?", "de": "Soll ich dich in einem Monat erinnern?", "en": "Should I remind you in a month?"}
+        btns = InlineKeyboardMarkup([[
+            InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="churn_remind_yes"),
+            InlineKeyboardButton("❌ Нет" if lang=="ru" else ("❌ Nein" if lang=="de" else "❌ No"), callback_data="churn_remind_no"),
+        ]])
+        await query.edit_message_text(remind_q.get(lang, remind_q["ru"]), reply_markup=btns)
+
+    elif data == "churn_remind_yes":
+        import datetime
+        remind_date = (datetime.datetime.now() + datetime.timedelta(days=30)).date()
+        save_user(user_id, remind_at=remind_date)
+        thanks = {"ru": "Отлично! Напомню через месяц 🌟", "de": "Super! Ich erinnere dich in einem Monat 🌟", "en": "Great! I'll remind you in a month 🌟"}
+        await query.edit_message_text(thanks.get(lang, thanks["ru"]))
+        await show_menu(context, user_id, lang)
+
+    elif data == "churn_remind_no":
+        thanks = {"ru": "Хорошо! Если передумаешь — всегда ждём 🌟", "de": "Alles klar! Wenn du es dir anders überlegst — wir warten 🌟", "en": "Alright! If you change your mind — we're always here 🌟"}
+        await query.edit_message_text(thanks.get(lang, thanks["ru"]))
         await show_menu(context, user_id, lang)
 
     elif data == "remind_no":
@@ -1503,6 +1573,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 thanks = {"ru": "Спасибо! Теперь Salveris знает тебя лучше и будет давать более точный анализ 🌟", "de": "Danke! Jetzt kennt Salveris dich besser und wird genauere Analysen erstellen 🌟", "en": "Thank you! Now Salveris knows you better and will provide more accurate analysis 🌟"}
                 await update.message.reply_text(thanks.get(lang, thanks["ru"]))
                 await show_menu(context, user_id, lang)
+            return
+
+        elif stage == "churn_answer":
+            reason = state.get("reason", "")
+            gender = user.get("gender", "f") if user else "f"
+            await context.bot.send_message(ADMIN_ID, "📊 Опрос от " + str(user.get("name")) + " (" + lang + "). Причина: " + reason + "\nОтвет: " + user_text)
+            thanks = {
+                "ru": "Спасибо, " + str(user.get("name","")) + "! Это очень помогает развитию Salveris 🙏\n\nКогда буд" + ("ешь готова" if gender=="f" else "ешь готов") + " — возвращайся 🌟",
+                "de": "Danke, " + str(user.get("name","")) + "! Das hilft sehr bei der Entwicklung von Salveris 🙏\n\nWenn du bereit bist — komm wieder 🌟",
+                "en": "Thank you, " + str(user.get("name","")) + "! This really helps Salveris development 🙏\n\nWhen you're ready — come back 🌟",
+            }
+            compass_state.pop(user_id, None)
+            save_session(user_id, session=[], compass={})
+            await update.message.reply_text(thanks.get(lang, thanks["ru"]))
+            await show_menu(context, user_id, lang)
             return
 
         elif stage == "feedback":
@@ -2207,6 +2292,30 @@ async def send_daily_messages(context):
 
             r2 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys2, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r2.content[0].text), parse_mode="HTML")
+
+            # Опрос через 24ч после окончания триала
+            import datetime
+            trial_end = None
+            if user_trial_started := user_data[7]:
+                if hasattr(user_trial_started, 'date'):
+                    trial_end = user_trial_started + datetime.timedelta(hours=72)
+                if trial_end and not is_paid_flag:
+                    hours_since_end = (datetime.datetime.now(datetime.timezone.utc) - trial_end.replace(tzinfo=datetime.timezone.utc)).total_seconds() / 3600
+                    if 24 <= hours_since_end < 48:
+                        gender = user_data[6] if len(user_data) > 6 else "f"
+                        churn_msg = {
+                            "ru": name + ", твой пробный период завершился.\n\nБуду признательна если поделишься — что остановило от подписки? Это поможет сделать Salveris лучше 🙏",
+                            "de": name + ", dein Testzeitraum ist abgelaufen.\n\nIch wäre dankbar wenn du teilst — was hat dich vom Abonnement abgehalten? Das hilft Salveris besser zu machen 🙏",
+                            "en": name + ", your trial period has ended.\n\nI'd be grateful if you share — what stopped you from subscribing? This will help make Salveris better 🙏",
+                        }
+                        btns = InlineKeyboardMarkup([[
+                            InlineKeyboardButton("✅ Поделиться" if lang=="ru" else ("✅ Teilen" if lang=="de" else "✅ Share"), callback_data="churn_share"),
+                            InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="churn_no"),
+                        ]])
+                        try:
+                            await context.bot.send_message(uid, churn_msg.get(lang, churn_msg["ru"]), reply_markup=btns)
+                        except Exception as e:
+                            print(f"Churn survey error {uid}: {e}", flush=True)
 
             # Часы триала
             if trial_hours_left is not None and trial_hours_left > 0:
