@@ -1136,7 +1136,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache ändern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
             [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
             [InlineKeyboardButton("✍️ Оставить отзыв" if lang=="ru" else ("✍️ Feedback geben" if lang=="de" else "✍️ Leave feedback"), callback_data="btn_feedback")],
-            [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
+            [InlineKeyboardButton("💬 Написать администратору" if lang=="ru" else ("💬 Admin schreiben" if lang=="de" else "💬 Contact admin"), url="https://t.me/aeng0")],
             [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
         ]
         await query.edit_message_text(info.get(lang, info["ru"]), reply_markup=InlineKeyboardMarkup(btns))
@@ -1241,7 +1241,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         btns = [
             [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
             [InlineKeyboardButton("✍️ Оставить отзыв" if lang=="ru" else ("✍️ Feedback geben" if lang=="de" else "✍️ Leave feedback"), callback_data="btn_feedback")],
-            [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
+            [InlineKeyboardButton("💬 Написать администратору" if lang=="ru" else ("💬 Admin schreiben" if lang=="de" else "💬 Contact admin"), url="https://t.me/aeng0")],
             [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
             [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data=f"pay_{plan}")],
             [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
