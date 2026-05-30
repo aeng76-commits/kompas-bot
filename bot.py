@@ -904,6 +904,19 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_menu(context, user_id, lang)
 
     elif data == "about_start":
+        gender = user.get("gender", "f") if user else "f"
+        privacy_msg = {
+            "ru": "🔒 Важно: эти данные используются только для твоего индивидуального анализа. Они никуда не передаются. Видеть и изменять их можешь только ты " + ("сама" if gender == "f" else "сам") + ".",
+            "de": "🔒 Wichtig: Diese Daten werden nur für deine individuelle Analyse verwendet. Sie werden nicht weitergegeben. Nur du kannst sie sehen und ändern.",
+            "en": "🔒 Important: this data is used only for your individual analysis. It is not shared with anyone. Only you can see and change it."
+        }
+        btns = InlineKeyboardMarkup([[
+            InlineKeyboardButton("✅ Продолжим" if lang=="ru" else ("✅ Weiter" if lang=="de" else "✅ Continue"), callback_data="about_go"),
+            InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="about_skip")
+        ]])
+        await query.edit_message_text(privacy_msg.get(lang, privacy_msg["ru"]), reply_markup=btns)
+
+    elif data == "about_go":
         compass_state[user_id] = {"stage": "about", "about_step": "work"}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
         q = {"ru": "💼 Работа/карьера\n\nРасскажи о своей работе или занятии — что сейчас происходит в этой сфере и как ты себя в ней чувствуешь?", "de": "💼 Arbeit/Karriere\n\nErzähl mir von deiner Arbeit oder Tätigkeit — was passiert gerade in diesem Bereich und wie fühlst du dich dabei?", "en": "💼 Work/Career\n\nTell me about your work or occupation — what is happening in this area right now and how do you feel about it?"}
