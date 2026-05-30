@@ -1135,6 +1135,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay")],
             [InlineKeyboardButton("✏️ Изменить данные" if lang=="ru" else ("✏️ Daten ändern" if lang=="de" else "✏️ Change data"), callback_data="btn_change_data")],
             [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache ändern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
+            [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
+            [InlineKeyboardButton("✍️ Оставить отзыв" if lang=="ru" else ("✍️ Feedback geben" if lang=="de" else "✍️ Leave feedback"), callback_data="btn_feedback")],
             [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
             [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
         ]
@@ -1238,6 +1240,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "en": "Bank transfer (SEPA)\n\nAmount: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: Inner Compass " + label + "\n\n⚠️ Please include your name and date of birth in the transfer note.\n\nAfter payment write to the administrator for activation."
         }
         btns = [
+            [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
+            [InlineKeyboardButton("✍️ Оставить отзыв" if lang=="ru" else ("✍️ Feedback geben" if lang=="de" else "✍️ Leave feedback"), callback_data="btn_feedback")],
             [InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Admin schreiben" if lang=="de" else "✍️ Contact admin"), url="https://t.me/aeng0")],
             [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
             [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data=f"pay_{plan}")],
