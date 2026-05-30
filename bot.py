@@ -163,6 +163,7 @@ SEPA = "IBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra
 MENU_BUTTONS = {
     "ru": [
         [InlineKeyboardButton("💳 Подписка", callback_data="btn_pay")],
+        [InlineKeyboardButton("ℹ️ Знакомство с Salveris", callback_data="btn_info")],
         [InlineKeyboardButton("👤 Обо мне", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Личный год", callback_data="btn_year")],
@@ -170,10 +171,10 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Настройки", callback_data="btn_settings")],
-        [InlineKeyboardButton("ℹ️ Навигация", callback_data="btn_info")],
     ],
     "de": [
         [InlineKeyboardButton("💳 Abonnement", callback_data="btn_pay")],
+        [InlineKeyboardButton("ℹ️ Salveris kennenlernen", callback_data="btn_info")],
         [InlineKeyboardButton("👤 Über mich", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Meine Persönlichkeit", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Persönliches Jahr", callback_data="btn_year")],
@@ -181,10 +182,10 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Persönlicher Tag", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Lass uns reden", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Einstellungen", callback_data="btn_settings")],
-        [InlineKeyboardButton("ℹ️ Navigation", callback_data="btn_info")],
     ],
     "en": [
         [InlineKeyboardButton("💳 Subscription", callback_data="btn_pay")],
+        [InlineKeyboardButton("ℹ️ Get to know Salveris", callback_data="btn_info")],
         [InlineKeyboardButton("👤 About me", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 My Personality", callback_data="btn_me")],
         [InlineKeyboardButton("🧭 Personal Year", callback_data="btn_year")],
@@ -192,7 +193,6 @@ MENU_BUTTONS = {
         [InlineKeyboardButton("☀️ Personal Day", callback_data="btn_day")],
         [InlineKeyboardButton("💡 Let's talk", callback_data="btn_compass")],
         [InlineKeyboardButton("⚙️ Settings", callback_data="btn_settings")],
-        [InlineKeyboardButton("ℹ️ Navigation", callback_data="btn_info")],
     ],
 }
 
