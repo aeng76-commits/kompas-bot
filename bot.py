@@ -67,6 +67,7 @@ def init_db():
             trial_started_at TIMESTAMP,
             paid_until TIMESTAMP,
             daily_usage JSONB DEFAULT '{}',
+            remind_at DATE,
             session_data JSONB DEFAULT '[]',
             compass_data JSONB DEFAULT '{}'
         )
@@ -2080,7 +2081,7 @@ async def send_feedback_request(context):
 async def send_daily_messages(context):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, remind_at FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
     users_list = cur.fetchall()
     cur.close()
     conn.close()
@@ -2332,6 +2333,29 @@ async def send_daily_messages(context):
                 await context.bot.send_message(ADMIN_ID, "Не доставлено: " + str(name) + " (" + str(uid) + ")")
             except:
                 pass
+            # Напоминание тем кто попросил
+            try:
+                remind_at = user_data[9] if len(user_data) > 9 else None
+                if remind_at:
+                    import datetime
+                    today = datetime.date.today()
+                    remind_date = remind_at if isinstance(remind_at, datetime.date) else remind_at
+                    if remind_date == today:
+                        gender_val = user_data[6] if len(user_data) > 6 else "f"
+                        remind_msg = {
+                            "ru": name + ", ты просил" + ("а" if gender_val=="f" else "") + " напомнить о Salveris 🌟\n\nГотов" + ("а" if gender_val=="f" else "") + " попробовать снова?",
+                            "de": name + ", du hast gebeten, dich an Salveris zu erinnern 🌟\n\nBereit es nochmal zu versuchen?",
+                            "en": name + ", you asked me to remind you about Salveris 🌟\n\nReady to try again?",
+                        }
+                        btns_r = InlineKeyboardMarkup([[
+                            InlineKeyboardButton("💳 Оформить подписку" if lang=="ru" else ("💳 Abonnieren" if lang=="de" else "💳 Subscribe"), callback_data="btn_pay"),
+                            InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="churn_remind_no"),
+                        ]])
+                        await context.bot.send_message(uid, remind_msg.get(lang, remind_msg["ru"]), reply_markup=btns_r)
+                        save_user(uid, remind_at=None)
+            except Exception as e:
+                print(f"Remind error {uid}: {e}", flush=True)
+
             await asyncio.sleep(1)
 
 if __name__ == "__main__":
