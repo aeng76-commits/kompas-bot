@@ -801,11 +801,14 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         if is_paid(user):
             prompts = get_profile_prompts_list(lang, user, section)
+            txts = []
             for p in prompts:
                 resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=800, system=p, messages=[{"role": "user", "content": "Напиши"}])
                 txt = clean_text(resp.content[0].text)
                 if txt:
-                    await context.bot.send_message(user_id, txt, parse_mode="HTML")
+                    txts.append(txt)
+            for txt in txts:
+                await context.bot.send_message(user_id, txt, parse_mode="HTML")
         else:
             # Проверяем общий лимит: max 1 раз каждый раздел в день
             daily = get_daily_usage(user_id)
