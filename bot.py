@@ -1721,43 +1721,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Уточняющие вопросы после "нет"
             clarify_count = state.get("clarify_count", 0)
 
-            max_clarify = 1 if (is_trial_active(user) and not is_paid(user)) else 3
-            if clarify_count >= max_clarify:
-                # Финальный анализ после уточнений
-                final_sys = f"""{lf}
+            # Один ответ на уточнение — сразу финальный анализ
+            final_sys = f"""{lf}
 Ты ассистент Внутренний Компас.
 {context_block}
-На основе всего разговора дай финальный краткий анализ — что стало яснее, и 2-3 практических шага.
+Человек уточнил что именно не понятно: "{user_text}"
+На основе всего разговора и этого уточнения дай развёрнутый анализ — что стало яснее, и 2-3 практических шага.
 Тепло, без оценок. ТЫ. {g}."""
-                resp_final = client.messages.create(
-                    model="claude-sonnet-4-6", max_tokens=800,
-                    system=final_sys, messages=user_sessions[user_id]
-                )
-                await update.message.reply_text(clean_text(resp_final.content[0].text))
-                compass_state.pop(user_id, None)
-                user_sessions[user_id] = []
-                await show_menu(context, user_id, lang)
-                return
-
-            clarify_sys = f"""{lf}
-Ты ассистент Внутренний Компас.
-{context_block}
-
-Человек сказал что что-то не понятно: "{user_text}"
-Это уточняющий вопрос {clarify_count + 1} из {max_clarify}.
-
-Задай ОДИН вопрос чтобы прояснить что именно не понятно.
-Коротко и тепло. ТЫ. {g}."""
-
-            resp = client.messages.create(
-                model="claude-sonnet-4-6", max_tokens=200,
-                system=clarify_sys, messages=user_sessions[user_id]
+            resp_final = client.messages.create(
+                model="claude-sonnet-4-6", max_tokens=800,
+                system=final_sys, messages=user_sessions[user_id]
             )
-            reply = clean_text(resp.content[0].text)
-            state["clarify_count"] = clarify_count + 1
-            compass_state[user_id] = state
-            user_sessions[user_id].append({"role": "assistant", "content": reply})
-            await update.message.reply_text(reply)
+            await update.message.reply_text(clean_text(resp_final.content[0].text))
+            compass_state.pop(user_id, None)
+            user_sessions[user_id] = []
+            save_session(user_id, session=[], compass={})
+            await show_menu(context, user_id, lang)
             return
 
 
