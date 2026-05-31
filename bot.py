@@ -2218,6 +2218,17 @@ async def send_feedback_request(context):
             print(f"Feedback error {uid}: {e}", flush=True)
 
 async def send_daily_messages(context):
+    try:
+        import datetime as dt2
+        conn0 = get_db()
+        cur0 = conn0.cursor()
+        today_str = dt2.datetime.now(dt2.timezone.utc).strftime('%Y-%m-%d')
+        cur0.execute("INSERT INTO settings (key, value) VALUES ('last_daily_date', %s) ON CONFLICT (key) DO UPDATE SET value=%s", (today_str, today_str))
+        conn0.commit()
+        cur0.close()
+        conn0.close()
+    except Exception as e:
+        print(f"Settings save error: {e}", flush=True)
     conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, remind_at FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
@@ -2527,6 +2538,25 @@ if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     import datetime as dt
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
+
+    # При старте проверяем — если рассылка сегодня ещё не отправлялась — отправляем
+    import datetime as dt2
+    now_utc = dt2.datetime.now(dt2.timezone.utc)
+    if 6 <= now_utc.hour < 23:
+        try:
+            conn0 = get_db()
+            cur0 = conn0.cursor()
+            cur0.execute("SELECT value FROM settings WHERE key='last_daily_date'")
+            row = cur0.fetchone()
+            cur0.close()
+            conn0.close()
+            last_date = row[0] if row else None
+            today_str = now_utc.strftime('%Y-%m-%d')
+            if last_date != today_str:
+                print("Startup: daily not sent yet today, scheduling in 30s", flush=True)
+                app.job_queue.run_once(send_daily_messages, when=30)
+        except Exception as e:
+            print(f"Startup daily check error: {e}", flush=True)
     # feedback рассылка отключена
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("me", cmd_me))
