@@ -1536,7 +1536,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             q_count = state.get("q_count", 0)
             topic = state.get("topic", "")
 
-            max_q = 3 if (is_trial_active(user) and not is_paid(user)) else 5
+            max_q = 3 if (is_trial_active(user) and not is_paid(user)) else 7
             if q_count >= max_q:
                 # Анализ после вопросов
                 analysis_sys = f"""{lf}
