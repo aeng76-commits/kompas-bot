@@ -2499,7 +2499,30 @@ async def send_daily_messages(context):
             await context.bot.send_message(uid, clean_text(r1.content[0].text), parse_mode="HTML")
 
             r2 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys2, messages=[{"role": "user", "content": "Напиши"}])
-            await context.bot.send_message(uid, clean_text(r2.content[0].text), parse_mode="HTML")
+            risk_text = clean_text(r2.content[0].text)
+            await context.bot.send_message(uid, risk_text, parse_mode="HTML")
+
+            # Совет дня
+            import datetime as dt_now
+            ud_num, has_zero = get_universal_day(dt_now.datetime.now(dt_now.timezone.utc))
+            ud_base = UNIVERSAL_DAY_TIPS.get(ud_num, {}).get(lang, "")
+            ud_zero = UNIVERSAL_DAY_TIPS.get(0, {}).get(lang, "") if has_zero else ""
+            sys3 = f"""{lf}
+Ты ассистент Salveris. Пишешь короткий совет дня для {name}.
+
+ЛИЧНЫЙ ДЕНЬ — что планирует человек сегодня: {ctx['day_text']}
+ОБЩИЙ ФОН ДНЯ — энергия для всех сегодня: {ud_base}
+{"ОСОБОЕ УСЛОВИЕ: " + ud_zero if ud_zero else ""}
+
+Напиши один короткий практический совет — 1-2 предложения.
+Начни с тега {"<b>📋 Совет дня</b>" if lang=="ru" else ("<b>📋 Tipp des Tages</b>" if lang=="de" else "<b>📋 Daily Tip</b>")}.
+ЗАДАЧА: объясни как общий фон дня влияет на планы личного дня и дай конкретную рекомендацию.
+ПРИМЕРЫ:
+- Личный день 1 (старт) + общий день 7 (анализ): "Перед принятием решений хорошо всё проанализируй — если есть возможность перенеси запуск на завтра."
+- Личный день 5 (нетворкинг) + общий день 9 (завершение): "Используй сегодняшнее общение чтобы завершить старые договорённости — не начинай новых переговоров."
+Не упоминай числа периодов. Тёплый конкретный стиль. ТЫ. {g}. Без markdown звёздочек."""
+            r3 = client.messages.create(model="claude-sonnet-4-6", max_tokens=200, system=sys3, messages=[{"role": "user", "content": "Напиши"}])
+            await context.bot.send_message(uid, clean_text(r3.content[0].text), parse_mode="HTML")
 
             # Опрос через 24ч после окончания триала
             import datetime
