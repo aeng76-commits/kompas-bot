@@ -1795,12 +1795,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(err.get(lang, err["ru"]))
         return
 
-    # Обычный диалог
-    sys_prompt = get_system_prompt(lang, user)
-    response = client.messages.create(model="claude-sonnet-4-6", max_tokens=1500, system=sys_prompt, messages=user_sessions[user_id])
-    reply = clean_text(response.content[0].text)
-    user_sessions[user_id].append({"role": "assistant", "content": reply})
-    await update.message.reply_text(reply, parse_mode="HTML")
+    # Если нет активной сессии — показываем меню
+    await show_menu(context, user_id, lang)
 
 async def my_ref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
