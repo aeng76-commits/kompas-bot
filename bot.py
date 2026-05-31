@@ -804,6 +804,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_id, no_date_msg.get(lang, no_date_msg["ru"]))
             return
         if is_paid(user):
+            log_action(user_id, section, "paid_open", lang)
             prompts = get_profile_prompts_list(lang, user, section)
             txts = []
             for p in prompts:
@@ -928,6 +929,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(privacy_msg.get(lang, privacy_msg["ru"]), reply_markup=btns)
 
     elif data == "about_go":
+        log_action(user_id, "about", "open", lang)
         compass_state[user_id] = {"stage": "about", "about_step": "work"}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
         q = {"ru": "💼 Работа/карьера\n\nРасскажи о своей работе или занятии — что сейчас происходит в этой сфере и как ты себя в ней чувствуешь?", "de": "💼 Arbeit/Karriere\n\nErzähl mir von deiner Arbeit oder Tätigkeit — was passiert gerade in diesem Bereich und wie fühlst du dich dabei?", "en": "💼 Work/Career\n\nTell me about your work or occupation — what is happening in this area right now and how do you feel about it?"}
@@ -1910,6 +1912,105 @@ async def admin_announce_about(update: Update, context: ContextTypes.DEFAULT_TYP
     await update.message.reply_text(result)
 
 
+async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    import datetime
+    conn = get_db()
+    cur = conn.cursor()
+
+    # Пользователи
+    cur.execute("SELECT COUNT(*) FROM users WHERE agreed=TRUE AND birth_day IS NOT NULL")
+    total_users = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM users WHERE paid_until > NOW()")
+    paid_users = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM users WHERE trial_started_at IS NOT NULL AND paid_until IS NULL OR paid_until < NOW()")
+    trial_users = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM users WHERE about_work IS NOT NULL OR about_finance IS NOT NULL")
+    about_filled = cur.fetchone()[0]
+
+    # Статистика за 30 дней
+    cur.execute("SELECT section, COUNT(*) FROM analytics WHERE created_at > NOW() - INTERVAL '30 days' GROUP BY section ORDER BY COUNT(*) DESC")
+    sections_30 = cur.fetchall()
+
+    # Статистика за всё время
+    cur.execute("SELECT section, COUNT(*) FROM analytics GROUP BY section ORDER BY COUNT(*) DESC")
+    sections_all = cur.fetchall()
+
+    # Активность по месяцам
+    cur.execute("""SELECT TO_CHAR(created_at, 'MM.YYYY') as month, COUNT(DISTINCT user_id) as active_users, COUNT(*) as actions
+        FROM analytics GROUP BY month ORDER BY month DESC LIMIT 6""")
+    monthly = cur.fetchall()
+
+    # Финансы
+    cur.execute("SELECT COUNT(*), SUM(EXTRACT(EPOCH FROM (paid_until - NOW()))/86400) FROM users WHERE paid_until > NOW()")
+    paid_data = cur.fetchone()
+    active_paid = paid_data[0] or 0
+
+    cur.execute("SELECT COUNT(*) FROM analytics WHERE created_at > NOW() - INTERVAL '30 days'")
+    actions_30 = cur.fetchone()[0]
+
+    cur.close()
+    conn.close()
+
+    EUR_RATE = 0.858
+    PRICE = 15.0
+    API_PER_PAID = 3.0
+    API_PER_USER = 0.5
+    HOSTING = 7.0
+
+    revenue_eur = active_paid * PRICE
+    api_cost_eur = active_paid * API_PER_PAID + total_users * API_PER_USER
+    total_cost_eur = api_cost_eur + HOSTING
+    profit_eur = revenue_eur - total_cost_eur
+    revenue_usd = revenue_eur / EUR_RATE
+    api_cost_usd = api_cost_eur / EUR_RATE
+    profit_usd = profit_eur / EUR_RATE
+
+    section_names = {
+        "me": "🌟 Grundlage meiner Persönlichkeit",
+        "year": "🧭 Persönliches Jahr",
+        "month": "📍 Persönlicher Monat",
+        "day": "☀️ Persönlicher Tag",
+        "compass": "💡 Lass uns reden",
+        "about": "👤 Über mich",
+    }
+
+    msg = "📊 <b>SALVERIS — Statistik & Finanzen</b>\n"
+    msg += f"Stand: {datetime.datetime.now().strftime('%d.%m.%Y %H:%M')}\n\n"
+
+    msg += "👥 <b>Benutzer</b>\n"
+    msg += f"Gesamt: {total_users}\n"
+    msg += f"Aktive Abonnenten: {active_paid}\n"
+    msg += f"Testnutzer: {trial_users}\n"
+    msg += f"Konversionsrate: {round(active_paid/total_users*100,1) if total_users > 0 else 0}%\n"
+    msg += f"Profil ausgefüllt (Über mich): {about_filled}\n\n"
+
+    msg += "📈 <b>Beliebtheit der Bereiche (letzte 30 Tage)</b>\n"
+    for section, cnt in sections_30:
+        name = section_names.get(section, section)
+        msg += f"{name}: {cnt}×\n"
+
+    msg += "\n📅 <b>Monatliche Aktivität</b>\n"
+    for month, active, actions in monthly:
+        msg += f"{month}: {active} aktive Nutzer, {actions} Aktionen\n"
+
+    msg += "\n📊 <b>Gesamtstatistik (alle Zeit)</b>\n"
+    for section, cnt in sections_all:
+        name = section_names.get(section, section)
+        msg += f"{name}: {cnt}×\n"
+
+    msg += f"\n💰 <b>Finanzen (aktueller Monat, Schätzung)</b>\n"
+    msg += f"Einnahmen: {revenue_eur:.2f}€ / ${revenue_usd:.2f}\n"
+    msg += f"API-Kosten: {api_cost_eur:.2f}€ / ${api_cost_usd:.2f}\n"
+    msg += f"Hosting: {HOSTING:.2f}€\n"
+    msg += f"Gesamtkosten: {total_cost_eur:.2f}€\n"
+    msg += f"<b>Nettogewinn: {profit_eur:.2f}€ / ${profit_usd:.2f}</b>\n"
+    msg += f"Marge: {round(profit_eur/revenue_eur*100,1) if revenue_eur > 0 else 0}%"
+
+    await update.message.reply_text(msg, parse_mode="HTML")
+
+
 async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -2420,6 +2521,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("day", cmd_day))
     app.add_handler(CommandHandler("compass", cmd_compass))
     app.add_handler(CommandHandler("language", cmd_language))
+    app.add_handler(CommandHandler("stats", admin_stats))
     app.add_handler(CommandHandler("announce_nav", admin_announce_nav))
     app.add_handler(CommandHandler("announce_about", admin_announce_about))
     app.add_handler(CommandHandler("news", admin_news))
