@@ -646,6 +646,18 @@ def get_system_prompt(lang, user):
 Один вопрос за раз. После каждого ответа — живой отклик, потом следующий вопрос.
 ПИШИ ТОЛЬКО НА {'русском' if lang == 'ru' else ('немецком' if lang == 'de' else 'английском')} ЯЗЫКЕ. НИКАКИХ СЛОВ НА ДРУГИХ ЯЗЫКАХ."""
 
+def log_action(user_id, section, action, lang="ru"):
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO analytics (user_id, section, action, lang) VALUES (%s, %s, %s, %s)",
+                    (user_id, section, action, lang))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Analytics error: {e}", flush=True)
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_sessions[user_id] = []
