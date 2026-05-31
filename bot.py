@@ -976,6 +976,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             increment_usage(user_id, "compass")
         compass_state[user_id] = {"stage": "initial", "q_count": 0, "clarify_count": 0, "topic": "", "trial": is_trial}
         user_sessions[user_id] = []
+        save_session(user_id, session=[], compass=compass_state[user_id])
         start_q = {
             "ru": "Расскажи — что сейчас занимает твои мысли больше всего? Какую ситуацию или вопрос ты хочешь прояснить?",
             "de": "Erzähl mir — was beschaeftigt dich gerade am meisten? Welche Situation oder Frage moechtest du klären?",
