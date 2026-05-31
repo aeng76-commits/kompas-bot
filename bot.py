@@ -1569,12 +1569,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         save_session(user_id, session=[], compass={})
                         await show_menu(context, user_id, lang)
                     else:
-                        understood = {"ru": "Всё понятно?", "de": "Ist alles klar?", "en": "Is everything clear?"}
-                        btns = [[
-                            InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="compass_yes"),
-                            InlineKeyboardButton("❓ Нет" if lang=="ru" else ("❓ Nein" if lang=="de" else "❓ No"), callback_data="compass_no")
-                        ]]
-                        await context.bot.send_message(user_id, understood.get(lang, understood["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+                        compass_state.pop(user_id, None)
+                        user_sessions[user_id] = []
+                        save_session(user_id, session=[], compass={})
+                        await show_menu(context, user_id, lang)
                         state["stage"] = "after_analysis"
                         compass_state[user_id] = state
                         save_session(user_id, session=user_sessions[user_id], compass=compass_state.get(user_id, {}))
