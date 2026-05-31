@@ -848,6 +848,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             total_after = sum(daily_after.get(s, 0) for s in ["me", "year", "month", "day"])
             remaining = 5 - total_after
             free_tokens = {"me": 1000, "year": 900, "month": 900, "day": 800}
+            log_action(user_id, section, "trial_open", lang)
             prompt = get_free_prompt(lang, user, section)
             response = client.messages.create(model="claude-sonnet-4-6", max_tokens=free_tokens[section], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
             await context.bot.send_message(user_id, clean_text(response.content[0].text))
@@ -867,6 +868,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_menu(context, user_id, lang)
 
     elif data == "btn_compass":
+        log_action(user_id, "compass", "open", lang)
         if not user or not user.get("day"):
             await query.edit_message_text(no_date_msg.get(lang, no_date_msg["ru"]))
             return
