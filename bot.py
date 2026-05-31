@@ -646,6 +646,68 @@ def get_system_prompt(lang, user):
 Один вопрос за раз. После каждого ответа — живой отклик, потом следующий вопрос.
 ПИШИ ТОЛЬКО НА {'русском' if lang == 'ru' else ('немецком' if lang == 'de' else 'английском')} ЯЗЫКЕ. НИКАКИХ СЛОВ НА ДРУГИХ ЯЗЫКАХ."""
 
+def get_universal_day(date):
+    """Вычисляет общий день для даты и возвращает число и описание"""
+    digits = [int(d) for d in date.strftime('%d%m%Y')]
+    total = sum(digits)
+    while total > 9:
+        total = sum(int(d) for d in str(total))
+    has_zero = '0' in date.strftime('%d')  # 10, 20, 30
+    return total, has_zero
+
+UNIVERSAL_DAY_TIPS = {
+    1: {
+        "ru": "Хороший день для старта новых проектов, подачи заявлений и регистрации.",
+        "de": "Guter Tag für neue Projekte, Anträge und Registrierungen.",
+        "en": "Good day for starting new projects, submitting applications and registrations."
+    },
+    2: {
+        "ru": "Благоприятный день для переговоров, подписания соглашений и партнёрских встреч.",
+        "de": "Günstiger Tag für Verhandlungen, Vertragsunterzeichnungen und Partnertreffen.",
+        "en": "Favorable day for negotiations, signing agreements and partner meetings."
+    },
+    3: {
+        "ru": "Хороший день для деловых встреч, переговоров и получения новой информации.",
+        "de": "Guter Tag für Geschäftstreffen, Verhandlungen und neue Informationen.",
+        "en": "Good day for business meetings, negotiations and getting new information."
+    },
+    4: {
+        "ru": "Хороший день для анализа, работы с документами и исправления ошибок. Не лучший день для запуска новых проектов.",
+        "de": "Guter Tag für Analysen, Dokumentenarbeit und Fehlerbehebung. Kein guter Tag für neue Projekte.",
+        "en": "Good day for analysis, working with documents and fixing errors. Not the best day for new projects."
+    },
+    5: {
+        "ru": "Благоприятный день для нетворкинга, презентаций и продвижения. Избегай импульсивных финансовых решений.",
+        "de": "Günstiger Tag für Networking, Präsentationen und Werbung. Impulsive Finanzentscheidungen vermeiden.",
+        "en": "Favorable day for networking, presentations and promotion. Avoid impulsive financial decisions."
+    },
+    6: {
+        "ru": "Хороший день для завершения лёгких задач и творческой работы. Не лучший день для крупных финансовых операций.",
+        "de": "Guter Tag für leichte Aufgaben und kreative Arbeit. Kein guter Tag für große Finanztransaktionen.",
+        "en": "Good day for completing light tasks and creative work. Not the best day for major financial transactions."
+    },
+    7: {
+        "ru": "День глубокого анализа. Лучше избегать подписания важных документов — перепроверь всё дважды.",
+        "de": "Tag der Tiefenanalyse. Wichtige Dokumente besser nicht unterzeichnen — alles zweimal prüfen.",
+        "en": "Day of deep analysis. Better to avoid signing important documents — double-check everything."
+    },
+    8: {
+        "ru": "Благоприятный день для финансовых операций, закрытия сделок и важных решений.",
+        "de": "Günstiger Tag für Finanztransaktionen, Geschäftsabschlüsse und wichtige Entscheidungen.",
+        "en": "Favorable day for financial transactions, closing deals and important decisions."
+    },
+    9: {
+        "ru": "День завершения. Не начинай новых проектов — завершай старые. Избегай новых финансовых обязательств.",
+        "de": "Tag des Abschlusses. Keine neuen Projekte beginnen — alte abschließen. Neue finanzielle Verpflichtungen vermeiden.",
+        "en": "Day of completion. Don't start new projects — finish old ones. Avoid new financial commitments."
+    },
+    0: {
+        "ru": "Важные решения, подписание документов и финансовые операции рекомендуется принимать после дополнительной проверки обстоятельств или перенести на другой день.",
+        "de": "Wichtige Entscheidungen, Dokumentenunterzeichnung und Finanztransaktionen sollten nach zusätzlicher Prüfung oder auf einen anderen Tag verschoben werden.",
+        "en": "Important decisions, document signing and financial transactions should be made after additional verification or postponed to another day."
+    }
+}
+
 def log_action(user_id, section, action, lang="ru"):
     try:
         conn = get_db()
