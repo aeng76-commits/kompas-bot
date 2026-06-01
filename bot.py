@@ -1,3 +1,4 @@
+import re
 # -*- coding: utf-8 -*-
 import os, datetime, re, json
 import anthropic
@@ -1655,7 +1656,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if session_marker == "change_date":
-        import re
         date_match = re.match(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", user_text.strip())
         if date_match:
             d, m, y = int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3))
@@ -1903,7 +1903,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Изменение даты рождения
     if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_date":
-        import re
         date_match = re.match(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", user_text.strip())
         if date_match:
             d, m, y = int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3))
