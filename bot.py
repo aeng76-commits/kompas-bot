@@ -999,6 +999,38 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(msg)
 
 
+    elif data == "about_skip_step":
+        state = compass_state.get(user_id, {})
+        about_step = state.get("about_step", "work")
+        if about_step == "work":
+            state["about_step"] = "finance"
+            compass_state[user_id] = state
+            save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
+            q = {"ru": "💰 Финансы\n\nКак выглядит твоя финансовая ситуация сейчас — что стабильно, что беспокоит, к чему стремишься?", "de": "💰 Finanzen\n\nWie sieht deine finanzielle Situation gerade aus — was ist stabil, was bereitet dir Sorgen, wonach strebst du?", "en": "💰 Finances\n\nHow does your financial situation look right now — what is stable, what concerns you, what are you aiming for?"}
+            skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
+            await query.edit_message_text(q.get(lang, q["ru"]), reply_markup=skip)
+        elif about_step == "finance":
+            state["about_step"] = "relations"
+            compass_state[user_id] = state
+            save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
+            q = {"ru": "💑 Отношения\n\nРасскажи о своих близких отношениях — что сейчас радует и что даётся непросто?", "de": "💑 Beziehungen\n\nErzähl mir von deinen engen Beziehungen — was freut dich gerade und was fällt schwer?", "en": "💑 Relationships\n\nTell me about your close relationships — what makes you happy right now and what is challenging?"}
+            skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
+            await query.edit_message_text(q.get(lang, q["ru"]), reply_markup=skip)
+        elif about_step == "relations":
+            state["about_step"] = "personal"
+            compass_state[user_id] = state
+            save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
+            q = {"ru": "🌱 Личное\n\nЕсть ли что-то важное что сейчас занимает твои мысли больше всего — цель, вопрос, ситуация?", "de": "🌱 Persönliches\n\nGibt es etwas Wichtiges das dich gerade am meisten beschäftigt — ein Ziel, eine Frage, eine Situation?", "en": "🌱 Personal\n\nIs there something important that occupies your mind the most right now — a goal, a question, a situation?"}
+            skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
+            await query.edit_message_text(q.get(lang, q["ru"]), reply_markup=skip)
+        elif about_step == "personal":
+            compass_state.pop(user_id, None)
+            save_session(user_id, session=[], compass={})
+            thanks = {"ru": "Спасибо! Теперь Salveris знает тебя лучше 🌟", "de": "Danke! Jetzt kennt Salveris dich besser 🌟", "en": "Thank you! Now Salveris knows you better 🌟"}
+            await query.edit_message_text(thanks.get(lang, thanks["ru"]))
+            await show_menu(context, user_id, lang)
+        return
+
     elif data == "about_skip":
         skip_msg = {"ru": "Хорошо! Ты всегда можешь добавить информацию о себе в разделе 👤 Обо мне 🌟", "de": "Alles klar! Du kannst jederzeit Informationen über dich im Bereich 👤 Über mich hinzufügen 🌟", "en": "Alright! You can always add information about yourself in the 👤 About me section 🌟"}
         await query.edit_message_text(skip_msg.get(lang, skip_msg["ru"]))
@@ -1022,7 +1054,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         compass_state[user_id] = {"stage": "about", "about_step": "work"}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
         q = {"ru": "💼 Работа/карьера\n\nРасскажи о своей работе или занятии — что сейчас происходит в этой сфере и как ты себя в ней чувствуешь?", "de": "💼 Arbeit/Karriere\n\nErzähl mir von deiner Arbeit oder Tätigkeit — was passiert gerade in diesem Bereich und wie fühlst du dich dabei?", "en": "💼 Work/Career\n\nTell me about your work or occupation — what is happening in this area right now and how do you feel about it?"}
-        await query.edit_message_text(q.get(lang, q["ru"]))
+        skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
+        await query.edit_message_text(q.get(lang, q["ru"]), reply_markup=skip)
 
     elif data == "btn_about":
         work = user.get("about_work") or "—"
@@ -1670,21 +1703,24 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 compass_state[user_id] = state
                 save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
                 q = {"ru": "💰 Финансы\n\nКак выглядит твоя финансовая ситуация сейчас — что стабильно, что беспокоит, к чему стремишься?", "de": "💰 Finanzen\n\nWie sieht deine finanzielle Situation gerade aus — was ist stabil, was bereitet dir Sorgen, wonach strebst du?", "en": "💰 Finances\n\nHow does your financial situation look right now — what is stable, what concerns you, what are you aiming for?"}
-                await update.message.reply_text(q.get(lang, q["ru"]))
+                skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
+                await update.message.reply_text(q.get(lang, q["ru"]), reply_markup=skip)
             elif about_step == "finance":
                 save_user(user_id, about_finance=user_text)
                 state["about_step"] = "relations"
                 compass_state[user_id] = state
                 save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
                 q = {"ru": "💑 Отношения\n\nРасскажи о своих близких отношениях — что сейчас радует и что даётся непросто?", "de": "💑 Beziehungen\n\nErzähl mir von deinen engen Beziehungen — was freut dich gerade und was fällt schwer?", "en": "💑 Relationships\n\nTell me about your close relationships — what makes you happy right now and what is challenging?"}
-                await update.message.reply_text(q.get(lang, q["ru"]))
+                skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
+                await update.message.reply_text(q.get(lang, q["ru"]), reply_markup=skip)
             elif about_step == "relations":
                 save_user(user_id, about_relations=user_text)
                 state["about_step"] = "personal"
                 compass_state[user_id] = state
                 save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
                 q = {"ru": "🌱 Личное\n\nЕсть ли что-то важное что сейчас занимает твои мысли больше всего — цель, вопрос, ситуация?", "de": "🌱 Persönliches\n\nGibt es etwas Wichtiges das dich gerade am meisten beschäftigt — ein Ziel, eine Frage, eine Situation?", "en": "🌱 Personal\n\nIs there something important that occupies your mind the most right now — a goal, a question, a situation?"}
-                await update.message.reply_text(q.get(lang, q["ru"]))
+                skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
+                await update.message.reply_text(q.get(lang, q["ru"]), reply_markup=skip)
             elif about_step == "personal":
                 save_user(user_id, about_personal=user_text)
                 compass_state.pop(user_id, None)
@@ -2712,7 +2748,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(gender_cb, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
-    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu|about_|feedback_yes|feedback_no|remind_no|announce_nav_|churn_|paid_churn_|btn_info|btn_subscribe)"))
+    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu|about_|feedback_yes|feedback_no|remind_no|announce_nav_|churn_|paid_churn_|btn_info|btn_subscribe|age_)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
     PORT = int(os.environ.get("PORT", 10000))
