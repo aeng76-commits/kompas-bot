@@ -1426,20 +1426,20 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(help_text.get(lang, help_text["ru"]), reply_markup=btns)
 
     elif data == "btn_menu":
-        # Если пользователь только что зарегистрировался — спрашиваем про "Обо мне"
-        if user and user.get("day") and not any(user.get(k) for k in ["about_work","about_finance","about_relations","about_personal"]):
-            about_invite = {
-                "ru": "Хочешь рассказать о себе подробнее? Это поможет Salveris давать более точный анализ.",
-                "de": "Möchtest du mehr über dich erzählen? Das hilft Salveris genauere Analysen zu erstellen.",
-                "en": "Would you like to tell more about yourself? This helps Salveris provide more accurate analysis."
-            }
-            about_btns = InlineKeyboardMarkup([[
-                InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="about_start"),
-                InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="about_skip")
-            ]])
-            await query.edit_message_text(about_invite.get(lang, about_invite["ru"]), reply_markup=about_btns)
-            return
         await show_menu(context, user_id, lang)
+        return
+
+    elif data == "trial_not_now":
+        about_invite = {
+            "ru": "Хочешь рассказать о себе подробнее? Это поможет Salveris давать более точный анализ.",
+            "de": "Möchtest du mehr über dich erzählen? Das hilft Salveris genauere Analysen zu erstellen.",
+            "en": "Would you like to tell more about yourself? This helps Salveris provide more accurate analysis."
+        }
+        about_btns = InlineKeyboardMarkup([[
+            InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="about_start"),
+            InlineKeyboardButton("❌ Не сейчас" if lang=="ru" else ("❌ Nicht jetzt" if lang=="de" else "❌ Not now"), callback_data="about_skip")
+        ]])
+        await query.edit_message_text(about_invite.get(lang, about_invite["ru"]), reply_markup=about_btns)
         return
 
     elif data == "btn_settings":
@@ -1966,7 +1966,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             }
             sub_btns = InlineKeyboardMarkup([[
                 InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay"),
-                InlineKeyboardButton("◄️ Не сейчас" if lang=="ru" else ("◄️ Nicht jetzt" if lang=="de" else "◄️ Not now"), callback_data="btn_menu")
+                InlineKeyboardButton("◄️ Не сейчас" if lang=="ru" else ("◄️ Nicht jetzt" if lang=="de" else "◄️ Not now"), callback_data="trial_not_now")
             ]])
             await update.message.reply_text(welcome_info.get(lang, welcome_info["ru"]), reply_markup=sub_btns)
         else:
