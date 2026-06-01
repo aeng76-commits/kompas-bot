@@ -1936,10 +1936,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Дата рождения
     if not user.get("day"):
-        m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
-        if m:
+        date_m = re.search(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", user_text)
+        if date_m:
             tg_username = update.effective_user.username or ""
-            save_user(user_id, birth_day=int(m.group(1)), birth_month=int(m.group(2)), birth_year=int(m.group(3)), trial_started_at=datetime.datetime.now(), username=tg_username)
+            save_user(user_id, birth_day=int(date_m.group(1)), birth_month=int(date_m.group(2)), birth_year=int(date_m.group(3)), trial_started_at=datetime.datetime.now(), username=tg_username)
             # Уведомление админу
             try:
                 tg_name = update.effective_user.username or update.effective_user.first_name or "?"
