@@ -788,7 +788,7 @@ async def lang_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_sessions[user_id] = []
     save_session(user_id, session=[], compass={})
     user = get_user(user_id)
-    if user and user.get("agreed") and user.get("birth_day"):
+    if user and user.get("agreed") and user.get("day"):
         await query.edit_message_text(
             {"ru": "Выбери раздел:", "de": "Wähle einen Bereich:", "en": "Choose a section:"}.get(lang, "Выбери раздел:"),
             reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(lang, MENU_BUTTONS["ru"]))
@@ -2104,7 +2104,7 @@ async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user = get_user(user_id)
-    if user and user.get("agreed") and user.get("birth_day"):
+    if user and user.get("agreed") and user.get("day"):
         await update.message.reply_text("🌟", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")]]))
     else:
         await update.message.reply_text("Напиши /start")
@@ -2112,7 +2112,7 @@ async def cmd_me(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user = get_user(user_id)
-    if user and user.get("agreed") and user.get("birth_day"):
+    if user and user.get("agreed") and user.get("day"):
         await update.message.reply_text("🧭", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🧭 Личный год", callback_data="btn_year")]]))
     else:
         await update.message.reply_text("Напиши /start")
@@ -2120,7 +2120,7 @@ async def cmd_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user = get_user(user_id)
-    if user and user.get("agreed") and user.get("birth_day"):
+    if user and user.get("agreed") and user.get("day"):
         await update.message.reply_text("📍", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📍 Личный месяц", callback_data="btn_month")]]))
     else:
         await update.message.reply_text("Напиши /start")
@@ -2128,7 +2128,7 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user = get_user(user_id)
-    if user and user.get("agreed") and user.get("birth_day"):
+    if user and user.get("agreed") and user.get("day"):
         await update.message.reply_text("☀️", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("☀️ Личный день", callback_data="btn_day")]]))
     else:
         await update.message.reply_text("Напиши /start")
@@ -2136,7 +2136,7 @@ async def cmd_day(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_compass(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user = get_user(user_id)
-    if user and user.get("agreed") and user.get("birth_day"):
+    if user and user.get("agreed") and user.get("day"):
         await update.message.reply_text("💡", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("💡 Поговорим о главном", callback_data="btn_compass")]]))
     else:
         await update.message.reply_text("Напиши /start")
