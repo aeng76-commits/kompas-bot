@@ -2515,7 +2515,6 @@ async def send_daily_messages(context):
             await context.bot.send_message(uid, risk_text, parse_mode="HTML")
 
             # Совет дня
-            import datetime as dt_now
             ud_num, has_zero = get_universal_day(dt_now.datetime.now(dt_now.timezone.utc))
             ud_base = UNIVERSAL_DAY_TIPS.get(ud_num, {}).get(lang, "")
             ud_zero = UNIVERSAL_DAY_TIPS.get(0, {}).get(lang, "") if has_zero else ""
@@ -2546,7 +2545,6 @@ async def send_daily_messages(context):
             await context.bot.send_message(uid, clean_text(r3.content[0].text), parse_mode="HTML")
 
             # Опрос через 24ч после окончания триала
-            import datetime
             trial_end = None
             if user_trial_started := user_data[7]:
                 if hasattr(user_trial_started, 'date'):
