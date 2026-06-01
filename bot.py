@@ -1757,6 +1757,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
 
+    # Изменение данных
+    if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_data":
+        import re
+        date_match = re.match(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", user_text.strip())
+        if date_match:
+            d, m, y = int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3))
+            save_user(user_id, birth_day=d, birth_month=m, birth_year=y, data_changes=1)
+            user_sessions[user_id] = []
+            ok = {"ru": "✅ Дата рождения обновлена!", "de": "✅ Geburtsdatum aktualisiert!", "en": "✅ Date of birth updated!"}
+            await update.message.reply_text(ok.get(lang, ok["ru"]))
+            await show_menu(context, user_id, lang)
+        else:
+            save_user(user_id, name=user_text.strip(), data_changes=1)
+            user_sessions[user_id] = []
+            ok = {"ru": f"✅ Имя обновлено на {user_text.strip()}!", "de": f"✅ Name auf {user_text.strip()} aktualisiert!", "en": f"✅ Name updated to {user_text.strip()}!"}
+            await update.message.reply_text(ok.get(lang, ok["ru"]))
+            await show_menu(context, user_id, lang)
+        return
+
     # Имя
     if not user.get("name"):
         name = user_text.strip()
