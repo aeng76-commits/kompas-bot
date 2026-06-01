@@ -102,7 +102,7 @@ def save_user(user_id, **kwargs):
     cur.execute("INSERT INTO users(user_id) VALUES(%s) ON CONFLICT(user_id) DO NOTHING", (user_id,))
     col_map = {"name":"name","gender":"gender","lang":"lang","birth_day":"birth_day","birth_month":"birth_month",
                "birth_year":"birth_year","agreed":"agreed","trial_started_at":"trial_started_at",
-               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username","is_minor":"is_minor","about_work":"about_work","about_finance":"about_finance","about_relations":"about_relations","about_personal":"about_personal"}
+               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username","is_minor":"is_minor","about_work":"about_work","about_finance":"about_finance","about_relations":"about_relations","about_personal":"about_personal","name_changes":"name_changes","date_changes":"date_changes"}
     for k, v in kwargs.items():
         col = col_map.get(k, k)
         if col == "daily_usage" and isinstance(v, dict):
@@ -1435,7 +1435,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         info = {"ru": ru_info, "de": de_info, "en": en_info}
         btns = [
             [InlineKeyboardButton("📋 Правила" if lang=="ru" else ("📋 Regeln" if lang=="de" else "📋 Rules"), callback_data="btn_rules")],
-            [InlineKeyboardButton("✏️ Изменить данные" if lang=="ru" else ("✏️ Daten ändern" if lang=="de" else "✏️ Change data"), callback_data="btn_change_data")],
+            [InlineKeyboardButton("✏️ Изменить имя" if lang=="ru" else ("✏️ Name ändern" if lang=="de" else "✏️ Change name"), callback_data="btn_change_name")],
+            [InlineKeyboardButton("📅 Изменить дату рождения" if lang=="ru" else ("📅 Geburtsdatum ändern" if lang=="de" else "📅 Change date of birth"), callback_data="btn_change_date")],
             [InlineKeyboardButton("🌐 Сменить язык" if lang=="ru" else ("🌐 Sprache ändern" if lang=="de" else "🌐 Change language"), callback_data="btn_lang")],
             [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
             [InlineKeyboardButton("💬 Написать администратору" if lang=="ru" else ("💬 Admin schreiben" if lang=="de" else "💬 Contact admin"), url="https://t.me/aeng0")],
@@ -1445,6 +1446,26 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "btn_rules":
         await query.edit_message_text(RULES[lang], reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data="btn_settings")]]))
+
+    elif data == "btn_change_name":
+        name_changes = user.get("name_changes") or 0
+        if name_changes >= 1:
+            msg = {"ru": "Ты уже изменила имя. Для повторного изменения напиши @aeng0.", "de": "Du hast den Namen bereits geändert. Schreibe @aeng0.", "en": "You have already changed your name. Contact @aeng0."}
+            await query.edit_message_text(msg.get(lang, msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Назад" if lang=="ru" else "◀️ Zurück", callback_data="btn_settings")]]))
+            return
+        msg = {"ru": "Напиши новое имя:", "de": "Schreibe deinen neuen Namen:", "en": "Write your new name:"}
+        user_sessions[user_id] = [{"role": "assistant", "content": "change_name"}]
+        await query.edit_message_text(msg.get(lang, msg["ru"]))
+
+    elif data == "btn_change_date":
+        date_changes = user.get("date_changes") or 0
+        if date_changes >= 1:
+            msg = {"ru": "Ты уже изменила дату рождения. Для повторного изменения напиши @aeng0.", "de": "Du hast das Geburtsdatum bereits geändert. Schreibe @aeng0.", "en": "You have already changed your date of birth. Contact @aeng0."}
+            await query.edit_message_text(msg.get(lang, msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Назад" if lang=="ru" else "◀️ Zurück", callback_data="btn_settings")]]))
+            return
+        msg = {"ru": "Напиши дату рождения в формате ДД.ММ.ГГГГ:", "de": "Schreibe dein Geburtsdatum im Format TT.MM.JJJJ:", "en": "Write your date of birth in format DD.MM.YYYY:"}
+        user_sessions[user_id] = [{"role": "assistant", "content": "change_date"}]
+        await query.edit_message_text(msg.get(lang, msg["ru"]))
 
     elif data == "btn_change_data":
         changes_left = 1 - (user.get("data_changes") or 0)
@@ -1832,23 +1853,29 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
 
-    # Изменение данных
-    if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_data":
+    # Изменение имени
+    if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_name":
+        save_user(user_id, name=user_text.strip(), name_changes=1)
+        user_sessions[user_id] = []
+        ok = {"ru": f"✅ Имя обновлено на {user_text.strip()}!", "de": f"✅ Name auf {user_text.strip()} aktualisiert!", "en": f"✅ Name updated to {user_text.strip()}!"}
+        await update.message.reply_text(ok.get(lang, ok["ru"]))
+        await show_menu(context, user_id, lang)
+        return
+
+    # Изменение даты рождения
+    if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_date":
         import re
         date_match = re.match(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", user_text.strip())
         if date_match:
             d, m, y = int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3))
-            save_user(user_id, birth_day=d, birth_month=m, birth_year=y, data_changes=1)
+            save_user(user_id, birth_day=d, birth_month=m, birth_year=y, date_changes=1)
             user_sessions[user_id] = []
             ok = {"ru": "✅ Дата рождения обновлена!", "de": "✅ Geburtsdatum aktualisiert!", "en": "✅ Date of birth updated!"}
             await update.message.reply_text(ok.get(lang, ok["ru"]))
             await show_menu(context, user_id, lang)
         else:
-            save_user(user_id, name=user_text.strip(), data_changes=1)
-            user_sessions[user_id] = []
-            ok = {"ru": f"✅ Имя обновлено на {user_text.strip()}!", "de": f"✅ Name auf {user_text.strip()} aktualisiert!", "en": f"✅ Name updated to {user_text.strip()}!"}
-            await update.message.reply_text(ok.get(lang, ok["ru"]))
-            await show_menu(context, user_id, lang)
+            err = {"ru": "Напиши дату в формате ДД.ММ.ГГГГ, например 04.10.1976", "de": "Bitte im Format TT.MM.JJJJ, z.B. 04.10.1976", "en": "Please use format DD.MM.YYYY, e.g. 04.10.1976"}
+            await update.message.reply_text(err.get(lang, err["ru"]))
         return
 
     # Имя
