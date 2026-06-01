@@ -1010,7 +1010,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 txt = clean_text(resp.content[0].text)
                 await context.bot.send_message(user_id, txt, parse_mode="HTML")
             brief_note = {
-                "ru": "✨ Это краткая версия. Полный анализ — значительно глубже и детальнее.",
+                "ru": "",
                 "de": "✨ Das ist die Kurzversion. Die vollständige Analyse geht deutlich tiefer.",
                 "en": "✨ This is the short version. The full analysis goes much deeper."
             }
@@ -1188,7 +1188,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>👤 Обо мне</b>\n"
             "Чем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
             "<b>💳 Подписка</b>\n"
-            "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений, глубже и детальнее — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
+            "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
             "<b>⚙️ Настройки</b>\n"
             "🌐 Сменить язык\n"
             "✏️ Изменить имя\n"
@@ -1211,7 +1211,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>👤 Über mich</b>\n"
             "Je mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
             "<b>💳 Abonnement</b>\n"
-            "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen, tiefer und detaillierter — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
+            "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
             "<b>⚙️ Einstellungen</b>\n"
             "🌐 Sprache ändern\n"
             "✏️ Name ändern\n"
@@ -1234,7 +1234,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>👤 About me</b>\n"
             "The more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
             "<b>💳 Subscription</b>\n"
-            "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits, deeper and more detailed — including an individual monthly overview. From 15€/month.\n\n"
+            "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits — including an individual monthly overview. From 15€/month.\n\n"
             "<b>⚙️ Settings</b>\n"
             "🌐 Change language\n"
             "✏️ Change name\n"
@@ -1366,7 +1366,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>👤 Обо мне</b>\n"
             "Чем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
             "<b>💳 Подписка</b>\n"
-            "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений, глубже и детальнее — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
+            "Пробный период — 72 часа, каждый раздел доступен 1 раз в день. Подписка открывает все разделы без ограничений — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
             "<b>⚙️ Настройки</b>\n"
             "🌐 Сменить язык\n"
             "✏️ Изменить имя\n"
@@ -1389,7 +1389,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>👤 Über mich</b>\n"
             "Je mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
             "<b>💳 Abonnement</b>\n"
-            "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen, tiefer und detaillierter — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
+            "Testzugang — 72 Stunden, jeder Bereich 1x pro Tag. Das Abonnement öffnet alle Bereiche ohne Einschränkungen — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
             "<b>⚙️ Einstellungen</b>\n"
             "🌐 Sprache ändern\n"
             "✏️ Name ändern\n"
@@ -1412,7 +1412,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "<b>👤 About me</b>\n"
             "The more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
             "<b>💳 Subscription</b>\n"
-            "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits, deeper and more detailed — including an individual monthly overview. From 15€/month.\n\n"
+            "Trial period — 72 hours, each section available 1 time per day. Subscription opens all sections without limits — including an individual monthly overview. From 15€/month.\n\n"
             "<b>⚙️ Settings</b>\n"
             "🌐 Change language\n"
             "✏️ Change name\n"
@@ -1975,9 +1975,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except:
                 pass
             welcome_info = {
-                "ru": "🌿 У тебя есть 72 часа бесплатного доступа.\n\nКаждый раздел можно открыть 1 раз за весь пробный период:\n• 🌟 Основа моей личности\n• 🧭 Личный год\n• 📍 Личный месяц\n• ☀️ Личный день\n• 💡 Поговорим о главном\n\n💎 С подпиской все разделы открываются без ограничений, глубже и детальнее — включая индивидуальный обзор в начале каждого месяца.",
-                "de": "🌿 Du hast 72 Stunden kostenlosen Zugang.\n\nJeden Bereich kannst du einmal im Testzeitraum öffnen:\n• 🌟 Meine Persönlichkeit\n• 🧭 Persönliches Jahr\n• 📍 Persönlicher Monat\n• ☀️ Persönlicher Tag\n• 💡 Lass uns reden\n\n💎 Mit dem Abonnement sind alle Bereiche ohne Einschränkungen verfügbar, tiefer und detaillierter — einschließlich einer individuellen Monatsübersicht.",
-                "en": "🌿 You have 72 hours of free access.\n\nEach section can be opened once during the trial period:\n• 🌟 My Personality\n• 🧭 Personal Year\n• 📍 Personal Month\n• ☀️ Personal Day\n• 💡 Let's talk\n\n💎 With a subscription all sections are available without limits, deeper and more detailed — including an individual monthly overview."
+                "ru": "🌿 У тебя есть 72 часа бесплатного доступа.\n\nКаждый раздел можно открыть 1 раз за весь пробный период:\n• 🌟 Основа моей личности\n• 🧭 Личный год\n• 📍 Личный месяц\n• ☀️ Личный день\n• 💡 Поговорим о главном\n\n💎 С подпиской все разделы открываются без ограничений — включая индивидуальный обзор в начале каждого месяца.",
+                "de": "🌿 Du hast 72 Stunden kostenlosen Zugang.\n\nJeden Bereich kannst du einmal im Testzeitraum öffnen:\n• 🌟 Meine Persönlichkeit\n• 🧭 Persönliches Jahr\n• 📍 Persönlicher Monat\n• ☀️ Persönlicher Tag\n• 💡 Lass uns reden\n\n💎 Mit dem Abonnement sind alle Bereiche ohne Einschränkungen verfügbar — einschließlich einer individuellen Monatsübersicht.",
+                "en": "🌿 You have 72 hours of free access.\n\nEach section can be opened once during the trial period:\n• 🌟 My Personality\n• 🧭 Personal Year\n• 📍 Personal Month\n• ☀️ Personal Day\n• 💡 Let's talk\n\n💎 With a subscription all sections are available without limits — including an individual monthly overview."
             }
             sub_btns = InlineKeyboardMarkup([[
                 InlineKeyboardButton("💳 Подписка" if lang=="ru" else ("💳 Abonnement" if lang=="de" else "💳 Subscription"), callback_data="btn_pay"),
