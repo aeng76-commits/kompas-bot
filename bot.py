@@ -142,8 +142,8 @@ def get_trial_usage(user_id):
     return usage.get(today, {})
 
 def check_free_limit(user_id, section):
-    usage = get_daily_usage(user_id)
-    limits = {"me": 1, "year": 1, "month": 1, "day": 1, "compass": 2}
+    usage = get_daily_usage(user_id) or {}
+    limits = {"me": 1, "year": 1, "month": 1, "day": 1, "compass": 1}
     return usage.get(section, 0) < limits.get(section, 1)
 
 def increment_usage(user_id, section):
