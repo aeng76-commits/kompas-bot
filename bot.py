@@ -983,31 +983,23 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             for txt in txts:
                 await context.bot.send_message(user_id, txt, parse_mode="HTML")
         else:
-            # Проверяем общий лимит: max 1 раз каждый раздел в день
-            daily = get_daily_usage(user_id)
-            total_today = sum(daily.get(s, 0) for s in ["me", "year", "month", "day"])
-            if total_today >= 5:
-                day_limit_msg = {
-                    "ru": "На сегодня ты использовала оба бесплатных запроса 🌙\nЗавтра снова будет доступно — или открой полный доступ прямо сейчас.",
-                    "de": "Du hast heute beide kostenlosen Anfragen genutzt 🌙\nMorgen geht es weiter — oder schalte jetzt den vollen Zugang frei.",
-                    "en": "You've used both free requests for today 🌙\nCome back tomorrow — or unlock full access now."
-                }
-                await context.bot.send_message(user_id, day_limit_msg.get(lang, day_limit_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
-                await show_menu(context, user_id, lang)
-                return
+            # Триал: каждый раздел 1 раз за весь триал, полное качество
             if not check_free_limit(user_id, section):
-                menu_kb = InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]])
-                await query.edit_message_text(limit_msg.get(lang, limit_msg["ru"]), reply_markup=menu_kb)
+                limit_trial_msg = {
+                    "ru": "Этот раздел ты уже открывала в пробный период 🌙\nОткрой полный доступ чтобы пользоваться без ограничений.",
+                    "de": "Diesen Bereich hast du bereits im Testzeitraum geöffnet 🌙\nSchalte den vollen Zugang frei.",
+                    "en": "You've already opened this section during your trial 🌙\nUnlock full access to use without limits."
+                }
+                await query.edit_message_text(limit_trial_msg.get(lang, limit_trial_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
                 return
             increment_usage(user_id, section)
-            daily_after = get_daily_usage(user_id)
-            total_after = sum(daily_after.get(s, 0) for s in ["me", "year", "month", "day"])
-            remaining = 5 - total_after
-            free_tokens = {"me": 1000, "year": 900, "month": 900, "day": 800}
             log_action(user_id, section, "trial_open", lang)
-            prompt = get_free_prompt(lang, user, section)
-            response = client.messages.create(model="claude-sonnet-4-6", max_tokens=free_tokens[section], system=prompt, messages=[{"role": "user", "content": "Дай анализ"}])
-            await context.bot.send_message(user_id, clean_text(response.content[0].text))
+            prompts = get_profile_prompts_list(lang, user, section)
+            tokens = {"me": 3000, "year": 3000, "month": 2500, "day": 2000}
+            for p in prompts:
+                resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 2000), system=p, messages=[{"role": "user", "content": "Напиши"}])
+                txt = clean_text(resp.content[0].text)
+                await context.bot.send_message(user_id, txt, parse_mode="HTML")
             brief_note = {
                 "ru": "✨ Это краткая версия. Полный анализ — значительно глубже и детальнее.",
                 "de": "✨ Das ist die Kurzversion. Die vollständige Analyse geht deutlich tiefer.",
