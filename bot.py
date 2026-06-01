@@ -1883,9 +1883,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
     # Изменение имени
-    print(f"DEBUG change_name check: sessions={user_sessions.get(user_id)}", flush=True)
     if user_sessions.get(user_id) and user_sessions[user_id] and user_sessions[user_id][0].get("content") == "change_name":
-        print(f"DEBUG saving name: {user_text.strip()}", flush=True)
         save_user(user_id, name=user_text.strip(), name_changes=1)
         user_sessions[user_id] = []
         ok = {"ru": f"✅ Имя обновлено на {user_text.strip()}!", "de": f"✅ Name auf {user_text.strip()} aktualisiert!", "en": f"✅ Name updated to {user_text.strip()}!"}
