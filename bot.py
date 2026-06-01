@@ -132,6 +132,12 @@ def get_daily_usage(user_id):
     if not user:
         return {}
     usage = user.get("daily_usage") or {}
+
+def get_trial_usage(user_id):
+    user = get_user(user_id)
+    if not user:
+        return {}
+    usage = user.get("daily_usage") or {}
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     return usage.get(today, {})
 
@@ -1730,7 +1736,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             q_count = state.get("q_count", 0)
             topic = state.get("topic", "")
 
-            max_q = 3 if (is_trial_active(user) and not is_paid(user)) else 7
+            max_q = 7
             if q_count >= max_q:
                 # Анализ после вопросов
                 analysis_sys = f"""{lf}
