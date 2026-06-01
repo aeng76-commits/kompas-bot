@@ -2361,7 +2361,7 @@ async def send_daily_messages(context):
         cur2.close()
         conn2.close()
         for row in all_users:
-            uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
+            uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
             user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
             if is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today):
                 continue
@@ -2407,7 +2407,7 @@ async def send_daily_messages(context):
 
     # Проверка окончания подписки за 24 часа
     for row in users_list:
-        uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
+        uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
         if paid_until:
             hours_left = (paid_until.replace(tzinfo=None) - today).total_seconds() / 3600
             if 23 <= hours_left <= 25:
@@ -2422,7 +2422,7 @@ async def send_daily_messages(context):
                     pass
 
     for row in users_list:
-        uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
+        uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
         if not day:
             continue
         user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
