@@ -455,19 +455,18 @@ def get_profile_prompts_list(lang, user, section):
 
     birth_day = user.get("day", "")
     birth_month = user.get("month", "")
-    birth_year = user.get("year", "")
 
     base_year = f"""{lf}
 Ты пишешь для системы Внутренний Компас.
 Имя: {name}. {g}.
-Дата рождения: {birth_day}.{birth_month}.{birth_year}
+День рождения: {birth_day}, месяц рождения: {birth_month}
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
 Профиль: {model_profile}
 Сильные стороны: {model_strengths}
 Риски: {model_risks}
 
-Важно: человек рождён {birth_day} числа — это влияет на то как он проживает любой период. Учитывай это при анализе.
+Важно: человек рождён {birth_day} числа месяца {birth_month} — это влияет на то как он проживает любой период. Учитывай нюансы конкретного числа при анализе.
 
 ЛИЧНЫЙ ГОД — главный вектор:
 {year_text}
