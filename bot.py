@@ -453,14 +453,21 @@ def get_profile_prompts_list(lang, user, section):
 Обращение: ТЫ. {g}.
 ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ.{about_block}"""
 
+    birth_day = user.get("day", "")
+    birth_month = user.get("month", "")
+    birth_year = user.get("year", "")
+
     base_year = f"""{lf}
 Ты пишешь для системы Внутренний Компас.
 Имя: {name}. {g}.
+Дата рождения: {birth_day}.{birth_month}.{birth_year}
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
 Профиль: {model_profile}
 Сильные стороны: {model_strengths}
 Риски: {model_risks}
+
+Важно: человек рождён {birth_day} числа — это влияет на то как он проживает любой период. Учитывай это при анализе.
 
 ЛИЧНЫЙ ГОД — главный вектор:
 {year_text}
