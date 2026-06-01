@@ -2099,6 +2099,53 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg, parse_mode="HTML")
 
 
+async def admin_send_monthly(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    await update.message.reply_text("Отправляю обзор месяца...")
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, remind_at FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    users_list = cur.fetchall()
+    cur.close()
+    conn.close()
+    today = dt2.datetime.now()
+    sent = 0
+    errors = 0
+    for row in users_list:
+        uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
+        if not day:
+            continue
+        user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
+        if not (is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today)):
+            continue
+        try:
+            ctx = build_profile_context(user_obj)
+            lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
+            g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
+            month_sys = f"""{lf}
+Ты ассистент Salveris. Сегодня 1-е число — начало нового месяца.
+Имя: {name}. {g}.
+Модель мышления: {ctx["mi"]}
+Личный месяц: {ctx["month_text"]}
+Личный год: {ctx["year_text"][:200]}
+
+Напиши обзор месяца в трёх блоках:
+1. О чём этот месяц — 2-3 предложения через призму модели мышления и личного месяца.
+2. 4-5 рекомендаций — как эффективно прожить этот месяц. Каждая рекомендация — отдельный абзац, конкретно.
+3. 4-5 рисков — что может мешать. Каждый риск — отдельный абзац, мягко.
+ЗАПРЕЩЕНО: клише, упоминание чисел периодов, markdown звёздочки.
+ТЫ. {g}. Тепло и конкретно."""
+            resp = call_claude("claude-sonnet-4-6", 1200, month_sys, [{"role": "user", "content": "Напиши обзор месяца"}])
+            header = {"ru": "🗓 Обзор месяца", "de": "🗓 Monatsübersicht", "en": "🗓 Monthly Overview"}
+            await context.bot.send_message(uid, header.get(lang, header["ru"]))
+            await context.bot.send_message(uid, clean_text(resp.content[0].text))
+            sent += 1
+        except Exception as e:
+            print(f"Monthly manual error {uid}: {e}", flush=True)
+            errors += 1
+    await update.message.reply_text(f"✅ Отправлено: {sent}, ошибок: {errors}")
+
 async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -2665,6 +2712,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("compass", cmd_compass))
     app.add_handler(CommandHandler("language", cmd_language))
     app.add_handler(CommandHandler("stats", admin_stats))
+    app.add_handler(CommandHandler("send_monthly", admin_send_monthly))
     app.add_handler(CommandHandler("announce_nav", admin_announce_nav))
     app.add_handler(CommandHandler("announce_about", admin_announce_about))
     app.add_handler(CommandHandler("news", admin_news))
