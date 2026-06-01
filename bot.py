@@ -483,6 +483,36 @@ def get_profile_prompts_list(lang, user, section):
 Обращение: ТЫ. {g}.
 ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ.{about_block}"""
 
+    base_month = f"""{lf}
+Ты пишешь для системы Внутренний Компас.
+Имя: {name}. {g}.
+День рождения: {birth_day}, месяц рождения: {birth_month}
+
+МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
+Профиль: {model_profile}
+Сильные стороны: {model_strengths}
+Риски: {model_risks}
+
+Важно: человек рождён {birth_day} числа месяца {birth_month} — это влияет на то как он проживает любой период. Учитывай нюансы конкретного числа при анализе.
+
+ЛИЧНЫЙ ГОД — главный вектор:
+{year_text}
+
+ЛИЧНЫЙ МЕСЯЦ — тактика внутри года:
+{month_text}
+
+СТИЛЬ — тёплый, глубокий, живой. Пиши связными абзацами — не списками и не отдельными короткими строками. Каждый абзац 2-3 предложения.
+
+ЗАПРЕЩЕНО:
+- Слова: трещины, штукатурить, изъяны, перепады, нестабильность, тормозит, перегрузка
+- Списки из одного предложения — только связные абзацы
+- Упоминание чисел периодов
+- Markdown звёздочки решётки
+- Обрезанные и неполные формы слов
+- Упоминание конкретного дня
+Обращение: ТЫ. {g}.
+ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ.{about_block}"""
+
     b = {
         "me": [
             base_personality + f"""
@@ -562,7 +592,7 @@ def get_profile_prompts_list(lang, user, section):
 Не советы из книги — а что именно этому человеку делать в этот период.""",
         ],
         "month": [
-            base_period + f"""
+            base_month + f"""
 
 Напиши ТОЛЬКО этот блок: {"<b>🧭 Тактика этого месяца</b>" if lang=="ru" else ("<b>🧭 Taktik dieses Monats</b>" if lang=="de" else "<b>🧭 This Month's Strategy</b>")}
 Начни с этого тега на первой строке.
@@ -570,7 +600,7 @@ def get_profile_prompts_list(lang, user, section):
 Покажи как тема этого месяца ложится на вектор года для {name}.
 Два-три связных абзаца.""",
 
-            base_period + f"""
+            base_month + f"""
 
 Напиши ТОЛЬКО этот блок: {"<b>✨ Возможности месяца</b>" if lang=="ru" else ("<b>✨ Möglichkeiten des Monats</b>" if lang=="de" else "<b>✨ Opportunities of the Month</b>")}
 Начни с этого тега на первой строке.
@@ -578,7 +608,7 @@ def get_profile_prompts_list(lang, user, section):
 Что открывается именно для {name} в этом месяце с учётом её модели.
 Два-три связных абзаца.""",
 
-            base_period + f"""
+            base_month + f"""
 
 Напиши ТОЛЬКО этот блок: {"<b>🔺 Риски месяца</b>" if lang=="ru" else ("<b>🔺 Risiken des Monats</b>" if lang=="de" else "<b>🔺 Risks of the Month</b>")}
 Начни с этого тега на первой строке.
@@ -586,7 +616,7 @@ def get_profile_prompts_list(lang, user, section):
 Где особенности {name} могут создать сложности именно в этом месяце.
 Мягко, с пониманием. Два-три связных абзаца.""",
 
-            base_period + f"""
+            base_month + f"""
 
 Напиши ТОЛЬКО этот блок: {"<b>🌱 Шаги на ближайшие 2 недели</b>" if lang=="ru" else ("<b>🌱 Schritte für die nächsten 2 Wochen</b>" if lang=="de" else "<b>🌱 Steps for the Next 2 Weeks</b>")}
 Начни с этого тега на первой строке.
