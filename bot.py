@@ -1455,6 +1455,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         msg = {"ru": "Напиши новое имя:", "de": "Schreibe deinen neuen Namen:", "en": "Write your new name:"}
         user_sessions[user_id] = [{"role": "assistant", "content": "change_name"}]
+        save_session(user_id, session=user_sessions[user_id], compass={})
         await query.edit_message_text(msg.get(lang, msg["ru"]))
 
     elif data == "btn_change_date":
@@ -1465,6 +1466,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         msg = {"ru": "Напиши дату рождения в формате ДД.ММ.ГГГГ:", "de": "Schreibe dein Geburtsdatum im Format TT.MM.JJJJ:", "en": "Write your date of birth in format DD.MM.YYYY:"}
         user_sessions[user_id] = [{"role": "assistant", "content": "change_date"}]
+        save_session(user_id, session=user_sessions[user_id], compass={})
         await query.edit_message_text(msg.get(lang, msg["ru"]))
 
     elif data == "btn_change_data":
