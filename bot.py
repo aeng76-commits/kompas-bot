@@ -1040,24 +1040,15 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
         is_trial = is_trial_active(user) and not is_paid(user)
+        is_trial = is_trial_active(user) and not is_paid(user)
         if is_trial:
-            daily = get_daily_usage(user_id)
-            total_today = sum(daily.get(s, 0) for s in ["me", "year", "month", "day", "compass"])
-            if total_today >= 5:
-                day_limit_msg = {
-                    "ru": "На сегодня все разделы уже открыты 🌙\nВозвращайся завтра — или открой полный доступ.",
-                    "de": "Alle Bereiche für heute bereits geöffnet 🌙\nKomm morgen wieder — oder schalte den vollen Zugang frei.",
-                    "en": "All sections opened for today 🌙\nCome back tomorrow — or unlock full access."
+            if get_daily_usage(user_id).get("compass", 0) >= 1:
+                limit_trial_msg = {
+                    "ru": "Компас ты уже открывала в пробный период 🌙\nОткрой полный доступ чтобы пользоваться без ограничений.",
+                    "de": "Den Kompass hast du bereits im Testzeitraum genutzt 🌙\nSchalte den vollen Zugang frei.",
+                    "en": "You've already used the Compass during your trial 🌙\nUnlock full access to use without limits."
                 }
-                limit_kb = InlineKeyboardMarkup([
-                    [InlineKeyboardButton("💳 Открыть полный доступ" if lang=="ru" else ("💳 Vollzugang freischalten" if lang=="de" else "💳 Unlock full access"), callback_data="btn_pay")],
-                    [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]
-                ])
-                await query.edit_message_text(day_limit_msg.get(lang, day_limit_msg["ru"]), reply_markup=limit_kb)
-                return
-            if daily.get("compass", 0) >= 1:
-                menu_kb = InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]])
-                await query.edit_message_text({"ru": "Этот раздел уже открыт сегодня — загляни завтра 🌙", "de": "Diesen Bereich hast du heute schon geöffnet — schau morgen wieder rein 🌙", "en": "You've already opened this section today — come back tomorrow 🌙"}.get(lang, ""), reply_markup=menu_kb)
+                await query.edit_message_text(limit_trial_msg.get(lang, limit_trial_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
                 return
             increment_usage(user_id, "compass")
         compass_state[user_id] = {"stage": "initial", "q_count": 0, "clarify_count": 0, "topic": "", "trial": is_trial}
