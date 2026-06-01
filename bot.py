@@ -974,14 +974,15 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if is_paid(user):
             log_action(user_id, section, "paid_open", lang)
             prompts = get_profile_prompts_list(lang, user, section)
-            txts = []
+            tokens = {"me": 1500, "year": 1500, "month": 1200, "day": 1000}
             for p in prompts:
-                resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=800, system=p, messages=[{"role": "user", "content": "Напиши"}])
-                txt = clean_text(resp.content[0].text)
-                if txt:
-                    txts.append(txt)
-            for txt in txts:
-                await context.bot.send_message(user_id, txt, parse_mode="HTML")
+                try:
+                    resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 1200), system=p, messages=[{"role": "user", "content": "Напиши"}])
+                    txt = clean_text(resp.content[0].text)
+                    if txt:
+                        await context.bot.send_message(user_id, txt, parse_mode="HTML")
+                except Exception as e:
+                    print(f"Paid analysis error: {e}", flush=True)
         else:
             # Триал: каждый раздел 1 раз за весь триал, полное качество
             if not check_free_limit(user_id, section):
