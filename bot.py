@@ -1054,9 +1054,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         name = user.get("name", "") if user else ""
         gender = user.get("gender", "f") if user else "f"
         thanks_word_ru = "нашла" if gender == "f" else "нашёл"
-        fb_ru = f"Спасибо, {name}, что {thanks_word_ru} время! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что понравилось или зацепило?\n2. Что можно улучшить?\n3. Порекомендуешь Salveris другу?"
-        fb_de = f"Danke, {name}, dass du dir Zeit nimmst! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat dir gefallen?\n2. Was kann verbessert werden?\n3. Würdest du Salveris empfehlen?"
-        fb_en = f"Thank you, {name}, for taking the time! Your opinion matters.\n\nPlease answer three questions in one message:\n\n1. What did you like?\n2. What could be improved?\n3. Would you recommend Salveris?"
+        fb_ru = f"Спасибо, {name}! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что изменилось в твоём понимании себя после того как ты начал(а) пользоваться Salveris?\n2. Какой момент или анализ тебя удивил или попал точно в цель?\n3. Кому бы ты порекомендовал(а) Salveris и почему?"
+        fb_de = f"Danke, {name}! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat sich in deinem Selbstverständnis verändert, seit du Salveris nutzt?\n2. Welcher Moment oder welche Analyse hat dich überrascht oder genau getroffen?\n3. Wem würdest du Salveris empfehlen und warum?"
+        fb_en = f"Thank you, {name}! Your opinion matters a lot.\n\nPlease answer three questions in one message:\n\n1. What changed in your self-understanding since you started using Salveris?\n2. Which moment or analysis surprised you or hit exactly right?\n3. Who would you recommend Salveris to and why?"
         fb_text = {"ru": fb_ru, "de": fb_de, "en": fb_en}
         compass_state[user_id] = {"stage": "feedback", "q_num": 1}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
@@ -1710,26 +1710,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         elif stage == "feedback":
-            q_num = state.get("q_num", 1)
-            questions = {
-                "ru": ["Что понравилось или зацепило в Salveris?", "Что не понравилось или показалось непонятным?", "Чего не хватало?"],
-                "de": ["Was hat dir an Salveris gefallen oder dich berührt?", "Was hat dir nicht gefallen oder war unklar?", "Was hat gefehlt?"],
-                "en": ["What did you like or found interesting in Salveris?", "What didn't you like or found confusing?", "What was missing?"]
-            }
-            # Сохраняем ответ и отправляем администратору
-            await context.bot.send_message(ADMIN_ID, "📝 Отзыв от " + str(user.get("name")) + " (" + lang + "). Вопрос " + str(q_num) + ": " + user_text)
-            if q_num < 3:
-                next_q = questions.get(lang, questions["ru"])[q_num]
-                state["q_num"] = q_num + 1
-                compass_state[user_id] = state
-                save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
-                await update.message.reply_text(next_q)
-            else:
-                thanks = {"ru": "Спасибо большое! Твоё мнение очень важно для развития Salveris 🙏🌟", "de": "Vielen Dank! Deine Meinung ist sehr wichtig für die Entwicklung von Salveris 🙏🌟", "en": "Thank you so much! Your opinion is very important for the development of Salveris 🙏🌟"}
-                compass_state.pop(user_id, None)
-                save_session(user_id, session=[], compass={})
-                await update.message.reply_text(thanks.get(lang, thanks["ru"]))
-                await show_menu(context, user_id, lang)
+            # Один ответ — сразу администратору
+            await context.bot.send_message(ADMIN_ID, "📝 Отзыв от " + str(user.get("name")) + " (" + lang + "):\n\n" + user_text)
+            thanks = {"ru": "Спасибо большое! Твоё мнение очень важно для развития Salveris 🙏🌟", "de": "Vielen Dank! Deine Meinung ist sehr wichtig für die Entwicklung von Salveris 🙏🌟", "en": "Thank you so much! Your opinion is very important for the development of Salveris 🙏🌟"}
+            compass_state.pop(user_id, None)
+            save_session(user_id, session=[], compass={})
+            await update.message.reply_text(thanks.get(lang, thanks["ru"]))
+            await show_menu(context, user_id, lang)
             return
 
         elif stage == "clarify":
