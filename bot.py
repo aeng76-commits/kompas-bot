@@ -763,7 +763,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except:
                 pass
     user = get_user(user_id)
-    if user and user.get("agreed") and user.get("birth_day"):
+    if user and user.get("agreed") and user.get("day"):
         lang = user.get("lang", "ru")
         await update.message.reply_text(
             {"ru": "Выбери раздел:", "de": "Wähle einen Bereich:", "en": "Choose a section:"}.get(lang, "Выбери раздел:"),
