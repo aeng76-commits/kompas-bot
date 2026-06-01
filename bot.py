@@ -1006,23 +1006,13 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             prompts = get_profile_prompts_list(lang, user, section)
             tokens = {"me": 3000, "year": 3000, "month": 2500, "day": 2000}
             for p in prompts:
-                resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 2000), system=p, messages=[{"role": "user", "content": "Напиши"}])
-                txt = clean_text(resp.content[0].text)
-                await context.bot.send_message(user_id, txt, parse_mode="HTML")
-            brief_note = {
-                "ru": "",
-                "de": "✨ Das ist die Kurzversion. Die vollständige Analyse geht deutlich tiefer.",
-                "en": "✨ This is the short version. The full analysis goes much deeper."
-            }
-            await context.bot.send_message(user_id, brief_note.get(lang, brief_note["ru"]))
-            if remaining <= 0:
-                limit_info = {
-                    "ru": "📊 Запросы на сегодня исчерпаны. Возвращайся завтра 🌙\n\nЕсли хочешь продолжить прямо сейчас — можно открыть полный доступ.",
-                    "de": "📊 Anfragen für heute aufgebraucht. Bis morgen 🌙\n\nWenn du jetzt weitermachen möchtest — du kannst den vollen Zugang freischalten.",
-                    "en": "📊 No more free requests for today. See you tomorrow 🌙\n\nIf you'd like to continue now — you can unlock full access."
-                }
-                await context.bot.send_message(user_id, limit_info.get(lang, limit_info["ru"]), reply_markup=get_upgrade_keyboard(lang))
-        await show_menu(context, user_id, lang)
+                try:
+                    resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 2000), system=p, messages=[{"role": "user", "content": "Напиши"}])
+                    txt = clean_text(resp.content[0].text)
+                    await context.bot.send_message(user_id, txt, parse_mode="HTML")
+                except Exception as e:
+                    print(f"Trial error: {e}", flush=True)
+            await show_menu(context, user_id, lang)
 
     elif data == "btn_compass":
         log_action(user_id, "compass", "open", lang)
