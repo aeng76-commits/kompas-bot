@@ -149,7 +149,11 @@ def check_free_limit(user_id, section):
 def increment_usage(user_id, section):
     user = get_user(user_id)
     usage = user.get("daily_usage") or {}
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    if is_trial_active(user) and not is_paid(user):
+        day_key = "trial"
+    else:
+        day_key = datetime.datetime.now().strftime("%Y-%m-%d")
+    today = day_key
     if today not in usage:
         usage = {today: {}}
     usage[today][section] = usage[today].get(section, 0) + 1
