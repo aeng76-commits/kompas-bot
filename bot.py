@@ -87,13 +87,13 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor,about_work,about_finance,about_relations,about_personal,remind_at FROM users WHERE user_id=%s", (user_id,))
+    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor,about_work,about_finance,about_relations,about_personal,remind_at,name_changes,date_changes FROM users WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return None
-    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor","about_work","about_finance","about_relations","about_personal","remind_at"]
+    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor","about_work","about_finance","about_relations","about_personal","remind_at","name_changes","date_changes"]
     return dict(zip(keys, row))
 
 def save_user(user_id, **kwargs):
