@@ -1628,9 +1628,36 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not isinstance(db_session, list):
         db_session = []
     user_sessions[user_id] = db_session
-    user_sessions[user_id].append({"role": "user", "content": user_text})
     if db_compass:
         compass_state[user_id] = db_compass
+
+    # Проверяем change_name и change_date ДО добавления в сессию
+    session_marker = user_sessions[user_id][0].get("content") if user_sessions.get(user_id) and user_sessions[user_id] else None
+
+    if session_marker == "change_name":
+        save_user(user_id, name=user_text.strip(), name_changes=1)
+        user_sessions[user_id] = []
+        ok = {"ru": f"✅ Имя обновлено на {user_text.strip()}!", "de": f"✅ Name auf {user_text.strip()} aktualisiert!", "en": f"✅ Name updated to {user_text.strip()}!"}
+        await update.message.reply_text(ok.get(lang, ok["ru"]))
+        await show_menu(context, user_id, lang)
+        return
+
+    if session_marker == "change_date":
+        import re
+        date_match = re.match(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", user_text.strip())
+        if date_match:
+            d, m, y = int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3))
+            save_user(user_id, birth_day=d, birth_month=m, birth_year=y, date_changes=1)
+            user_sessions[user_id] = []
+            ok = {"ru": "✅ Дата рождения обновлена!", "de": "✅ Geburtsdatum aktualisiert!", "en": "✅ Date of birth updated!"}
+            await update.message.reply_text(ok.get(lang, ok["ru"]))
+            await show_menu(context, user_id, lang)
+        else:
+            err = {"ru": "Напиши дату в формате ДД.ММ.ГГГГ, например 04.10.1976", "de": "Bitte im Format TT.MM.JJJJ, z.B. 04.10.1976", "en": "Please use format DD.MM.YYYY, e.g. 04.10.1976"}
+            await update.message.reply_text(err.get(lang, err["ru"]))
+        return
+
+    user_sessions[user_id].append({"role": "user", "content": user_text})
 
     # Компас: режим диалога
     if user_id in compass_state and compass_state[user_id]:
