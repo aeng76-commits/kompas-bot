@@ -2868,7 +2868,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(lang_cb, pattern="^lang_"))
     app.add_handler(CallbackQueryHandler(gender_cb, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(compass_yn_cb, pattern="^compass_"))
-    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|btn_menu|about_|feedback_yes|feedback_no|remind_no|announce_nav_|churn_|paid_churn_|btn_info|btn_subscribe|age_)"))
+    app.add_handler(CallbackQueryHandler(menu_cb, pattern="^(btn_|pay_|sepa_|trial_start|trial_choice|trial_not_now|btn_menu|about_|feedback_yes|feedback_no|remind_no|announce_nav_|churn_|paid_churn_|btn_info|btn_subscribe|age_)"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "").strip()
     PORT = int(os.environ.get("PORT", 10000))
