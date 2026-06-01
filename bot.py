@@ -1443,7 +1443,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         btns = [
             [InlineKeyboardButton("💳 PayPal", url=paypal_url)],
             [InlineKeyboardButton("🏦 Банковский перевод (SEPA)" if lang=="ru" else ("🏦 Banküberweisung (SEPA)" if lang=="de" else "🏦 Bank transfer (SEPA)"), callback_data=f"sepa_{plan}")],
-            [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data="trial_choice")],
+            [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
         ]
         await query.edit_message_text(header.get(lang, header["ru"]), reply_markup=InlineKeyboardMarkup(btns))
 
@@ -1461,9 +1461,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "en": "Bank transfer (SEPA)\n\nAmount: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: Inner Compass " + label + "\n\n⚠️ Please include your name and date of birth in the transfer note.\n\nAfter payment write to the administrator for activation."
         }
         btns = [
-            [InlineKeyboardButton("❓ Помощь" if lang=="ru" else ("❓ Hilfe" if lang=="de" else "❓ Help"), callback_data="btn_help")],
             [InlineKeyboardButton("💬 Написать администратору" if lang=="ru" else ("💬 Admin schreiben" if lang=="de" else "💬 Contact admin"), url="https://t.me/aeng0")],
-            [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")],
             [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data=f"pay_{plan}")],
             [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
         ]
