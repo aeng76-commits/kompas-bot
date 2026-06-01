@@ -132,6 +132,10 @@ def get_daily_usage(user_id):
     if not user:
         return {}
     usage = user.get("daily_usage") or {}
+    if is_trial_active(user) and not is_paid(user):
+        return usage.get("trial", {})
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    return usage.get(today, {})
 
 def get_trial_usage(user_id):
     user = get_user(user_id)
