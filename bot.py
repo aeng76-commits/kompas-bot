@@ -202,7 +202,11 @@ MENU_BUTTONS = {
 
 def get_upgrade_keyboard(lang):
     labels = {"ru": "💳 Открыть полный доступ", "de": "💳 Vollzugang freischalten", "en": "💳 Get full access"}
-    return InlineKeyboardMarkup([[InlineKeyboardButton(labels.get(lang, labels["ru"]), callback_data="btn_pay")]])
+    menu = {"ru": "🏠 Меню", "de": "🏠 Menü", "en": "🏠 Menu"}
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(labels.get(lang, labels["ru"]), callback_data="btn_pay")],
+        [InlineKeyboardButton(menu.get(lang, menu["ru"]), callback_data="btn_menu_home")]
+    ])
 
 def call_claude(model, max_tokens, system, messages, retries=2):
     import time
