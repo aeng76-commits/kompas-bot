@@ -2313,7 +2313,7 @@ async def send_daily_messages(context):
     # Обзор месяца 1-го числа
     if today.day == 1:
         for row in users_list:
-            uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row
+            uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
             if not day:
                 continue
             user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
