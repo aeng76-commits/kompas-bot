@@ -2515,7 +2515,7 @@ async def send_daily_messages(context):
             await context.bot.send_message(uid, risk_text, parse_mode="HTML")
 
             # Совет дня
-            ud_num, has_zero = get_universal_day(dt_now.datetime.now(dt_now.timezone.utc))
+            ud_num, has_zero = get_universal_day(dt2.datetime.now(dt2.timezone.utc))
             ud_base = UNIVERSAL_DAY_TIPS.get(ud_num, {}).get(lang, "")
             ud_zero = UNIVERSAL_DAY_TIPS.get(0, {}).get(lang, "") if has_zero else ""
             sys3 = f"""{lf}
@@ -2546,13 +2546,13 @@ async def send_daily_messages(context):
 
             # Опрос через 24ч после окончания триала
             trial_end = None
-            if user_trial_started := user_data[7]:
+            if user_trial_started := trial_started_at:
                 if hasattr(user_trial_started, 'date'):
                     trial_end = user_trial_started + datetime.timedelta(hours=72)
                 if trial_end and not is_paid_flag:
                     hours_since_end = (datetime.datetime.now(datetime.timezone.utc) - trial_end.replace(tzinfo=datetime.timezone.utc)).total_seconds() / 3600
                     if 24 <= hours_since_end < 48:
-                        gender = user_data[6] if len(user_data) > 6 else "f"
+                        gender = gender if True else "f"
                         churn_msg = {
                             "ru": name + ", твой пробный период завершился.\n\nБуду признательна если поделишься — что остановило от подписки? Это поможет сделать Salveris лучше 🙏",
                             "de": name + ", dein Testzeitraum ist abgelaufen.\n\nIch wäre dankbar wenn du teilst — was hat dich vom Abonnement abgehalten? Das hilft Salveris besser zu machen 🙏",
@@ -2585,13 +2585,13 @@ async def send_daily_messages(context):
             # Опрос через 24ч после окончания платной подписки
             try:
                 import datetime
-                paid_until = user_data[8] if len(user_data) > 8 else None
+                paid_until = paid_until if len(user_data) > 8 else None
                 if paid_until and not is_paid_flag:
                     if hasattr(paid_until, 'tzinfo') and paid_until.tzinfo is None:
                         paid_until = paid_until.replace(tzinfo=datetime.timezone.utc)
                     hours_since_end = (datetime.datetime.now(datetime.timezone.utc) - paid_until).total_seconds() / 3600
                     if 24 <= hours_since_end < 48:
-                        gender_val = user_data[6] if len(user_data) > 6 else "f"
+                        gender_val = gender if True else "f"
                         paid_churn_msg = {
                             "ru": name + ", твоя подписка завершилась.\n\nБуду рада видеть тебя снова 🌟 Если что-то остановило от продления — поделись, это важно.",
                             "de": name + ", dein Abonnement ist abgelaufen.\n\nIch würde mich freuen, dich wiederzusehen 🌟 Wenn etwas dich von der Verlängerung abgehalten hat — teile es mit mir.",
@@ -2608,13 +2608,13 @@ async def send_daily_messages(context):
 
             # Напоминание тем кто попросил
             try:
-                remind_at = user_data[9] if len(user_data) > 9 else None
+                remind_at = remind_at if True else None
                 if remind_at:
                     import datetime
                     today = datetime.date.today()
                     remind_date = remind_at if isinstance(remind_at, datetime.date) else remind_at
                     if remind_date == today:
-                        gender_val = user_data[6] if len(user_data) > 6 else "f"
+                        gender_val = gender if True else "f"
                         remind_msg = {
                             "ru": name + ", ты просил" + ("а" if gender_val=="f" else "") + " напомнить о Salveris 🌟\n\nГотов" + ("а" if gender_val=="f" else "") + " попробовать снова?",
                             "de": name + ", du hast gebeten, dich an Salveris zu erinnern 🌟\n\nBereit es nochmal zu versuchen?",
