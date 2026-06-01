@@ -459,14 +459,11 @@ def get_profile_prompts_list(lang, user, section):
     base_year = f"""{lf}
 Ты пишешь для системы Внутренний Компас.
 Имя: {name}. {g}.
-День рождения: {birth_day}
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
 Профиль: {model_profile}
 Сильные стороны: {model_strengths}
 Риски: {model_risks}
-
-Важно: человек рождён {birth_day} числа — это влияет на то как он проживает любой период. Учитывай нюансы конкретного числа при анализе.
 
 ЛИЧНЫЙ ГОД — главный вектор:
 {year_text}
@@ -486,14 +483,11 @@ def get_profile_prompts_list(lang, user, section):
     base_month = f"""{lf}
 Ты пишешь для системы Внутренний Компас.
 Имя: {name}. {g}.
-День рождения: {birth_day}
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
 Профиль: {model_profile}
 Сильные стороны: {model_strengths}
 Риски: {model_risks}
-
-Важно: человек рождён {birth_day} числа — это влияет на то как он проживает любой период. Учитывай нюансы конкретного числа при анализе.
 
 ЛИЧНЫЙ ГОД — главный вектор:
 {year_text}
