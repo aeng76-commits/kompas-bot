@@ -2309,7 +2309,7 @@ async def send_daily_messages(context):
     users_list = cur.fetchall()
     cur.close()
     conn.close()
-    today = datetime.datetime.now()
+    today = dt2.datetime.now()
     # Обзор месяца 1-го числа
     if today.day == 1:
         for row in users_list:
