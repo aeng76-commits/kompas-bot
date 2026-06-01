@@ -204,6 +204,18 @@ def get_upgrade_keyboard(lang):
     labels = {"ru": "💳 Открыть полный доступ", "de": "💳 Vollzugang freischalten", "en": "💳 Get full access"}
     return InlineKeyboardMarkup([[InlineKeyboardButton(labels.get(lang, labels["ru"]), callback_data="btn_pay")]])
 
+def call_claude(model, max_tokens, system, messages, retries=2):
+    import time
+    for attempt in range(retries):
+        try:
+            return client.messages.create(model=model, max_tokens=max_tokens, system=system, messages=messages)
+        except Exception as e:
+            print(f"Claude API error attempt {attempt+1}: {e}", flush=True)
+            if attempt < retries - 1:
+                time.sleep(3)
+            else:
+                raise
+
 def clean_text(text):
     text = re.sub(r'#{1,6}\s', '', text)
     text = re.sub(r'__(.+?)__', r'\1', text)
