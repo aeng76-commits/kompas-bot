@@ -1395,6 +1395,13 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     elif data == "trial_start":
+        if user and user.get("agreed") and user.get("day"):
+            # Существующий пользователь — просто показываем меню
+            await show_menu(context, user_id, lang)
+            return
+        # Новый пользователь — начинаем регистрацию
+        import datetime
+        save_user(user_id, trial_started_at=datetime.datetime.now(datetime.timezone.utc), agreed=True)
         greet = {"ru": "Привет! Это Salveris. Как тебя зовут?", "de": "Hallo! Das ist Salveris. Wie heißt du?", "en": "Hi! This is Salveris. What is your name?"}
         msg = greet.get(lang, greet["ru"])
         user_sessions[user_id] = [{"role": "assistant", "content": msg}]
