@@ -2441,12 +2441,13 @@ async def admin_grant(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if target_user:
         target_lang = target_user.get("lang", "ru")
         notify_msg = {
-            "ru": f"✅ Твой доступ открыт до {paid_until.strftime('%d.%m.%Y %H:%M')}\n\nЕсли хочешь продлить — напиши администратору заранее.",
-            "de": f"✅ Dein Zugang ist geöffnet bis {paid_until.strftime('%d.%m.%Y %H:%M')}\n\nWenn du verlängern möchtest — schreibe dem Administrator rechtzeitig.",
-            "en": f"✅ Your access is open until {paid_until.strftime('%d.%m.%Y %H:%M')}\n\nIf you want to renew — contact the administrator in advance."
+            "ru": f"✅ Доступ открыт до {paid_until.strftime('%d.%m.%Y')} 🌟",
+            "de": f"✅ Zugang geöffnet bis {paid_until.strftime('%d.%m.%Y')} 🌟",
+            "en": f"✅ Access open until {paid_until.strftime('%d.%m.%Y')} 🌟"
         }
         try:
             await context.bot.send_message(target_id, notify_msg.get(target_lang, notify_msg["ru"]))
+            await context.bot.send_message(target_id, {"ru": "Выбери раздел:", "de": "Wähle einen Bereich:", "en": "Choose a section:"}.get(target_lang, "Выбери раздел:"), reply_markup=InlineKeyboardMarkup(MENU_BUTTONS.get(target_lang, MENU_BUTTONS["ru"])))
         except:
             pass
 
