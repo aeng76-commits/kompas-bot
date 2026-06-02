@@ -2485,6 +2485,48 @@ async def send_feedback_request(context):
         except Exception as e:
             print(f"Feedback error {uid}: {e}", flush=True)
 
+async def send_birthday_messages(context):
+    import datetime as dt2
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    users_list = cur.fetchall()
+    cur.close()
+    conn.close()
+    today = dt2.datetime.now()
+    for row in users_list:
+        uid, name, day, month, year, lang, gender = row[:7]
+        if not day:
+            continue
+        if day == today.day and month == today.month:
+            bday_text = {
+                "ru": f"🎂 С днём рождения, {name}!\n\nПусть этот день принесёт тебе радость, тепло и всё что ты хочешь.",
+                "de": f"🎂 Herzlichen Glückwunsch zum Geburtstag, {name}!\n\nMöge dieser Tag dir Freude, Wärme und alles bringen, was du dir wünschst.",
+                "en": f"🎂 Happy Birthday, {name}!\n\nMay this day bring you joy, warmth and everything you wish for."
+            }
+            try:
+                await context.bot.send_animation(uid, animation="CgACAgIAAxkDAAIQtmoV2C1332tJt-TwcooI1sFi1CDQAAKAmQACbEiwSFxl2P1fOg9kOwQ")
+                await context.bot.send_message(uid, bday_text.get(lang, bday_text["ru"]))
+                user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
+                ctx = build_profile_context(user_obj)
+                lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
+                g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
+                bday_sys = f"""{lf}
+Ты ассистент Salveris. День рождения {name}.
+Модель мышления: {ctx["mi"]}
+
+Напиши ровно 3 предложения по шаблону — меняй только качества:
+1. "[Одно сильное качество этого человека образно и точно, начни с Ты] — и это редкий дар."
+2. "[Второе сильное качество, начни с Твоя/Твоё/Твой] заслуживает уважения."
+3. "Пусть рядом с тобой будут те кто ценит тебя."
+
+ЗАПРЕЩЕНО: слова "год", "день", "сегодня", "время", "проект", "успех", "достижение", "суперсила", "рождена чтобы".
+ТЫ. {g}. Без markdown."""
+                resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=200, system=bday_sys, messages=[{"role": "user", "content": "Поздравь"}])
+                await context.bot.send_message(uid, clean_text(resp.content[0].text))
+            except Exception as e:
+                print(f"Birthday error {uid}: {e}", flush=True)
+
 async def send_daily_messages(context):
     try:
         import datetime as dt2
@@ -2627,15 +2669,8 @@ async def send_daily_messages(context):
             continue
         user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
         try:
-            # Поздравление с днём рождения
+            # Поздравление перенесено в send_birthday_messages (7:30)
             if day == today.day and month == today.month:
-                bday_text = {
-                    "ru": f"🎂 С днём рождения, {name}!\n\nПусть этот день принесёт тебе радость, тепло и всё что ты хочешь.",
-                    "de": f"🎂 Herzlichen Glückwunsch zum Geburtstag, {name}!\n\nMöge dieser Tag dir Freude, Wärme und alles bringen, was du dir wünschst.",
-                    "en": f"🎂 Happy Birthday, {name}!\n\nMay this day bring you joy, warmth and everything you wish for."
-                }
-                await context.bot.send_animation(uid, animation="CgACAgIAAxkDAAIQtmoV2C1332tJt-TwcooI1sFi1CDQAAKAmQACbEiwSFxl2P1fOg9kOwQ")
-                await context.bot.send_message(uid, bday_text.get(lang, bday_text["ru"]))
                 try:
                     bday_user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
                     ctx = build_profile_context(bday_user)
@@ -2843,6 +2878,7 @@ if __name__ == "__main__":
     init_db()
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     import datetime as dt
+    app.job_queue.run_daily(send_birthday_messages, time=dt.time(hour=5, minute=30, tzinfo=dt.timezone.utc))
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
 
     # При старте проверяем — если рассылка сегодня ещё не отправлялась — отправляем
