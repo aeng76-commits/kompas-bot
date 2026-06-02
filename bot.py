@@ -1307,10 +1307,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data in ("churn_price", "churn_value", "churn_func", "churn_other"):
         gender = user.get("gender", "f") if user else "f"
         questions = {
-            "churn_price": {"ru": "Какая сумма была бы комфортной для тебя в месяц?", "de": "Welcher Betrag wäre für dich monatlich angenehm?", "en": "What amount would be comfortable for you per month?"},
-            "churn_value": {"ru": "Что было непонятно или не зацепило?", "de": "Was war unklar oder hat dich nicht angesprochen?", "en": "What was unclear or didn't resonate with you?"},
-            "churn_func": {"ru": "Чего именно не хватило? Это очень важно для развития Salveris.", "de": "Was genau hat gefehlt? Das ist sehr wichtig für die Entwicklung von Salveris.", "en": "What exactly was missing? This is very important for Salveris development."},
-            "churn_other": {"ru": "Расскажи подробнее — что остановило?", "de": "Erzähl mehr — was hat dich aufgehalten?", "en": "Tell me more — what stopped you?"},
+            "churn_price": {"ru": "Один честный ответ поможет сделать Salveris лучше — при какой цене ты бы подписалась?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — bei welchem Preis hättest du abonniert?", "en": "One honest answer helps make Salveris better — at what price would you have subscribed?"},
+            "churn_value": {"ru": "Один честный ответ поможет сделать Salveris лучше — что именно не попало в точку или осталось непонятным?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — was genau hat nicht getroffen oder war unklar?", "en": "One honest answer helps make Salveris better — what exactly didn't resonate or remained unclear?"},
+            "churn_func": {"ru": "Один честный ответ поможет сделать Salveris лучше — чего именно не хватило?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — was genau hat gefehlt?", "en": "One honest answer helps make Salveris better — what exactly was missing?"},
+            "churn_other": {"ru": "Один честный ответ поможет сделать Salveris лучше — что именно не сработало для тебя?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — was genau hat für dich nicht funktioniert?", "en": "One honest answer helps make Salveris better — what exactly didn't work for you?"},
         }
         q = questions.get(data, {})
         compass_state[user_id] = {"stage": "churn_answer", "reason": data}
