@@ -993,8 +993,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 try:
                     import asyncio
                     resp = await asyncio.to_thread(lambda: client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 1200), system=p, messages=[{"role": "user", "content": "Напиши"}]))
-                    txt = clean_text(resp.content[0].text)
-                    print(f"CLAUDE RESP len={len(txt)}: {txt[:50]}", flush=True)
+                    raw = resp.content[0].text if resp.content else None
+                    print(f"RAW: {str(raw)[:100]}", flush=True)
+                    txt = clean_text(raw) if raw else None
+                    print(f"TXT: {str(txt)[:50]}", flush=True)
                     if txt:
                         await context.bot.send_message(user_id, txt, parse_mode="HTML")
                 except Exception as e:
