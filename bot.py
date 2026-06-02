@@ -1653,6 +1653,7 @@ async def compass_yn_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
+    print(f"MSG from {user_id}: {user_text[:50]}", flush=True)
     user = get_user(user_id)
     lang = user.get("lang", "ru") if user else "ru"
 
