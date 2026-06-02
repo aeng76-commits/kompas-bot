@@ -2554,7 +2554,9 @@ async def send_daily_messages(context):
         cur2.close()
         conn2.close()
         for row in all_users:
-            uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
+            row_data = list(row)
+            uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row_data[:9]
+            remind_at = row_data[9] if len(row_data) > 9 else None
             user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
             if is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today):
                 continue
@@ -2800,12 +2802,10 @@ async def send_daily_messages(context):
 
             # Напоминание тем кто попросил
             try:
-                remind_at = remind_at if True else None
                 if remind_at:
-                    import datetime
-                    today = datetime.date.today()
-                    remind_date = remind_at if isinstance(remind_at, datetime.date) else remind_at
-                    if remind_date == today:
+                    today_date = dt2.date.today()
+                    remind_date = remind_at
+                    if remind_date == today_date:
                         gender_val = gender if True else "f"
                         remind_msg = {
                             "ru": name + ", ты просил" + ("а" if gender_val=="f" else "") + " напомнить о Salveris 🌟\n\nГотов" + ("а" if gender_val=="f" else "") + " попробовать снова?",
