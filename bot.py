@@ -1654,6 +1654,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
     user = get_user(user_id)
+    print(f"USER: {user.get('name') if user else None}", flush=True)
     lang = user.get("lang", "ru") if user else "ru"
 
     if not user or not user.get("agreed"):
@@ -1661,6 +1662,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     db_session, db_compass = get_session(user_id)
+    print(f"SESSION: {db_session}", flush=True)
     if not isinstance(db_session, list):
         db_session = []
     user_sessions[user_id] = db_session
@@ -1669,6 +1671,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Проверяем change_name и change_date ДО добавления в сессию
     session_marker = user_sessions[user_id][0].get("content") if user_sessions.get(user_id) and user_sessions[user_id] else None
+    print(f"MARKER: {session_marker}", flush=True)
 
     if session_marker == "change_name":
         save_user(user_id, name=user_text.strip(), name_changes=1)
