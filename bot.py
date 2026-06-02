@@ -2669,22 +2669,31 @@ async def send_daily_messages(context):
             ctx = build_profile_context(user)
             mi = ctx["mi"]
             model_name = mi.get("name", "") if isinstance(mi, dict) else ""
+            model_profile = mi.get("profile", "") if isinstance(mi, dict) else ""
             model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
             lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
             g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
+            about_parts = []
+            if user_obj.get("about_work"): about_parts.append("Работа: " + user_obj["about_work"])
+            if user_obj.get("about_finance"): about_parts.append("Финансы: " + user_obj["about_finance"])
+            if user_obj.get("about_relations"): about_parts.append("Отношения: " + user_obj["about_relations"])
+            if user_obj.get("about_personal"): about_parts.append("Личное: " + user_obj["about_personal"])
+            about_block = ("\n\nО человеке:\n" + "\n".join(about_parts)) if about_parts else ""
 
             sys1 = f"""{lf}
 Ты ассистент Salveris. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
+{model_profile}
 ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
 ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
-ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}
+ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
 
 Напиши ровно 3 рекомендации на сегодня для {name}.
 Начни с тега {"<b>🌿 Рекомендации на сегодня</b>" if lang=="ru" else ("<b>🌿 Empfehlungen für heute</b>" if lang=="de" else "<b>🌿 Recommendations for Today</b>")}.
-Обращайся к {name} по имени хотя бы раз. Учитывай все три периода вместе.
-Формат: 1. 2. 3. — каждый пункт 1-2 предложения, конкретно и применимо прямо сегодня.
+Учитывай модель мышления, все три периода и данные о человеке.
+Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, конкретно и применимо прямо сегодня.
+ЗАПРЕЩЕНО: сложные составные предложения, "который/которая/которое", поучительный тон.
 ТЫ. {g}. Без markdown звёздочек."""
 
             sys2 = f"""{lf}
@@ -2694,12 +2703,13 @@ async def send_daily_messages(context):
 РИСКИ МОДЕЛИ: {model_risks}
 ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
 ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
-ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}
+ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
 
 Напиши ровно 3 риска на сегодня для {name}.
 Начни с тега {"<b>🔺 Риски на сегодня</b>" if lang=="ru" else ("<b>🔺 Risiken für heute</b>" if lang=="de" else "<b>🔺 Risks for Today</b>")}.
-Обращайся к {name} по имени хотя бы раз. Учитывай все три периода вместе.
-Формат: 1. 2. 3. — каждый пункт 1-2 предложения, мягко и конкретно.
+Учитывай модель мышления, все три периода и данные о человеке.
+Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, мягко и конкретно.
+ЗАПРЕЩЕНО: сложные составные предложения, "который/которая/которое", поучительный тон.
 ТЫ. {g}. Без markdown звёздочек."""
 
             r1 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys1, messages=[{"role": "user", "content": "Напиши"}])
