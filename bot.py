@@ -1988,7 +1988,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Если нет активной сессии — показываем меню
+    print(f"SHOW_MENU for {user_id} lang={lang}", flush=True)
     await show_menu(context, user_id, lang)
+    print(f"SHOW_MENU done", flush=True)
 
 async def my_ref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
