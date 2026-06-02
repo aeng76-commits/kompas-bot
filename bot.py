@@ -963,6 +963,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     lang = user.get("lang", "ru") if user else "ru"
     data = query.data
+    print(f"MENU_CB: {user_id} data={data}", flush=True)
 
     no_date_msg = {"ru": "Сначала введи дату рождения — напиши /start", "de": "Bitte gib dein Geburtsdatum ein — schreibe /start", "en": "Please enter your birthdate — write /start"}
     upsell_msg = {"ru": "Это лишь начало. Полный анализ — в подписке.", "de": "Das ist nur der Anfang. Vollständige Analyse mit Abonnement.", "en": "This is just the beginning. Full analysis with subscription."}
