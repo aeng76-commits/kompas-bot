@@ -991,6 +991,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         await context.bot.send_message(user_id, txt, parse_mode="HTML")
                 except Exception as e:
                     print(f"Paid analysis error: {e}", flush=True)
+            await show_menu(context, user_id, lang)
         else:
             # Триал: каждый раздел 1 раз за весь триал, полное качество
             if not check_free_limit(user_id, section):
