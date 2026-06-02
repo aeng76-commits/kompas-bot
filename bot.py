@@ -238,7 +238,9 @@ def call_claude(model, max_tokens, system, messages, retries=2):
 def clean_text(text):
     text = re.sub(r'#{1,6}\s', '', text)
     text = re.sub(r'__(.+?)__', r'\1', text)
-    return text.strip()
+    text = re.sub(r'__(.+?)__', r'\1', text)
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
 
 def split_message(text, max_length=4000):
     text = clean_text(text)
@@ -1078,7 +1080,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             state["about_step"] = "relations"
             compass_state[user_id] = state
             save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
-            q = {"ru": "💑 Отношения\n\nРасскажи о своих близких отношениях — что сейчас радует и что даётся непросто?", "de": "💑 Beziehungen\n\nErzähl mir von deinen engen Beziehungen — was freut dich gerade und was fällt schwer?", "en": "💑 Relationships\n\nTell me about your close relationships — what makes you happy right now and what is challenging?"}
+            q = {"ru": "💑 Отношения\n\nРасскажи о своих отношениях — партнёр, семья, друзья, коллеги. Что сейчас радует и что даётся непросто в общении с близкими и окружением?", "de": "💑 Beziehungen\n\nErzähl mir von deinen Beziehungen — Partner, Familie, Freunde, Kollegen. Was freut dich gerade und was fällt schwer im Umgang mit deinem Umfeld?", "en": "💑 Relationships\n\nTell me about your relationships — partner, family, friends, colleagues. What makes you happy right now and what is challenging in your interactions with others?"}
             skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
             await query.edit_message_text(q.get(lang, q["ru"]), reply_markup=skip)
         elif about_step == "relations":
@@ -1845,7 +1847,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 state["about_step"] = "relations"
                 compass_state[user_id] = state
                 save_session(user_id, session=user_sessions.get(user_id, []), compass=state)
-                q = {"ru": "💑 Отношения\n\nРасскажи о своих близких отношениях — что сейчас радует и что даётся непросто?", "de": "💑 Beziehungen\n\nErzähl mir von deinen engen Beziehungen — was freut dich gerade und was fällt schwer?", "en": "💑 Relationships\n\nTell me about your close relationships — what makes you happy right now and what is challenging?"}
+                q = {"ru": "💑 Отношения\n\nРасскажи о своих отношениях — партнёр, семья, друзья, коллеги. Что сейчас радует и что даётся непросто в общении с близкими и окружением?", "de": "💑 Beziehungen\n\nErzähl mir von deinen Beziehungen — Partner, Familie, Freunde, Kollegen. Was freut dich gerade und was fällt schwer im Umgang mit deinem Umfeld?", "en": "💑 Relationships\n\nTell me about your relationships — partner, family, friends, colleagues. What makes you happy right now and what is challenging in your interactions with others?"}
                 skip = InlineKeyboardMarkup([[InlineKeyboardButton("⏭️ Пропустить" if lang=="ru" else ("⏭️ Überspringen" if lang=="de" else "⏭️ Skip"), callback_data="about_skip_step")]])
                 await update.message.reply_text(q.get(lang, q["ru"]), reply_markup=skip)
             elif about_step == "relations":
