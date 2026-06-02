@@ -1567,6 +1567,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(f"⭐ {descriptions[lang]['6m']}", callback_data="pay_6m")],
             [InlineKeyboardButton(descriptions[lang]["12m"], callback_data="pay_12m")],
             [InlineKeyboardButton("🇷🇺 Оплата из России" if lang=="ru" else ("🇷🇺 Zahlung aus Russland" if lang=="de" else "🇷🇺 Payment from Russia"), url="https://t.me/aeng0")],
+            [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
         ]
         await query.edit_message_text(header.get(lang, header["ru"]), reply_markup=InlineKeyboardMarkup(btns))
 
