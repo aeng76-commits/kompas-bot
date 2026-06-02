@@ -1697,6 +1697,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_sessions[user_id].append({"role": "user", "content": user_text})
 
+    print(f"COMPASS_STATE: {compass_state.get(user_id)}", flush=True)
     # Компас: режим диалога
     if user_id in compass_state and compass_state[user_id]:
         state = compass_state[user_id]
