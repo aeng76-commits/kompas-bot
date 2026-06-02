@@ -241,7 +241,8 @@ def clean_text(text):
     text = re.sub(r'__(.+?)__', r'\1', text)
     text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
     text = re.sub(r'\*(.+?)\*', r'\1', text)
-
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
+    return text.strip()
 def split_message(text, max_length=4000):
     text = clean_text(text)
     if "===БЛОК===" in text:
