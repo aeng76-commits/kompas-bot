@@ -993,10 +993,13 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 try:
                     resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 1200), system=p, messages=[{"role": "user", "content": "Напиши"}])
                     txt = clean_text(resp.content[0].text)
+                    print(f"CLAUDE RESP len={len(txt)}: {txt[:50]}", flush=True)
                     if txt:
                         await context.bot.send_message(user_id, txt, parse_mode="HTML")
                 except Exception as e:
+                    import traceback
                     print(f"Paid analysis error: {e}", flush=True)
+                    traceback.print_exc()
             await show_menu(context, user_id, lang)
         else:
             # Триал: каждый раздел 1 раз за весь триал, полное качество
