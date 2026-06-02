@@ -2527,6 +2527,81 @@ async def send_birthday_messages(context):
             except Exception as e:
                 print(f"Birthday error {uid}: {e}", flush=True)
 
+async def send_monthly_overview(context):
+    import datetime as dt2
+    today = dt2.datetime.now()
+    if today.day != 1:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, about_work, about_finance, about_relations, about_personal FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    users_list = cur.fetchall()
+    cur.close()
+    conn.close()
+    for row in users_list:
+        uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row[:9]
+        about_work = row[9] if len(row) > 9 else None
+        about_finance = row[10] if len(row) > 10 else None
+        about_relations = row[11] if len(row) > 11 else None
+        about_personal = row[12] if len(row) > 12 else None
+        if not day:
+            continue
+        user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
+        if not (is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today)):
+            continue
+        try:
+            import data as D
+            m = D.get_model(day)
+            mi = D.MODELS.get(m, {})
+            py = D.get_year(day, month, today.year)
+            pm = D.get_month(py, today.month)
+            year_text = D.YEARS.get(py, "")
+            month_text = D.MONTHS.get(pm, "")
+            model_name = mi.get("name", "") if isinstance(mi, dict) else ""
+            model_profile = mi.get("profile", "") if isinstance(mi, dict) else ""
+            model_strengths = mi.get("strengths", "") if isinstance(mi, dict) else ""
+            model_risks_text = mi.get("risks", "") if isinstance(mi, dict) else ""
+            lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
+            g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
+            about_parts = []
+            if about_work: about_parts.append("Работа: " + about_work)
+            if about_finance: about_parts.append("Финансы: " + about_finance)
+            if about_relations: about_parts.append("Отношения: " + about_relations)
+            if about_personal: about_parts.append("Личное: " + about_personal)
+            about_block = ("\n\nО человеке:\n" + "\n".join(about_parts)) if about_parts else ""
+            month_names = {"ru": ["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"],
+                          "de": ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
+                          "en": ["January","February","March","April","May","June","July","August","September","October","November","December"]}
+            month_name = month_names.get(lang, month_names["ru"])[today.month - 1]
+            month_sys = f"""{lf}
+Ты ассистент Salveris. Пишешь обзор на этот месяц для {name}.
+{g}. День рождения: {day}.
+
+МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
+{model_profile}
+Сильные стороны: {model_strengths}
+Риски модели: {model_risks_text}
+
+ЛИЧНЫЙ ГОД — главный вектор:
+{year_text}
+
+ЛИЧНЫЙ МЕСЯЦ — тактика:
+{month_text}{about_block}
+
+Напиши обзор месяца в трёх блоках:
+1. О чём этот месяц — 2-3 предложения через призму модели мышления и личного месяца.
+2. 3-4 рекомендации — конкретно, каждая отдельным абзацем.
+3. 3-4 момента на которые стоит обратить внимание — мягко, каждый отдельным абзацем.
+
+ЗАПРЕЩЕНО: клише, числа периодов, markdown звёздочки, вопросы в конце, поучительный тон.
+ТЫ. {g}. Тепло и конкретно."""
+            resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=1500, system=month_sys, messages=[{"role": "user", "content": "Напиши обзор"}])
+            header = {"ru": f"🗓 Обзор на этот месяц", "de": f"🗓 Monatsübersicht", "en": f"🗓 Monthly Overview"}
+            await context.bot.send_message(uid, header.get(lang, header["ru"]))
+            await context.bot.send_message(uid, clean_text(resp.content[0].text))
+        except Exception as e:
+            print(f"Monthly overview error {uid}: {e}", flush=True)
+
 async def send_daily_messages(context):
     try:
         import datetime as dt2
@@ -2879,6 +2954,7 @@ if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     import datetime as dt
     app.job_queue.run_daily(send_birthday_messages, time=dt.time(hour=5, minute=30, tzinfo=dt.timezone.utc))
+    app.job_queue.run_daily(send_monthly_overview, time=dt.time(hour=8, minute=0, tzinfo=dt.timezone.utc))
     app.job_queue.run_daily(send_daily_messages, time=dt.time(hour=6, minute=0, tzinfo=dt.timezone.utc))
 
     # При старте проверяем — если рассылка сегодня ещё не отправлялась — отправляем
