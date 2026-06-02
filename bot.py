@@ -982,6 +982,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, no_date_msg.get(lang, no_date_msg["ru"]))
             return
+        print(f"IS_PAID: {is_paid(user)}", flush=True)
         if is_paid(user):
             log_action(user_id, section, "paid_open", lang)
             prompts = get_profile_prompts_list(lang, user, section)
