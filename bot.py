@@ -2004,6 +2004,27 @@ async def my_ref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     await update.message.reply_text(msgs.get(lang, msgs["ru"]))
 
+async def admin_refs(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT u.name, u.user_id, r.name, r.user_id FROM users u JOIN users r ON u.referred_by = r.user_id WHERE u.referred_by IS NOT NULL ORDER BY r.name")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    if not rows:
+        await update.message.reply_text("Рефералов пока нет.")
+        return
+    result = "Реферальная статистика:\n"
+    current_ref = None
+    for name, uid, ref_name, ref_id in rows:
+        if ref_name != current_ref:
+            current_ref = ref_name
+            result += "\n" + str(ref_name) + " (" + str(ref_id) + "):\n"
+        result += "  -> " + str(name) + " (" + str(uid) + ")\n"
+    await update.message.reply_text(result[:4000])
+
 async def admin_makeref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -2982,6 +3003,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("makeref", admin_makeref))
     app.add_handler(CommandHandler("users", admin_users))
     app.add_handler(CommandHandler("active", admin_active))
+    app.add_handler(CommandHandler("refs", admin_refs))
     app.add_handler(CommandHandler("reset_user", admin_reset))
     app.add_handler(CommandHandler("grant_access", admin_grant))
     app.add_handler(CallbackQueryHandler(age_cb, pattern="^age_"))
