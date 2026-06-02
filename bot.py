@@ -2621,48 +2621,6 @@ async def send_daily_messages(context):
     cur.close()
     conn.close()
     today = dt2.datetime.now()
-    # Обзор месяца 1-го числа
-    if today.day == 1:
-        for row in users_list:
-            uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
-            if not day:
-                continue
-            user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
-            if not (is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today)):
-                continue
-            try:
-                ctx = build_profile_context(user_obj)
-                lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
-                g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
-                month_sys = f"""{lf}
-Ты ассистент Salveris. Сегодня 1-е число — начало нового месяца.
-Имя: {name}. {g}.
-Модель мышления: {ctx["mi"]}
-Личный месяц: {ctx["month_text"]}
-Личный год: {ctx["year_text"][:200]}
-
-Напиши обзор месяца в трёх блоках:
-
-1. О чём этот месяц — 2-3 предложения. Суть месяца через призму модели мышления и личного месяца.
-
-2. 4-5 рекомендаций — как эффективно прожить этот месяц. Каждая рекомендация — отдельный абзац, конкретно и применимо.
-
-3. 4-5 рисков — что может мешать в этом месяце. Каждый риск — отдельный абзац, мягко и с пониманием.
-
-ЗАПРЕЩЕНО: клише, общие слова, упоминание чисел периодов, markdown звёздочки.
-ТЫ. {g}. Тепло и конкретно."""
-
-                resp = client.messages.create(
-                    model="claude-sonnet-4-6", max_tokens=1200,
-                    system=month_sys,
-                    messages=[{{"role": "user", "content": "Напиши обзор месяца"}}]
-                )
-                header = {{"ru": "🗓 Обзор месяца", "de": "🗓 Monatsübersicht", "en": "🗓 Monthly Overview"}}
-                await context.bot.send_message(uid, header.get(lang, header["ru"]))
-                await context.bot.send_message(uid, clean_text(resp.content[0].text))
-            except Exception as e:
-                print(f"Monthly overview error {{uid}}: {{e}}", flush=True)
-
     # Напоминание неактивным 1-го числа
     if today.day == 1:
         conn2 = get_db()
