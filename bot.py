@@ -986,8 +986,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if is_paid(user):
             log_action(user_id, section, "paid_open", lang)
             prompts = get_profile_prompts_list(lang, user, section)
+            print(f"PROMPTS COUNT: {len(prompts)}", flush=True)
             tokens = {"me": 1500, "year": 1500, "month": 1200, "day": 1000}
             for p in prompts:
+                print(f"CALLING CLAUDE...", flush=True)
                 try:
                     resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 1200), system=p, messages=[{"role": "user", "content": "Напиши"}])
                     txt = clean_text(resp.content[0].text)
