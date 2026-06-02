@@ -2742,7 +2742,7 @@ async def send_daily_messages(context):
             if user_trial_started := trial_started_at:
                 if hasattr(user_trial_started, 'date'):
                     trial_end = user_trial_started + datetime.timedelta(hours=72)
-                if trial_end and not is_paid_flag:
+                if trial_end and not is_paid(user_obj):
                     hours_since_end = (datetime.datetime.now(datetime.timezone.utc) - trial_end.replace(tzinfo=datetime.timezone.utc)).total_seconds() / 3600
                     if 24 <= hours_since_end < 48:
                         gender = gender if True else "f"
@@ -2777,12 +2777,11 @@ async def send_daily_messages(context):
                 pass
             # Опрос через 24ч после окончания платной подписки
             try:
-                import datetime
-                paid_until = paid_until if len(user_data) > 8 else None
-                if paid_until and not is_paid_flag:
-                    if hasattr(paid_until, 'tzinfo') and paid_until.tzinfo is None:
-                        paid_until = paid_until.replace(tzinfo=datetime.timezone.utc)
-                    hours_since_end = (datetime.datetime.now(datetime.timezone.utc) - paid_until).total_seconds() / 3600
+                paid_until_val = paid_until
+                if paid_until_val and not is_paid(user_obj):
+                    if hasattr(paid_until_val, 'tzinfo') and paid_until_val.tzinfo is None:
+                        paid_until_val = paid_until_val.replace(tzinfo=dt2.timezone.utc)
+                    hours_since_end = (dt2.datetime.now(dt2.timezone.utc) - paid_until_val).total_seconds() / 3600
                     if 24 <= hours_since_end < 48:
                         gender_val = gender if True else "f"
                         paid_churn_msg = {
