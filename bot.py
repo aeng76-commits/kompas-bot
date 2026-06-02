@@ -2292,6 +2292,37 @@ async def admin_send_monthly(update: Update, context: ContextTypes.DEFAULT_TYPE)
             errors += 1
     await update.message.reply_text(f"✅ Отправлено: {sent}, ошибок: {errors}")
 
+async def admin_active(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    import datetime as dt2
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, name, lang, trial_started_at, paid_until FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE ORDER BY trial_started_at DESC")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    now = dt2.datetime.now()
+    lines = []
+    paid_count = 0
+    trial_count = 0
+    for uid, name, lang, trial_started_at, paid_until in rows:
+        user_obj = {"trial_started_at": trial_started_at, "paid_until": paid_until}
+        if paid_until and paid_until.replace(tzinfo=None) > now:
+            status = f"Платный до {paid_until.strftime('%d.%m.%Y')}"
+            paid_count += 1
+        elif trial_started_at and (now - trial_started_at.replace(tzinfo=None)).total_seconds() < 259200:
+            hours_left = round(72 - (now - trial_started_at.replace(tzinfo=None)).total_seconds() / 3600)
+            status = f"Триал {hours_left}ч"
+            trial_count += 1
+        else:
+            continue
+        lines.append(f"{name} ({lang}) — {status} — {uid}")
+    total = paid_count + trial_count
+    header = f"✅ Активных: {total} (платных: {paid_count}, триал: {trial_count})\n\n"
+    msg = header + "\n".join(lines) if lines else header + "Нет активных пользователей"
+    await update.message.reply_text(msg[:4000])
+
 async def admin_export(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -2950,6 +2981,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("myref", my_ref))
     app.add_handler(CommandHandler("makeref", admin_makeref))
     app.add_handler(CommandHandler("users", admin_users))
+    app.add_handler(CommandHandler("active", admin_active))
     app.add_handler(CommandHandler("reset_user", admin_reset))
     app.add_handler(CommandHandler("grant_access", admin_grant))
     app.add_handler(CallbackQueryHandler(age_cb, pattern="^age_"))
