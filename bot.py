@@ -964,7 +964,6 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     lang = user.get("lang", "ru") if user else "ru"
     data = query.data
-    print(f"MENU_CB: {user_id} data={data}", flush=True)
 
     no_date_msg = {"ru": "Сначала введи дату рождения — напиши /start", "de": "Bitte gib dein Geburtsdatum ein — schreibe /start", "en": "Please enter your birthdate — write /start"}
     upsell_msg = {"ru": "Это лишь начало. Полный анализ — в подписке.", "de": "Das ist nur der Anfang. Vollständige Analyse mit Abonnement.", "en": "This is just the beginning. Full analysis with subscription."}
@@ -983,21 +982,15 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not user or not user.get("day"):
             await context.bot.send_message(user_id, no_date_msg.get(lang, no_date_msg["ru"]))
             return
-        print(f"IS_PAID: {is_paid(user)}", flush=True)
         if is_paid(user):
             log_action(user_id, section, "paid_open", lang)
             prompts = get_profile_prompts_list(lang, user, section)
-            print(f"PROMPTS COUNT: {len(prompts)}", flush=True)
             tokens = {"me": 1500, "year": 1500, "month": 1200, "day": 1000}
             for p in prompts:
-                print(f"CALLING CLAUDE...", flush=True)
                 try:
                     import asyncio
                     resp = await asyncio.to_thread(lambda: client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 1200), system=p, messages=[{"role": "user", "content": "Напиши"}]))
-                    raw = resp.content[0].text if resp.content else None
-                    print(f"RAW: {str(raw)[:100]}", flush=True)
-                    txt = clean_text(raw) if raw else None
-                    print(f"TXT: {str(txt)[:50]}", flush=True)
+                    txt = clean_text(resp.content[0].text)
                     if txt:
                         await context.bot.send_message(user_id, txt, parse_mode="HTML")
                 except Exception as e:
@@ -1665,7 +1658,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
     user = get_user(user_id)
-    print(f"USER: {user.get('name') if user else None}", flush=True)
     lang = user.get("lang", "ru") if user else "ru"
 
     if not user or not user.get("agreed"):
@@ -1673,7 +1665,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     db_session, db_compass = get_session(user_id)
-    print(f"SESSION: {db_session}", flush=True)
     if not isinstance(db_session, list):
         db_session = []
     user_sessions[user_id] = db_session
@@ -1682,7 +1673,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Проверяем change_name и change_date ДО добавления в сессию
     session_marker = user_sessions[user_id][0].get("content") if user_sessions.get(user_id) and user_sessions[user_id] else None
-    print(f"MARKER: {session_marker}", flush=True)
 
     if session_marker == "change_name":
         save_user(user_id, name=user_text.strip(), name_changes=1)
@@ -1708,7 +1698,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_sessions[user_id].append({"role": "user", "content": user_text})
 
-    print(f"COMPASS_STATE: {compass_state.get(user_id)}", flush=True)
     # Компас: режим диалога
     if user_id in compass_state and compass_state[user_id]:
         state = compass_state[user_id]
@@ -2000,9 +1989,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Если нет активной сессии — показываем меню
-    print(f"SHOW_MENU for {user_id} lang={lang}", flush=True)
     await show_menu(context, user_id, lang)
-    print(f"SHOW_MENU done", flush=True)
 
 async def my_ref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
