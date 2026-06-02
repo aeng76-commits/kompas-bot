@@ -2251,7 +2251,7 @@ async def admin_send_monthly(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text("Отправляю обзор месяца...")
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, remind_at FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, remind_at, about_work, about_finance, about_relations, about_personal FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
     users_list = cur.fetchall()
     cur.close()
     conn.close()
@@ -2498,7 +2498,7 @@ async def send_daily_messages(context):
         print(f"Settings save error: {e}", flush=True)
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, remind_at FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
+    cur.execute("SELECT user_id, name, birth_day, birth_month, birth_year, lang, gender, trial_started_at, paid_until, remind_at, about_work, about_finance, about_relations, about_personal FROM users WHERE birth_day IS NOT NULL AND agreed=TRUE")
     users_list = cur.fetchall()
     cur.close()
     conn.close()
@@ -2557,7 +2557,11 @@ async def send_daily_messages(context):
             row_data = list(row)
             uid, name, day, month, year, lang, gender, trial_started_at, paid_until = row_data[:9]
             remind_at = row_data[9] if len(row_data) > 9 else None
-            user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until}
+            about_work = row_data[10] if len(row_data) > 10 else None
+            about_finance = row_data[11] if len(row_data) > 11 else None
+            about_relations = row_data[12] if len(row_data) > 12 else None
+            about_personal = row_data[13] if len(row_data) > 13 else None
+            user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f", "trial_started_at": trial_started_at, "paid_until": paid_until, "about_work": about_work, "about_finance": about_finance, "about_relations": about_relations, "about_personal": about_personal}
             if is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today):
                 continue
             if not day:
