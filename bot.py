@@ -991,7 +991,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             for p in prompts:
                 print(f"CALLING CLAUDE...", flush=True)
                 try:
-                    resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 1200), system=p, messages=[{"role": "user", "content": "Напиши"}])
+                    import asyncio
+                    resp = await asyncio.to_thread(client.messages.create, model="claude-sonnet-4-6", max_tokens=tokens.get(section, 1200), system=p, messages=[{"role": "user", "content": "Напиши"}])
                     txt = clean_text(resp.content[0].text)
                     print(f"CLAUDE RESP len={len(txt)}: {txt[:50]}", flush=True)
                     if txt:
