@@ -2814,37 +2814,30 @@ async def send_daily_messages(context):
             if user_obj.get("about_personal"): about_parts.append("Личное: " + user_obj["about_personal"])
             about_block = ("\n\nО человеке:\n" + "\n".join(about_parts)) if about_parts else ""
 
+            sys_intro = {"ru": f"Ты ассистент Salveris. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.", "de": f"Du bist Salveris-Assistent. Du schreibst eine Morgennachricht für {name}. Heute ist {ctx['today']}.", "en": f"You are Salveris assistant. You are writing a morning message for {name}. Today is {ctx['today']}."}
+            sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
             sys1 = f"""{lf}
-Ты ассистент Salveris. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.
+{sys_intro.get(lang, sys_intro["ru"])}
 
-МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
+THINKING MODEL: {model_name}
 {model_profile}
-ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
-ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
-ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
+PERSONAL YEAR: {ctx['year_text'][:200]}
+PERSONAL MONTH: {ctx['month_text'][:150]}
+PERSONAL DAY: {ctx['day_text']}{about_block}
 
-Напиши ровно 3 рекомендации на сегодня для {name}.
-Начни с тега {"<b>🌿 Рекомендации на сегодня</b>" if lang=="ru" else ("<b>🌿 Empfehlungen für heute</b>" if lang=="de" else "<b>🌿 Recommendations for Today</b>")}.
-Учитывай модель мышления, все три периода и данные о человеке.
-Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, конкретно и применимо прямо сегодня.
-ЗАПРЕЩЕНО: сложные составные предложения, "который/которая/которое", поучительный тон.
-ТЫ. {g}. Без markdown звёздочек."""
+{sys_rec.get(lang, sys_rec["ru"])}"""
 
+            sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, мягко и конкретно. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
             sys2 = f"""{lf}
-Ты ассистент Salveris. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.
+{sys_intro.get(lang, sys_intro["ru"])}
 
-МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
-РИСКИ МОДЕЛИ: {model_risks}
-ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
-ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
-ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
+THINKING MODEL: {model_name}
+MODEL RISKS: {model_risks}
+PERSONAL YEAR: {ctx['year_text'][:200]}
+PERSONAL MONTH: {ctx['month_text'][:150]}
+PERSONAL DAY: {ctx['day_text']}{about_block}
 
-Напиши ровно 3 риска на сегодня для {name}.
-Начни с тега {"<b>🔺 Риски на сегодня</b>" if lang=="ru" else ("<b>🔺 Risiken für heute</b>" if lang=="de" else "<b>🔺 Risks for Today</b>")}.
-Учитывай модель мышления, все три периода и данные о человеке.
-Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, мягко и конкретно.
-ЗАПРЕЩЕНО: сложные составные предложения, "который/которая/которое", поучительный тон.
-ТЫ. {g}. Без markdown звёздочек."""
+{sys_risk.get(lang, sys_risk["ru"])}"""
 
             r1 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys1, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r1.content[0].text), parse_mode="HTML")
@@ -2857,29 +2850,15 @@ async def send_daily_messages(context):
             ud_num, has_zero = get_universal_day(dt2.datetime.now(dt2.timezone.utc))
             ud_base = UNIVERSAL_DAY_TIPS.get(ud_num, {}).get(lang, "")
             ud_zero = UNIVERSAL_DAY_TIPS.get(0, {}).get(lang, "") if has_zero else ""
+            sys_tip = {"ru": f"Напиши один короткий практический совет — 1-2 предложения. Начни с тега <b>📋 Совет дня</b>. Как скорректировать действия личного дня с учётом общего фона. ПРАВИЛА: никаких чисел периодов, максимум 2 предложения. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe einen kurzen praktischen Tipp — 1-2 Sätze. Beginne mit dem Tag <b>📋 Tipp des Tages</b>. Wie die Aktivitäten des persönlichen Tages im Einklang mit dem allgemeinen Hintergrund angepasst werden können. REGELN: keine Periodenzahlen, maximal 2 Sätze. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write one short practical tip — 1-2 sentences. Start with the tag <b>📋 Daily Tip</b>. How to adjust the activities of the personal day considering the general background. RULES: no period numbers, maximum 2 sentences. YOU. {g}. No markdown asterisks."}
             sys3 = f"""{lf}
-Ты ассистент Salveris. Пишешь короткий совет дня для {name}.
+{sys_intro.get(lang, sys_intro["ru"])}
 
-ЛИЧНЫЙ ДЕНЬ — что планирует человек сегодня: {ctx['day_text']}
-ОБЩИЙ ФОН ДНЯ — энергия для всех сегодня: {ud_base}
-{"ОСОБОЕ УСЛОВИЕ: " + ud_zero if ud_zero else ""}
+PERSONAL DAY: {ctx['day_text']}
+GENERAL DAY ENERGY: {ud_base}
+{"SPECIAL CONDITION: " + ud_zero if ud_zero else ""}
 
-Напиши один короткий практический совет — 1-2 предложения.
-Начни с тега {"<b>📋 Совет дня</b>" if lang=="ru" else ("<b>📋 Tipp des Tages</b>" if lang=="de" else "<b>📋 Daily Tip</b>")}.
-ЗАДАЧА: дай один короткий практический совет — как скорректировать действия личного дня с учётом общего фона.
-
-ПРАВИЛА:
-- Никаких чисел периодов
-- Если общий фон не рекомендует важные действия — скажи перенести на другой день
-- Не противоречь сам себе в одном предложении
-- Максимум 2 предложения, коротко и по делу
-
-ПРИМЕРЫ ПРАВИЛЬНОГО СТИЛЯ:
-- "Сегодня хороший день для активного общения и продвижения договорённостей — но подписание документов и финансовые решения лучше перенести на другой день."
-- "Используй сегодняшнюю энергию чтобы завершить старые договорённости — не начинай новых переговоров."
-- "Перед принятием важных решений хорошо всё проанализируй — если есть возможность перенеси запуск на завтра."
-
-ТЫ. {g}. Без markdown звёздочек."""
+{sys_tip.get(lang, sys_tip["ru"])}"""
             r3 = client.messages.create(model="claude-sonnet-4-6", max_tokens=200, system=sys3, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r3.content[0].text), parse_mode="HTML")
 
