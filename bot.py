@@ -2805,7 +2805,7 @@ async def send_daily_messages(context):
             model_name = mi.get("name", "") if isinstance(mi, dict) else ""
             model_profile = mi.get("profile", "") if isinstance(mi, dict) else ""
             model_risks = mi.get("risks", "") if isinstance(mi, dict) else ""
-            lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
+            lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE AUSSCHLIESSLICH AUF DEUTSCH. KEIN RUSSISCH. KEIN ENGLISCH.", "en": "RESPOND EXCLUSIVELY IN ENGLISH. NO RUSSIAN. NO GERMAN. EVERY SINGLE SENTENCE MUST BE IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
             g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
             about_parts = []
             if user_obj.get("about_work"): about_parts.append("Работа: " + user_obj["about_work"])
