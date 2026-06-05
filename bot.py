@@ -2825,7 +2825,9 @@ PERSONAL YEAR: {ctx['year_text'][:200]}
 PERSONAL MONTH: {ctx['month_text'][:150]}
 PERSONAL DAY: {ctx['day_text']}{about_block}
 
-{sys_rec.get(lang, sys_rec["ru"])}"""
+{sys_rec.get(lang, sys_rec["ru"])}
+
+{lf}"""
 
             sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, мягко и конкретно. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
             sys2 = f"""{lf}
@@ -2837,7 +2839,9 @@ PERSONAL YEAR: {ctx['year_text'][:200]}
 PERSONAL MONTH: {ctx['month_text'][:150]}
 PERSONAL DAY: {ctx['day_text']}{about_block}
 
-{sys_risk.get(lang, sys_risk["ru"])}"""
+{sys_risk.get(lang, sys_risk["ru"])}
+
+{lf}"""
 
             r1 = client.messages.create(model="claude-sonnet-4-6", max_tokens=500, system=sys1, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r1.content[0].text), parse_mode="HTML")
@@ -2858,7 +2862,9 @@ PERSONAL DAY: {ctx['day_text']}
 GENERAL DAY ENERGY: {ud_base}
 {"SPECIAL CONDITION: " + ud_zero if ud_zero else ""}
 
-{sys_tip.get(lang, sys_tip["ru"])}"""
+{sys_tip.get(lang, sys_tip["ru"])}
+
+{lf}"""
             r3 = client.messages.create(model="claude-sonnet-4-6", max_tokens=200, system=sys3, messages=[{"role": "user", "content": "Напиши"}])
             await context.bot.send_message(uid, clean_text(r3.content[0].text), parse_mode="HTML")
 
