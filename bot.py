@@ -762,49 +762,49 @@ def get_universal_day(date):
 
 UNIVERSAL_DAY_TIPS = {
     1: {
-        "ru": "Хороший день для старта новых проектов, подачи заявлений и регистрации.",
-        "de": "Guter Tag für neue Projekte, Anträge und Registrierungen.",
-        "en": "Good day for starting new projects, submitting applications and registrations."
+        "ru": "Сегодня энергия поддерживает первые шаги и личные инициативы — если есть что-то что давно откладываешь, именно сегодня стоит сдвинуть с места. Финансовые и юридические вопросы лучше оставить на другой день.",
+        "de": "Heute unterstützt die Energie erste Schritte und persönliche Initiativen — wenn du etwas lange aufgeschoben hast, ist heute der richtige Moment. Finanz- und Rechtsfragen besser auf einen anderen Tag verschieben.",
+        "en": "Today's energy supports first steps and personal initiatives — if there's something you've been putting off, today is the right moment to start. Financial and legal matters are better left for another day."
     },
     2: {
-        "ru": "Благоприятный день для переговоров, подписания соглашений и партнёрских встреч.",
-        "de": "Günstiger Tag für Verhandlungen, Vertragsunterzeichnungen und Partnertreffen.",
-        "en": "Favorable day for negotiations, signing agreements and partner meetings."
+        "ru": "Сегодня особенно хорошо идут разговоры где важно найти общий язык — переговоры, деловые встречи, личные договорённости. Избегай давления и ультиматумов: компромисс сейчас принесёт больше чем жёсткая позиция.",
+        "de": "Heute laufen Gespräche besonders gut, bei denen es darum geht, eine gemeinsame Basis zu finden — Verhandlungen, Geschäftstreffen, persönliche Vereinbarungen. Druck und Ultimaten vermeiden: Kompromisse bringen jetzt mehr als eine harte Haltung.",
+        "en": "Today conversations flow especially well when the goal is finding common ground — negotiations, business meetings, personal agreements. Avoid pressure and ultimatums: compromise will bring more today than a rigid position."
     },
     3: {
-        "ru": "Хороший день для деловых встреч, переговоров и получения новой информации.",
-        "de": "Guter Tag für Geschäftstreffen, Verhandlungen und neue Informationen.",
-        "en": "Good day for business meetings, negotiations and getting new information."
+        "ru": "День активного общения и новых контактов — идеи которые сегодня возникнут в разговоре могут оказаться неожиданно ценными. Не торопись принимать решения на основе только что услышанного: сначала переспи с этим.",
+        "de": "Tag aktiver Kommunikation und neuer Kontakte — Ideen die heute im Gespräch entstehen können sich als überraschend wertvoll erweisen. Keine Entscheidungen auf Basis von gerade Gehörtem überstürzen: erst eine Nacht darüber schlafen.",
+        "en": "A day of active communication and new contacts — ideas that come up in conversation today may turn out to be surprisingly valuable. Don't rush to make decisions based on what you just heard: sleep on it first."
     },
     4: {
-        "ru": "Хороший день для анализа, работы с документами и исправления ошибок. Не лучший день для запуска новых проектов.",
-        "de": "Guter Tag für Analysen, Dokumentenarbeit und Fehlerbehebung. Kein guter Tag für neue Projekte.",
-        "en": "Good day for analysis, working with documents and fixing errors. Not the best day for new projects."
+        "ru": "Сегодня хорошо идёт работа с деталями — проверка документов, исправление ошибок, доработка того что уже начато. Запускать что-то новое сейчас не лучшая идея: энергия дня работает на углубление а не на расширение.",
+        "de": "Heute läuft die Arbeit mit Details gut — Dokumentenprüfung, Fehlerbehebung, Weiterentwicklung von bereits Begonnenem. Jetzt etwas Neues zu starten ist keine gute Idee: die Energie des Tages arbeitet auf Vertiefung nicht auf Erweiterung.",
+        "en": "Today is good for working with details — checking documents, fixing errors, refining what's already started. Launching something new is not ideal right now: today's energy works toward deepening rather than expanding."
     },
     5: {
-        "ru": "Благоприятный день для нетворкинга, презентаций и продвижения. Избегай импульсивных финансовых решений.",
-        "de": "Günstiger Tag für Networking, Präsentationen und Werbung. Impulsive Finanzentscheidungen vermeiden.",
-        "en": "Favorable day for networking, presentations and promotion. Avoid impulsive financial decisions."
+        "ru": "Сегодня хорошо работает всё что связано с общением, продвижением и новыми знакомствами. Финансовые решения принятые на импульсе сегодня могут оказаться невыгодными — лучше отложить до завтра.",
+        "de": "Heute funktioniert alles gut was mit Kommunikation, Werbung und neuen Bekanntschaften zu tun hat. Finanzentscheidungen die heute impulsiv getroffen werden könnten sich als unvorteilhaft erweisen — besser bis morgen warten.",
+        "en": "Today works well for everything related to communication, promotion and new connections. Financial decisions made impulsively today may turn out to be disadvantageous — better to wait until tomorrow."
     },
     6: {
-        "ru": "Хороший день для завершения лёгких задач и творческой работы. Не лучший день для крупных финансовых операций.",
-        "de": "Guter Tag für leichte Aufgaben und kreative Arbeit. Kein guter Tag für große Finanztransaktionen.",
-        "en": "Good day for completing light tasks and creative work. Not the best day for major financial transactions."
+        "ru": "День когда стоит уделить внимание тому что уже создано — улучшить, довести до порядка, позаботиться о близких. Крупные сделки и серьёзные финансовые шаги сегодня лучше не форсировать.",
+        "de": "Ein Tag um dem Aufmerksamkeit zu schenken was bereits geschaffen wurde — verbessern, in Ordnung bringen, sich um Nahestehende kümmern. Große Geschäfte und ernsthafte Finanzschritte heute besser nicht forcieren.",
+        "en": "A day to pay attention to what's already been created — improve it, put it in order, take care of those close to you. Major deals and serious financial steps are better not forced today."
     },
     7: {
-        "ru": "День глубокого анализа. Лучше избегать подписания важных документов — перепроверь всё дважды.",
-        "de": "Tag der Tiefenanalyse. Wichtige Dokumente besser nicht unterzeichnen — alles zweimal prüfen.",
-        "en": "Day of deep analysis. Better to avoid signing important documents — double-check everything."
+        "ru": "Сегодня хорошо идут размышления, анализ и работа в одиночестве. Если нужно подписать важный документ или принять серьёзное решение — не торопись, перечитай ещё раз и проверь детали.",
+        "de": "Heute laufen Überlegungen, Analysen und Alleinarbeit gut. Wenn du ein wichtiges Dokument unterschreiben oder eine ernsthafte Entscheidung treffen musst — nicht überstürzen, noch einmal lesen und Details prüfen.",
+        "en": "Today is good for reflection, analysis and working alone. If you need to sign an important document or make a serious decision — don't rush, read it again and check the details."
     },
     8: {
-        "ru": "Благоприятный день для финансовых операций, закрытия сделок и важных решений.",
-        "de": "Günstiger Tag für Finanztransaktionen, Geschäftsabschlüsse und wichtige Entscheidungen.",
-        "en": "Favorable day for financial transactions, closing deals and important decisions."
+        "ru": "Один из самых сильных дней для финансовых шагов, переговоров о деньгах и закрытия важных договорённостей. Используй эту энергию осознанно — то что подписано или решено сегодня будет иметь вес.",
+        "de": "Einer der stärksten Tage für finanzielle Schritte, Geldverhandlungen und den Abschluss wichtiger Vereinbarungen. Diese Energie bewusst nutzen — was heute unterzeichnet oder entschieden wird hat Gewicht.",
+        "en": "One of the strongest days for financial steps, money negotiations and closing important agreements. Use this energy consciously — what is signed or decided today will carry weight."
     },
     9: {
-        "ru": "День завершения. Не начинай новых проектов — завершай старые. Избегай новых финансовых обязательств.",
-        "de": "Tag des Abschlusses. Keine neuen Projekte beginnen — alte abschließen. Neue finanzielle Verpflichtungen vermeiden.",
-        "en": "Day of completion. Don't start new projects — finish old ones. Avoid new financial commitments."
+        "ru": "Сегодня хорошо завершать — дела, разговоры, договорённости которые давно висят незакрытыми. Начинать что-то новое сейчас не лучшее время: день работает на закрытие а не на открытие.",
+        "de": "Heute ist gut zum Abschließen — Dinge, Gespräche, Vereinbarungen die lange offen geblieben sind. Jetzt etwas Neues zu beginnen ist keine gute Zeit: der Tag arbeitet auf Schließung nicht auf Öffnung.",
+        "en": "Today is good for completing — tasks, conversations, agreements that have been left open for a long time. Starting something new now is not the best time: the day works toward closing not opening."
     },
     0: {
         "ru": "Важные решения, подписание документов и финансовые операции рекомендуется принимать после дополнительной проверки обстоятельств или перенести на другой день.",
