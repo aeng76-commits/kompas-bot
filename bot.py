@@ -2816,7 +2816,9 @@ async def send_daily_messages(context):
 
             sys_intro = {"ru": f"Ты ассистент Salveris. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.", "de": f"Du bist Salveris-Assistent. Du schreibst eine Morgennachricht für {name}. Heute ist {ctx['today']}.", "en": f"You are Salveris assistant. You are writing a morning message for {name}. Today is {ctx['today']}."}
             sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
+            lang_warning = {"ru": "", "de": "WICHTIG: Die Kontextdaten unten sind auf Russisch — das ist normal. Deine Antwort muss VOLLSTÄNDIG AUF DEUTSCH sein.", "en": "IMPORTANT: The context data below is in Russian — that is normal. Your response must be ENTIRELY IN ENGLISH."}
             sys1 = f"""{lf}
+{lang_warning.get(lang, "")}
 {sys_intro.get(lang, sys_intro["ru"])}
 
 THINKING MODEL: {model_name}
@@ -2831,6 +2833,7 @@ PERSONAL DAY: {ctx['day_text']}{about_block}
 
             sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, мягко и конкретно. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
             sys2 = f"""{lf}
+{lang_warning.get(lang, "")}
 {sys_intro.get(lang, sys_intro["ru"])}
 
 THINKING MODEL: {model_name}
