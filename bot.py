@@ -1730,24 +1730,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             max_q = 7
             if q_count >= max_q:
                 # Анализ после вопросов
+                lang_warn = {"ru": "", "de": "WICHTIG: Kontextdaten sind auf Russisch — antworte VOLLSTÄNDIG AUF DEUTSCH.", "en": "IMPORTANT: Context data is in Russian — respond ENTIRELY IN ENGLISH."}
+                compass_intro = {"ru": "Ты ассистент Внутренний Компас.", "de": "Du bist der Assistent Innerer Kompass.", "en": "You are the Inner Compass assistant."}
+                topic_label = {"ru": f"Тема которую человек хочет прояснить: {topic}", "de": f"Das Thema das die Person klären möchte: {topic}", "en": f"The topic the person wants to clarify: {topic}"}
+                structure_label = {
+                    "ru": "СТРУКТУРА: 2-3 абзаца анализа — что происходит на самом деле, как модель мышления влияет на ситуацию. Затем 3-4 конкретных рекомендации. СТИЛЬ: тёплый, глубокий, без диагнозов, как умный друг. ЗАПРЕЩЕНО: клише, оценки, markdown.",
+                    "de": "STRUKTUR: 2-3 Absätze Analyse — was wirklich passiert, wie das Denkmodell die Situation beeinflusst. Dann 3-4 konkrete Empfehlungen. STIL: warm, tiefgründig, ohne Diagnosen, wie ein kluger Freund. VERBOTEN: Klischees, Bewertungen, markdown.",
+                    "en": "STRUCTURE: 2-3 paragraphs of analysis — what is really happening, how the thinking model influences the situation. Then 3-4 concrete recommendations. STYLE: warm, deep, without diagnoses, like a smart friend. FORBIDDEN: clichés, judgments, markdown."
+                }
                 analysis_sys = f"""{lf}
-Ты ассистент Внутренний Компас.
+{lang_warn.get(lang, "")}
+{compass_intro.get(lang, compass_intro["ru"])}
 {context_block}
 
-Тема которую человек хочет прояснить: {topic}
+{topic_label.get(lang, topic_label["ru"])}
 
-На основе всего разговора дай глубокий персональный анализ ситуации.
-Учти модель мышления, личный год и месяц — покажи как они влияют на эту ситуацию.
+{structure_label.get(lang, structure_label["ru"])}
 
-СТРУКТУРА:
-Два-три абзаца анализа — что происходит на самом деле, как модель мышления влияет на эту ситуацию.
-Затем 3-4 конкретных рекомендации подходящих именно этой модели мышления и текущему периоду.
-
-СТИЛЬ: тёплый, глубокий, без диагнозов. Говори как умный друг который хорошо тебя знает.
-ЗАПРЕЩЕНО: клише, оценки, слова напряжение/хаос/нестабильность, markdown."""
+{lf}"""
 
                 try:
-                    analysis_messages = user_sessions[user_id] + [{"role": "user", "content": "Дай полный персональный анализ этой ситуации с рекомендациями."}]
+                    analysis_prompt = {"ru": "Дай полный персональный анализ этой ситуации с рекомендациями.", "de": "Gib eine vollständige persönliche Analyse dieser Situation mit Empfehlungen.", "en": "Give a full personal analysis of this situation with recommendations."}
+                    analysis_messages = user_sessions[user_id] + [{"role": "user", "content": analysis_prompt.get(lang, analysis_prompt["ru"])}]
                     resp = client.messages.create(
                         model="claude-sonnet-4-6", max_tokens=1500,
                         system=analysis_sys, messages=analysis_messages
