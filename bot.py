@@ -1813,17 +1813,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             state["stage"] = "questions"
             state["q_count"] = 0
 
+            fq_intro = {"ru": f"Ты ассистент Внутренний Компас. Ведёшь диалог с {user.get('name','')}.", "de": f"Du bist der Assistent Innerer Kompass. Du führst einen Dialog mit {user.get('name','')}.", "en": f"You are the Inner Compass assistant. You are having a dialogue with {user.get('name','')}."}
+            fq_task = {"ru": f"Человек хочет прояснить: {user_text}. Задай ПЕРВЫЙ глубокий вопрос. Сначала покажи что услышал (1 предложение), потом вопрос. Учитывай модель мышления. ТЫ. {g}. Тепло, без оценок. Без markdown.", "de": f"Die Person möchte klären: {user_text}. Stelle die ERSTE tiefe Frage. Zuerst zeige dass du gehört hast (1 Satz), dann die Frage. Denkmodell berücksichtigen. DU. {g}. Warm, ohne Bewertungen. Kein markdown.", "en": f"The person wants to clarify: {user_text}. Ask the FIRST deep question. First show you heard them (1 sentence), then the question. Consider the thinking model. YOU. {g}. Warm, without judgments. No markdown."}
             first_q_sys = f"""{lf}
-Ты ассистент Внутренний Компас. Ведёшь диалог с {user.get('name','')}.
+{lang_warn.get(lang, "")}
+{fq_intro.get(lang, fq_intro["ru"])}
 {context_block}
 
-Человек хочет прояснить: {user_text}
+{fq_task.get(lang, fq_task["ru"])}
 
-Задай ПЕРВЫЙ глубокий вопрос который поможет лучше понять суть ситуации.
-Вопрос должен быть таким чтобы человек думал и отвечал развёрнуто.
-Сначала покажи что услышал (1 предложение), потом вопрос.
-Учитывай модель мышления при формулировке.
-ТЫ. {g}. Тепло, без оценок."""
+{lf}"""
 
             resp = client.messages.create(
                 model="claude-sonnet-4-6", max_tokens=300,
