@@ -1774,7 +1774,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     return
                 except Exception as e:
                     print(f"Analysis error: {e}", flush=True)
-                    await update.message.reply_text("Произошла ошибка при генерации анализа. Попробуй ещё раз.")
+                    err_msg = {"ru": "Произошла ошибка. Попробуй ещё раз.", "de": "Ein Fehler ist aufgetreten. Bitte versuche es erneut.", "en": "An error occurred. Please try again."}
+                    await update.message.reply_text(err_msg.get(lang, err_msg["ru"]))
 
                 compass_state.pop(user_id, None)
                 user_sessions[user_id] = []
@@ -1783,20 +1784,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return
 
             # Задаём следующий вопрос
+            q_intro = {"ru": f"Ты ассистент Внутренний Компас. Ведёшь диалог с {user.get('name','')}.", "de": f"Du bist der Assistent Innerer Kompass. Du führst einen Dialog mit {user.get('name','')}.", "en": f"You are the Inner Compass assistant. You are having a dialogue with {user.get('name','')}."}
+            q_task = {"ru": f"Тема: {topic}. Это вопрос {q_count + 1} из {max_q}. Задай ОДИН глубокий вопрос. Сначала короткий отклик на предыдущий ответ (1 предложение), потом вопрос. Учитывай модель мышления. НЕ спрашивай готова ли к анализу. ТЫ. {g}. Тепло и без оценок. Без markdown.", "de": f"Thema: {topic}. Dies ist Frage {q_count + 1} von {max_q}. Stelle EINE tiefe Frage. Zuerst kurze Reaktion auf die letzte Antwort (1 Satz), dann die Frage. Denkmodell berücksichtigen. DU. {g}. Warm und ohne Bewertungen. Kein markdown.", "en": f"Topic: {topic}. This is question {q_count + 1} of {max_q}. Ask ONE deep question. First a short response to the previous answer (1 sentence), then the question. Consider the thinking model. YOU. {g}. Warm and without judgments. No markdown."}
             q_sys = f"""{lf}
-Ты ассистент Внутренний Компас. Ведёшь диалог с {user.get('name','')}.
+{lang_warn.get(lang, "")}
+{q_intro.get(lang, q_intro["ru"])}
 {context_block}
 
-Тема: {topic}
-Это вопрос {q_count + 1} из {max_q}.
+{q_task.get(lang, q_task["ru"])}
 
-Задай ОДИН глубокий вопрос который поможет человеку самому осознать что происходит.
-Вопрос должен быть таким чтобы человек думал перед ответом и отвечал развёрнуто.
-Сначала дай короткий живой отклик на предыдущий ответ (1 предложение), потом вопрос.
-Учитывай модель мышления при формулировке вопроса.
-НЕ спрашивай "Готова к анализу?" или подобное — просто задавай вопрос.
-ТЫ. {g}. Тепло и без оценок.
-НИКАКОГО markdown, никаких звёздочек и решёток."""
+{lf}"""
 
             resp = client.messages.create(
                 model="claude-sonnet-4-6", max_tokens=300,
