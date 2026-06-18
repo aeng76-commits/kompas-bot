@@ -287,6 +287,11 @@ DAYS = {
     9: {"ru": "День завершения и синхронизации. Фокус: закрыть задачи, подвести итоги. Риск: перенос задач.", "de": "Tag des Abschlusses und der Synchronisierung. Fokus: Aufgaben abschließen, Ergebnisse zusammenfassen. Risiko: Aufgabenübertragung.", "en": "Day of completion and synchronization. Focus: close tasks, summarize results. Risk: task carry-over."},
 }
 
+def reduce(n):
+    while n > 9:
+        n = sum(int(d) for d in str(n))
+    return n
+
 def get_model(birth_day):
     return birth_day if 1 <= birth_day <= 31 else reduce(birth_day)
 
