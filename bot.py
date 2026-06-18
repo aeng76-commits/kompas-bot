@@ -269,23 +269,34 @@ def split_message(text, max_length=4000):
         parts.append(current)
     return parts if parts else [text]
 
-def build_profile_context(user):
+def build_profile_context(user, lang="ru"):
     now = datetime.datetime.now()
     m = D.get_model(user["day"])
     py = D.get_year(user["day"], user["month"], now.year)
     pm = D.get_month(py, now.month)
     pd = D.get_day(pm, now.day)
-    mi = D.MODELS.get(m, {})
+    mi_raw = D.MODELS.get(m, {})
+    # Если данные многоязычные — берём нужный язык
+    def get_field(d, field):
+        v = d.get(field, "")
+        if isinstance(v, dict):
+            return v.get(lang, v.get("ru", ""))
+        return v
+    mi = {k: get_field(mi_raw, k) for k in ["name", "profile", "strengths", "risks", "chaos", "formula"]} if mi_raw else {}
+    def get_text(d):
+        if isinstance(d, dict):
+            return d.get(lang, d.get("ru", ""))
+        return d or ""
     return {
         "mi": mi,
-        "year_text": D.YEARS.get(py, ""),
-        "month_text": D.MONTHS.get(pm, ""),
-        "day_text": D.DAYS.get(pd, ""),
+        "year_text": get_text(D.YEARS.get(py, "")),
+        "month_text": get_text(D.MONTHS.get(pm, "")),
+        "day_text": get_text(D.DAYS.get(pd, "")),
         "today": now.strftime("%d.%m.%Y"),
     }
 
 def get_profile_prompt(lang, user, section):
-    ctx = build_profile_context(user)
+    ctx = build_profile_context(user, lang)
     mi = ctx["mi"]
     name = user.get("name", "")
     gender = user.get("gender", "f")
@@ -385,7 +396,7 @@ def get_profile_prompt(lang, user, section):
 
 
 def get_profile_prompts_list(lang, user, section):
-    ctx = build_profile_context(user)
+    ctx = build_profile_context(user, lang)
     mi = ctx["mi"]
     name = user.get("name", "")
     gender = user.get("gender", "f")
@@ -686,7 +697,7 @@ def get_profile_prompts_list(lang, user, section):
 
 
 def get_free_prompt(lang, user, section):
-    ctx = build_profile_context(user)
+    ctx = build_profile_context(user, lang)
     mi = ctx["mi"]
     name = user.get("name", "")
     gender = user.get("gender", "f")
@@ -731,7 +742,7 @@ def get_system_prompt(lang, user):
     lang_force = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ. НИКАКИХ АНГЛИЙСКИХ СЛОВ.", "de": "ANTWORTE NUR AUF DEUTSCH. KEIN RUSSISCH.", "en": "RESPOND ONLY IN ENGLISH. NO RUSSIAN OR OTHER LANGUAGES."}
     profile_block = ""
     if user and user.get("day"):
-        ctx = build_profile_context(user)
+        ctx = build_profile_context(user, lang)
         mi = ctx["mi"]
         profile_block = f"""
 === ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ===
@@ -1702,7 +1713,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in compass_state and compass_state[user_id]:
         state = compass_state[user_id]
         stage = state.get("stage", "initial")
-        ctx = build_profile_context(user) if user.get("day") else {}
+        ctx = build_profile_context(user, lang) if user.get("day") else {}
         mi = ctx.get("mi", {})
         model_name = mi.get("name", "") if isinstance(mi, dict) else ""
         model_profile = mi.get("profile", "") if isinstance(mi, dict) else str(mi)
@@ -2296,7 +2307,7 @@ async def admin_send_monthly(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if not (is_trial_active(user_obj) or (paid_until and paid_until.replace(tzinfo=None) > today)):
             continue
         try:
-            ctx = build_profile_context(user_obj)
+            ctx = build_profile_context(user_obj, lang)
             lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
             g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
             month_sys = f"""{lf}
@@ -2569,7 +2580,7 @@ async def send_birthday_messages(context):
                 await context.bot.send_animation(uid, animation="CgACAgIAAxkDAAIQtmoV2C1332tJt-TwcooI1sFi1CDQAAKAmQACbEiwSFxl2P1fOg9kOwQ")
                 await context.bot.send_message(uid, bday_text.get(lang, bday_text["ru"]))
                 user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
-                ctx = build_profile_context(user_obj)
+                ctx = build_profile_context(user_obj, lang)
                 lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
                 g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
                 bday_sys = f"""{lf}
@@ -2704,7 +2715,7 @@ async def send_daily_messages(context):
             if not day:
                 continue
             try:
-                ctx = build_profile_context(user_obj)
+                ctx = build_profile_context(user_obj, lang)
                 lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
                 g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
                 remind_sys = f"""{lf}
@@ -2767,7 +2778,7 @@ async def send_daily_messages(context):
             if day == today.day and month == today.month:
                 try:
                     bday_user = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
-                    ctx = build_profile_context(bday_user)
+                    ctx = build_profile_context(bday_user, lang)
                     lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
                     g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
                     bday_sys = f"""{lf}
@@ -2800,7 +2811,7 @@ async def send_daily_messages(context):
                 delta = datetime.datetime.now() - trial_started_at.replace(tzinfo=None)
                 hours_passed = delta.total_seconds() / 3600
                 trial_hours_left = max(0, round(72 - hours_passed))
-            ctx = build_profile_context(user)
+            ctx = build_profile_context(user, lang)
             mi = ctx["mi"]
             model_name = mi.get("name", "") if isinstance(mi, dict) else ""
             model_profile = mi.get("profile", "") if isinstance(mi, dict) else ""
