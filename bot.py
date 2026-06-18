@@ -421,8 +421,11 @@ def get_profile_prompts_list(lang, user, section):
     if user.get("about_personal"): about_parts.append("Личное: " + user["about_personal"])
     about_block = ("\n\nКОНТЕКСТ ЖИЗНИ (учитывай при анализе):\n" + "\n".join(about_parts)) if about_parts else ""
 
+    lang_warning = {"ru": "", "de": "WICHTIG: Die Kontextdaten unten sind auf Russisch — das ist normal. Deine GESAMTE Antwort muss AUF DEUTSCH sein. Kein einziges russisches Wort.", "en": "IMPORTANT: The context data below is in Russian — that is normal. Your ENTIRE response must be IN ENGLISH. Not a single Russian word."}
+    system_name = {"ru": "Ты пишешь для системы Внутренний Компас.", "de": "Du schreibst für das System Innerer Kompass.", "en": "You are writing for the Inner Compass system."}
     base_personality = f"""{lf}
-Ты пишешь для системы Внутренний Компас.
+{lang_warning.get(lang, "")}
+{system_name.get(lang, system_name["ru"])}
 Имя: {name}. {g}.
 
 МОДЕЛЬ МЫШЛЕНИЯ:
