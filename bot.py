@@ -461,7 +461,8 @@ def get_profile_prompts_list(lang, user, section):
 ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ.{about_block}"""
 
     base_period = f"""{lf}
-Ты пишешь для системы Внутренний Компас.
+{lang_warning.get(lang, "")}
+{system_name.get(lang, system_name["ru"])}
 Имя: {name}. {g}.
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
@@ -495,7 +496,8 @@ def get_profile_prompts_list(lang, user, section):
     birth_month = user.get("month", "")
 
     base_year = f"""{lf}
-Ты пишешь для системы Внутренний Компас.
+{lang_warning.get(lang, "")}
+{system_name.get(lang, system_name["ru"])}
 Имя: {name}. {g}.
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
@@ -520,7 +522,8 @@ def get_profile_prompts_list(lang, user, section):
 ОТВЕЧАЙ ТОЛЬКО НА {"русском" if lang == "ru" else ("немецком" if lang == "de" else "английском")} ЯЗЫКЕ.{about_block}"""
 
     base_month = f"""{lf}
-Ты пишешь для системы Внутренний Компас.
+{lang_warning.get(lang, "")}
+{system_name.get(lang, system_name["ru"])}
 Имя: {name}. {g}.
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
