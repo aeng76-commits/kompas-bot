@@ -419,7 +419,7 @@ def get_profile_prompts_list(lang, user, section):
     if user.get("about_finance"): about_parts.append("Финансы: " + user["about_finance"])
     if user.get("about_relations"): about_parts.append("Отношения: " + user["about_relations"])
     if user.get("about_personal"): about_parts.append("Личное: " + user["about_personal"])
-    about_block = ("\n\nКОНТЕКСТ ЖИЗНИ (учитывай при анализе):\n" + "\n".join(about_parts)) if about_parts else ""
+    about_block = ("\n\nКОНТЕКСТ ЖИЗНИ:\n" + "\n".join(about_parts) + "\n\nВАЖНО: этот контекст — фон для понимания человека, не повестка дня. Не зацикливайся на проблемах из этого контекста. Используй его чтобы делать анализ точнее и персональнее — но каждый день опирайся прежде всего на энергию дня, месяца и года.") if about_parts else ""
 
     lang_warning = {"ru": "", "de": "WICHTIG: Die Kontextdaten unten sind auf Russisch — das ist normal. Deine GESAMTE Antwort muss AUF DEUTSCH sein. Kein einziges russisches Wort.", "en": "IMPORTANT: The context data below is in Russian — that is normal. Your ENTIRE response must be IN ENGLISH. Not a single Russian word."}
     system_name = {"ru": "Ты пишешь для системы Внутренний Компас.", "de": "Du schreibst für das System Innerer Kompass.", "en": "You are writing for the Inner Compass system."}
