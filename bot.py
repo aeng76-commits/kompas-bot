@@ -1732,7 +1732,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user.get("about_finance"): about_parts.append("Финансы: " + user["about_finance"])
         if user.get("about_relations"): about_parts.append("Отношения: " + user["about_relations"])
         if user.get("about_personal"): about_parts.append("Личное: " + user["about_personal"])
-        about_block = ("\n\nО человеке:\n" + "\n".join(about_parts)) if about_parts else ""
+        about_block = ("\n\nКОНТЕКСТ ЖИЗНИ:\n" + "\n".join(about_parts) + "\n\nВАЖНО: этот контекст — фон для понимания человека, не повестка дня. Опирайся прежде всего на энергию периода — не зацикливайся на проблемах из контекста.") if about_parts else ""
         context_block = f"""Имя: {user.get('name','')}. {g}.
 Модель мышления: {model_name}. {model_profile}
 Риски: {model_risks}
@@ -2646,7 +2646,7 @@ async def send_monthly_overview(context):
             if about_finance: about_parts.append("Финансы: " + about_finance)
             if about_relations: about_parts.append("Отношения: " + about_relations)
             if about_personal: about_parts.append("Личное: " + about_personal)
-            about_block = ("\n\nО человеке:\n" + "\n".join(about_parts)) if about_parts else ""
+            about_block = ("\n\nКОНТЕКСТ ЖИЗНИ:\n" + "\n".join(about_parts) + "\n\nВАЖНО: этот контекст — фон для понимания человека, не повестка дня. Опирайся прежде всего на энергию периода — не зацикливайся на проблемах из контекста.") if about_parts else ""
             month_names = {"ru": ["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"],
                           "de": ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
                           "en": ["January","February","March","April","May","June","July","August","September","October","November","December"]}
