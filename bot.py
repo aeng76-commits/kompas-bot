@@ -179,7 +179,7 @@ SEPA = "IBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra
 MENU_BUTTONS = {
     "ru": [
         [InlineKeyboardButton("💳 Подписка", callback_data="btn_pay")],
-        [InlineKeyboardButton("ℹ️ Знакомство с Salveris", callback_data="btn_info")],
+        [InlineKeyboardButton("ℹ️ Знакомство с Alvalori", callback_data="btn_info")],
         [InlineKeyboardButton("✍️ Оставить отзыв", callback_data="btn_feedback")],
         [InlineKeyboardButton("👤 Обо мне", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Основа моей личности", callback_data="btn_me")],
@@ -191,7 +191,7 @@ MENU_BUTTONS = {
     ],
     "de": [
         [InlineKeyboardButton("💳 Abonnement", callback_data="btn_pay")],
-        [InlineKeyboardButton("ℹ️ Salveris kennenlernen", callback_data="btn_info")],
+        [InlineKeyboardButton("ℹ️ Alvalori kennenlernen", callback_data="btn_info")],
         [InlineKeyboardButton("✍️ Feedback geben", callback_data="btn_feedback")],
         [InlineKeyboardButton("👤 Über mich", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 Meine Persönlichkeit", callback_data="btn_me")],
@@ -203,7 +203,7 @@ MENU_BUTTONS = {
     ],
     "en": [
         [InlineKeyboardButton("💳 Subscription", callback_data="btn_pay")],
-        [InlineKeyboardButton("ℹ️ Get to know Salveris", callback_data="btn_info")],
+        [InlineKeyboardButton("ℹ️ Get to know Alvalori", callback_data="btn_info")],
         [InlineKeyboardButton("✍️ Leave feedback", callback_data="btn_feedback")],
         [InlineKeyboardButton("👤 About me", callback_data="btn_about")],
         [InlineKeyboardButton("🌟 My Personality", callback_data="btn_me")],
@@ -945,9 +945,9 @@ async def agree_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "agree_minor":
         save_user(user_id, agreed=True, is_minor=True)
         minor_msg = {
-            "ru": "Привет! Это Salveris. Как тебя зовут?",
-            "de": "Hallo! Das ist Salveris. Wie heißt du?",
-            "en": "Hi! This is Salveris. What is your name?"
+            "ru": "Привет! Это Alvalori. Как тебя зовут?",
+            "de": "Hallo! Das ist Alvalori. Wie heißt du?",
+            "en": "Hi! This is Alvalori. What is your name?"
         }
         msg = minor_msg.get(lang, minor_msg["ru"])
         user_sessions[user_id] = [{"role": "assistant", "content": msg}]
@@ -1114,7 +1114,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif about_step == "personal":
             compass_state.pop(user_id, None)
             save_session(user_id, session=[], compass={})
-            thanks = {"ru": "Спасибо! Теперь Salveris знает тебя лучше 🌟", "de": "Danke! Jetzt kennt Salveris dich besser 🌟", "en": "Thank you! Now Salveris knows you better 🌟"}
+            thanks = {"ru": "Спасибо! Теперь Alvalori знает тебя лучше 🌟", "de": "Danke! Jetzt kennt Alvalori dich besser 🌟", "en": "Thank you! Now Alvalori knows you better 🌟"}
             await query.edit_message_text(thanks.get(lang, thanks["ru"]))
             await show_menu(context, user_id, lang)
         return
@@ -1161,9 +1161,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "btn_feedback":
         name = user.get("name", "") if user else ""
         fb_invite = {
-            "ru": f"Привет, {name}! Чтобы Salveris становился лучше — мне важно твоё мнение. Буду признательна если найдёшь 2 минуты и ответишь на 3 вопроса 🙏",
-            "de": f"Hallo, {name}! Damit Salveris besser wird — ist mir deine Meinung wichtig. Ich wäre dankbar wenn du 2 Minuten findest und 3 Fragen beantwortest 🙏",
-            "en": f"Hi, {name}! To make Salveris better — your opinion matters to me. I'd be grateful if you find 2 minutes to answer 3 questions 🙏"
+            "ru": f"Привет, {name}! Чтобы Alvalori становился лучше — мне важно твоё мнение. Буду признательна если найдёшь 2 минуты и ответишь на 3 вопроса 🙏",
+            "de": f"Hallo, {name}! Damit Alvalori besser wird — ist mir deine Meinung wichtig. Ich wäre dankbar wenn du 2 Minuten findest und 3 Fragen beantwortest 🙏",
+            "en": f"Hi, {name}! To make Alvalori better — your opinion matters to me. I'd be grateful if you find 2 minutes to answer 3 questions 🙏"
         }
         btns = InlineKeyboardMarkup([[
             InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="feedback_yes"),
@@ -1175,9 +1175,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         name = user.get("name", "") if user else ""
         gender = user.get("gender", "f") if user else "f"
         thanks_word_ru = "нашла" if gender == "f" else "нашёл"
-        fb_ru = f"Спасибо, {name}! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что изменилось в твоём понимании себя после того как ты начал(а) пользоваться Salveris?\n2. Какой момент или анализ тебя удивил или попал точно в цель?\n3. Кому бы ты порекомендовал(а) Salveris и почему?"
-        fb_de = f"Danke, {name}! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat sich in deinem Selbstverständnis verändert, seit du Salveris nutzt?\n2. Welcher Moment oder welche Analyse hat dich überrascht oder genau getroffen?\n3. Wem würdest du Salveris empfehlen und warum?"
-        fb_en = f"Thank you, {name}! Your opinion matters a lot.\n\nPlease answer three questions in one message:\n\n1. What changed in your self-understanding since you started using Salveris?\n2. Which moment or analysis surprised you or hit exactly right?\n3. Who would you recommend Salveris to and why?"
+        fb_ru = f"Спасибо, {name}! Твоё мнение очень важно.\n\nОтветь пожалуйста на три вопроса одним сообщением:\n\n1. Что изменилось в твоём понимании себя после того как ты начал(а) пользоваться Alvalori?\n2. Какой момент или анализ тебя удивил или попал точно в цель?\n3. Кому бы ты порекомендовал(а) Alvalori и почему?"
+        fb_de = f"Danke, {name}! Deine Meinung ist sehr wichtig.\n\nBitte beantworte drei Fragen in einer Nachricht:\n\n1. Was hat sich in deinem Selbstverständnis verändert, seit du Alvalori nutzt?\n2. Welcher Moment oder welche Analyse hat dich überrascht oder genau getroffen?\n3. Wem würdest du Alvalori empfehlen und warum?"
+        fb_en = f"Thank you, {name}! Your opinion matters a lot.\n\nPlease answer three questions in one message:\n\n1. What changed in your self-understanding since you started using Alvalori?\n2. Which moment or analysis surprised you or hit exactly right?\n3. Who would you recommend Alvalori to and why?"
         fb_text = {"ru": fb_ru, "de": fb_de, "en": fb_en}
         compass_state[user_id] = {"stage": "feedback", "q_num": 1}
         save_session(user_id, session=user_sessions.get(user_id, []), compass=compass_state[user_id])
@@ -1191,16 +1191,16 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "announce_nav_open":
         gender = user.get("gender", "f") if user else "f"
         info_ru = (
-            "<b>ℹ️ Знакомство с Salveris</b>\n\n"
-            "Salveris анализирует твою дату рождения — и на её основе определяет модель мышления, сильные стороны и текущие жизненные циклы. Каждый анализ строится индивидуально только для тебя.\n\n"
+            "<b>ℹ️ Знакомство с Alvalori</b>\n\n"
+            "Alvalori анализирует твою дату рождения — и на её основе определяет модель мышления, сильные стороны и текущие жизненные циклы. Каждый анализ строится индивидуально только для тебя.\n\n"
             "<b>🌟 Основа моей личности</b>\n"
             "Как ты думаешь, принимаешь решения и реагируешь на давление. Это твой фундамент.\n\n"
             "<b>🧭 Личный год / 📍 Месяц / ☀️ День</b>\n"
             "Что сейчас происходит в твоей жизни, на что обратить внимание и чего избегать. Год — общий вектор, месяц — тактика, день — фокус на сегодня.\n\n"
             "<b>💡 Поговорим о главном</b>\n"
-            "Расскажи о любой ситуации — в работе, отношениях, жизни. Salveris задаст вопросы и даст персональный анализ именно для тебя.\n\n"
+            "Расскажи о любой ситуации — в работе, отношениях, жизни. Alvalori задаст вопросы и даст персональный анализ именно для тебя.\n\n"
             "<b>👤 Обо мне</b>\n"
-            "Чем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
+            "Чем больше Alvalori знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
             "<b>💳 Подписка</b>\n"
             "Пробный период — 72 часа, каждый раздел доступен 1 раз за весь пробный период. Подписка открывает все разделы без ограничений — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
             "<b>⚙️ Настройки</b>\n"
@@ -1211,19 +1211,19 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❓ Помощь\n"
             "💬 Написать администратору\n\n"
             "<b>✍️ Оставить отзыв</b>\n"
-            "Расскажи что понравилось и что можно улучшить — это помогает Salveris становиться лучше."
+            "Расскажи что понравилось и что можно улучшить — это помогает Alvalori становиться лучше."
         )
         info_de = (
-            "<b>ℹ️ Salveris kennenlernen</b>\n\n"
-            "Salveris analysiert dein Geburtsdatum — und bestimmt daraus dein Denkmodell, deine Stärken und aktuelle Lebenszyklen. Jede Analyse wird individuell nur für dich erstellt.\n\n"
+            "<b>ℹ️ Alvalori kennenlernen</b>\n\n"
+            "Alvalori analysiert dein Geburtsdatum — und bestimmt daraus dein Denkmodell, deine Stärken und aktuelle Lebenszyklen. Jede Analyse wird individuell nur für dich erstellt.\n\n"
             "<b>🌟 Meine Persönlichkeit</b>\n"
             "Wie du denkst, Entscheidungen triffst und auf Druck reagierst. Das ist dein Fundament.\n\n"
             "<b>🧭 Persönliches Jahr / 📍 Monat / ☀️ Tag</b>\n"
             "Was gerade in deinem Leben passiert, worauf du achten solltest und was du vermeiden solltest. Jahr — Gesamtvektor, Monat — Taktik, Tag — Fokus für heute.\n\n"
             "<b>💡 Lass uns reden</b>\n"
-            "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Salveris stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
+            "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Alvalori stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
             "<b>👤 Über mich</b>\n"
-            "Je mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
+            "Je mehr Alvalori über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
             "<b>💳 Abonnement</b>\n"
             "Testzugang — 72 Stunden, jeder Bereich 1x im gesamten Testzeitraum. Das Abonnement öffnet alle Bereiche ohne Einschränkungen — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
             "<b>⚙️ Einstellungen</b>\n"
@@ -1234,19 +1234,19 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❓ Hilfe\n"
             "💬 Administrator schreiben\n\n"
             "<b>✍️ Feedback hinterlassen</b>\n"
-            "Erzähl uns was dir gefallen hat und was verbessert werden kann — das hilft Salveris besser zu werden."
+            "Erzähl uns was dir gefallen hat und was verbessert werden kann — das hilft Alvalori besser zu werden."
         )
         info_en = (
-            "<b>ℹ️ Get to know Salveris</b>\n\n"
-            "Salveris analyses your date of birth — and based on it determines your thinking model, strengths and current life cycles. Every analysis is built individually just for you.\n\n"
+            "<b>ℹ️ Get to know Alvalori</b>\n\n"
+            "Alvalori analyses your date of birth — and based on it determines your thinking model, strengths and current life cycles. Every analysis is built individually just for you.\n\n"
             "<b>🌟 My Personality</b>\n"
             "How you think, make decisions and respond to pressure. This is your foundation.\n\n"
             "<b>🧭 Personal Year / 📍 Month / ☀️ Day</b>\n"
             "What is happening in your life right now, what to pay attention to and what to avoid. Year — overall vector, month — tactics, day — focus for today.\n\n"
             "<b>💡 Let\'s talk</b>\n"
-            "Tell about any situation — work, relationships, life. Salveris will ask questions and give a personal analysis just for you.\n\n"
+            "Tell about any situation — work, relationships, life. Alvalori will ask questions and give a personal analysis just for you.\n\n"
             "<b>👤 About me</b>\n"
-            "The more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
+            "The more Alvalori knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
             "<b>💳 Subscription</b>\n"
             "Trial period — 72 hours, each section available 1 time during the entire trial. Subscription opens all sections without limits — including an individual monthly overview. From 15€/month.\n\n"
             "<b>⚙️ Settings</b>\n"
@@ -1257,7 +1257,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❓ Help\n"
             "💬 Contact administrator\n\n"
             "<b>✍️ Leave feedback</b>\n"
-            "Tell us what you liked and what can be improved — it helps Salveris get better."
+            "Tell us what you liked and what can be improved — it helps Alvalori get better."
         )
         info_text = {"ru": info_ru, "de": info_de, "en": info_en}
         menu_btn = InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]])
@@ -1331,10 +1331,10 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data in ("churn_price", "churn_value", "churn_func", "churn_other"):
         gender = user.get("gender", "f") if user else "f"
         questions = {
-            "churn_price": {"ru": "Один честный ответ поможет сделать Salveris лучше — при какой цене ты бы подписалась?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — bei welchem Preis hättest du abonniert?", "en": "One honest answer helps make Salveris better — at what price would you have subscribed?"},
-            "churn_value": {"ru": "Один честный ответ поможет сделать Salveris лучше — что именно не попало в точку или осталось непонятным?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — was genau hat nicht getroffen oder war unklar?", "en": "One honest answer helps make Salveris better — what exactly didn't resonate or remained unclear?"},
-            "churn_func": {"ru": "Один честный ответ поможет сделать Salveris лучше — чего именно не хватило?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — was genau hat gefehlt?", "en": "One honest answer helps make Salveris better — what exactly was missing?"},
-            "churn_other": {"ru": "Один честный ответ поможет сделать Salveris лучше — что именно не сработало для тебя?", "de": "Eine ehrliche Antwort hilft Salveris besser zu machen — was genau hat für dich nicht funktioniert?", "en": "One honest answer helps make Salveris better — what exactly didn't work for you?"},
+            "churn_price": {"ru": "Один честный ответ поможет сделать Alvalori лучше — при какой цене ты бы подписалась?", "de": "Eine ehrliche Antwort hilft Alvalori besser zu machen — bei welchem Preis hättest du abonniert?", "en": "One honest answer helps make Alvalori better — at what price would you have subscribed?"},
+            "churn_value": {"ru": "Один честный ответ поможет сделать Alvalori лучше — что именно не попало в точку или осталось непонятным?", "de": "Eine ehrliche Antwort hilft Alvalori besser zu machen — was genau hat nicht getroffen oder war unklar?", "en": "One honest answer helps make Alvalori better — what exactly didn't resonate or remained unclear?"},
+            "churn_func": {"ru": "Один честный ответ поможет сделать Alvalori лучше — чего именно не хватило?", "de": "Eine ehrliche Antwort hilft Alvalori besser zu machen — was genau hat gefehlt?", "en": "One honest answer helps make Alvalori better — what exactly was missing?"},
+            "churn_other": {"ru": "Один честный ответ поможет сделать Alvalori лучше — что именно не сработало для тебя?", "de": "Eine ehrliche Antwort hilft Alvalori besser zu machen — was genau hat für dich nicht funktioniert?", "en": "One honest answer helps make Alvalori better — what exactly didn't work for you?"},
         }
         q = questions.get(data, {})
         compass_state[user_id] = {"stage": "churn_answer", "reason": data}
@@ -1369,16 +1369,16 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "btn_info":
         info_ru = (
-            "<b>ℹ️ Знакомство с Salveris</b>\n\n"
-            "Salveris анализирует твою дату рождения — и на её основе определяет модель мышления, сильные стороны и текущие жизненные циклы. Каждый анализ строится индивидуально только для тебя.\n\n"
+            "<b>ℹ️ Знакомство с Alvalori</b>\n\n"
+            "Alvalori анализирует твою дату рождения — и на её основе определяет модель мышления, сильные стороны и текущие жизненные циклы. Каждый анализ строится индивидуально только для тебя.\n\n"
             "<b>🌟 Основа моей личности</b>\n"
             "Как ты думаешь, принимаешь решения и реагируешь на давление. Это твой фундамент.\n\n"
             "<b>🧭 Личный год / 📍 Месяц / ☀️ День</b>\n"
             "Что сейчас происходит в твоей жизни, на что обратить внимание и чего избегать. Год — общий вектор, месяц — тактика, день — фокус на сегодня.\n\n"
             "<b>💡 Поговорим о главном</b>\n"
-            "Расскажи о любой ситуации — в работе, отношениях, жизни. Salveris задаст вопросы и даст персональный анализ именно для тебя.\n\n"
+            "Расскажи о любой ситуации — в работе, отношениях, жизни. Alvalori задаст вопросы и даст персональный анализ именно для тебя.\n\n"
             "<b>👤 Обо мне</b>\n"
-            "Чем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
+            "Чем больше Alvalori знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n"
             "<b>💳 Подписка</b>\n"
             "Пробный период — 72 часа, каждый раздел доступен 1 раз за весь пробный период. Подписка открывает все разделы без ограничений — включая индивидуальный обзор в начале каждого месяца. От 15€/месяц.\n\n"
             "<b>⚙️ Настройки</b>\n"
@@ -1389,19 +1389,19 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❓ Помощь\n"
             "💬 Написать администратору\n\n"
             "<b>✍️ Оставить отзыв</b>\n"
-            "Расскажи что понравилось и что можно улучшить — это помогает Salveris становиться лучше."
+            "Расскажи что понравилось и что можно улучшить — это помогает Alvalori становиться лучше."
         )
         info_de = (
-            "<b>ℹ️ Salveris kennenlernen</b>\n\n"
-            "Salveris analysiert dein Geburtsdatum — und bestimmt daraus dein Denkmodell, deine Stärken und aktuelle Lebenszyklen. Jede Analyse wird individuell nur für dich erstellt.\n\n"
+            "<b>ℹ️ Alvalori kennenlernen</b>\n\n"
+            "Alvalori analysiert dein Geburtsdatum — und bestimmt daraus dein Denkmodell, deine Stärken und aktuelle Lebenszyklen. Jede Analyse wird individuell nur für dich erstellt.\n\n"
             "<b>🌟 Meine Persönlichkeit</b>\n"
             "Wie du denkst, Entscheidungen triffst und auf Druck reagierst. Das ist dein Fundament.\n\n"
             "<b>🧭 Persönliches Jahr / 📍 Monat / ☀️ Tag</b>\n"
             "Was gerade in deinem Leben passiert, worauf du achten solltest und was du vermeiden solltest. Jahr — Gesamtvektor, Monat — Taktik, Tag — Fokus für heute.\n\n"
             "<b>💡 Lass uns reden</b>\n"
-            "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Salveris stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
+            "Erzähl von einer Situation — Arbeit, Beziehungen, Leben. Alvalori stellt Fragen und gibt dir eine persönliche Analyse.\n\n"
             "<b>👤 Über mich</b>\n"
-            "Je mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
+            "Je mehr Alvalori über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n"
             "<b>💳 Abonnement</b>\n"
             "Testzugang — 72 Stunden, jeder Bereich 1x im gesamten Testzeitraum. Das Abonnement öffnet alle Bereiche ohne Einschränkungen — einschließlich einer individuellen Monatsübersicht. Ab 15€/Monat.\n\n"
             "<b>⚙️ Einstellungen</b>\n"
@@ -1412,19 +1412,19 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❓ Hilfe\n"
             "💬 Administrator schreiben\n\n"
             "<b>✍️ Feedback hinterlassen</b>\n"
-            "Erzähl uns was dir gefallen hat und was verbessert werden kann — das hilft Salveris besser zu werden."
+            "Erzähl uns was dir gefallen hat und was verbessert werden kann — das hilft Alvalori besser zu werden."
         )
         info_en = (
-            "<b>ℹ️ Get to know Salveris</b>\n\n"
-            "Salveris analyses your date of birth — and based on it determines your thinking model, strengths and current life cycles. Every analysis is built individually just for you.\n\n"
+            "<b>ℹ️ Get to know Alvalori</b>\n\n"
+            "Alvalori analyses your date of birth — and based on it determines your thinking model, strengths and current life cycles. Every analysis is built individually just for you.\n\n"
             "<b>🌟 My Personality</b>\n"
             "How you think, make decisions and respond to pressure. This is your foundation.\n\n"
             "<b>🧭 Personal Year / 📍 Month / ☀️ Day</b>\n"
             "What is happening in your life right now, what to pay attention to and what to avoid. Year — overall vector, month — tactics, day — focus for today.\n\n"
             "<b>💡 Let\'s talk</b>\n"
-            "Tell about any situation — work, relationships, life. Salveris will ask questions and give a personal analysis just for you.\n\n"
+            "Tell about any situation — work, relationships, life. Alvalori will ask questions and give a personal analysis just for you.\n\n"
             "<b>👤 About me</b>\n"
-            "The more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
+            "The more Alvalori knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n"
             "<b>💳 Subscription</b>\n"
             "Trial period — 72 hours, each section available 1 time during the entire trial. Subscription opens all sections without limits — including an individual monthly overview. From 15€/month.\n\n"
             "<b>⚙️ Settings</b>\n"
@@ -1435,7 +1435,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❓ Help\n"
             "💬 Contact administrator\n\n"
             "<b>✍️ Leave feedback</b>\n"
-            "Tell us what you liked and what can be improved — it helps Salveris get better."
+            "Tell us what you liked and what can be improved — it helps Alvalori get better."
         )
         info_text = {"ru": info_ru, "de": info_de, "en": info_en}
         btns = InlineKeyboardMarkup([[
@@ -1460,9 +1460,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "trial_not_now":
         about_invite = {
-            "ru": "Хочешь рассказать о себе подробнее? Это поможет Salveris давать более точный анализ.",
-            "de": "Möchtest du mehr über dich erzählen? Das hilft Salveris genauere Analysen zu erstellen.",
-            "en": "Would you like to tell more about yourself? This helps Salveris provide more accurate analysis."
+            "ru": "Хочешь рассказать о себе подробнее? Это поможет Alvalori давать более точный анализ.",
+            "de": "Möchtest du mehr über dich erzählen? Das hilft Alvalori genauere Analysen zu erstellen.",
+            "en": "Would you like to tell more about yourself? This helps Alvalori provide more accurate analysis."
         }
         about_btns = InlineKeyboardMarkup([[
             InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="about_start"),
@@ -1565,7 +1565,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Новый пользователь — начинаем регистрацию
         import datetime
         save_user(user_id, trial_started_at=datetime.datetime.now(datetime.timezone.utc), agreed=True)
-        greet = {"ru": "Привет! Это Salveris. Как тебя зовут?", "de": "Hallo! Das ist Salveris. Wie heißt du?", "en": "Hi! This is Salveris. What is your name?"}
+        greet = {"ru": "Привет! Это Alvalori. Как тебя зовут?", "de": "Hallo! Das ist Alvalori. Wie heißt du?", "en": "Hi! This is Alvalori. What is your name?"}
         msg = greet.get(lang, greet["ru"])
         user_sessions[user_id] = [{"role": "assistant", "content": msg}]
         await query.edit_message_text(msg)
@@ -1883,7 +1883,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 save_user(user_id, about_personal=user_text)
                 compass_state.pop(user_id, None)
                 save_session(user_id, session=[], compass={})
-                thanks = {"ru": "Спасибо! Теперь Salveris знает тебя лучше и будет давать более точный анализ 🌟", "de": "Danke! Jetzt kennt Salveris dich besser und wird genauere Analysen erstellen 🌟", "en": "Thank you! Now Salveris knows you better and will provide more accurate analysis 🌟"}
+                thanks = {"ru": "Спасибо! Теперь Alvalori знает тебя лучше и будет давать более точный анализ 🌟", "de": "Danke! Jetzt kennt Alvalori dich besser und wird genauere Analysen erstellen 🌟", "en": "Thank you! Now Alvalori knows you better and will provide more accurate analysis 🌟"}
                 await update.message.reply_text(thanks.get(lang, thanks["ru"]))
                 await show_menu(context, user_id, lang)
             return
@@ -1893,9 +1893,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             gender = user.get("gender", "f") if user else "f"
             await context.bot.send_message(ADMIN_ID, "📊 Опрос от " + str(user.get("name")) + " (" + lang + "). Причина: " + reason + "\nОтвет: " + user_text)
             thanks = {
-                "ru": "Спасибо, " + str(user.get("name","")) + "! Это очень помогает развитию Salveris 🙏\n\nКогда буд" + ("ешь готова" if gender=="f" else "ешь готов") + " — возвращайся 🌟",
-                "de": "Danke, " + str(user.get("name","")) + "! Das hilft sehr bei der Entwicklung von Salveris 🙏\n\nWenn du bereit bist — komm wieder 🌟",
-                "en": "Thank you, " + str(user.get("name","")) + "! This really helps Salveris development 🙏\n\nWhen you're ready — come back 🌟",
+                "ru": "Спасибо, " + str(user.get("name","")) + "! Это очень помогает развитию Alvalori 🙏\n\nКогда буд" + ("ешь готова" if gender=="f" else "ешь готов") + " — возвращайся 🌟",
+                "de": "Danke, " + str(user.get("name","")) + "! Das hilft sehr bei der Entwicklung von Alvalori 🙏\n\nWenn du bereit bist — komm wieder 🌟",
+                "en": "Thank you, " + str(user.get("name","")) + "! This really helps Alvalori development 🙏\n\nWhen you're ready — come back 🌟",
             }
             compass_state.pop(user_id, None)
             save_session(user_id, session=[], compass={})
@@ -1906,7 +1906,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif stage == "feedback":
             # Один ответ — сразу администратору
             await context.bot.send_message(ADMIN_ID, "📝 Отзыв от " + str(user.get("name")) + " (" + lang + "):\n\n" + user_text)
-            thanks = {"ru": "Спасибо большое! Твоё мнение очень важно для развития Salveris 🙏🌟", "de": "Vielen Dank! Deine Meinung ist sehr wichtig für die Entwicklung von Salveris 🙏🌟", "en": "Thank you so much! Your opinion is very important for the development of Salveris 🙏🌟"}
+            thanks = {"ru": "Спасибо большое! Твоё мнение очень важно для развития Alvalori 🙏🌟", "de": "Vielen Dank! Deine Meinung ist sehr wichtig für die Entwicklung von Alvalori 🙏🌟", "en": "Thank you so much! Your opinion is very important for the development of Alvalori 🙏🌟"}
             compass_state.pop(user_id, None)
             save_session(user_id, session=[], compass={})
             await update.message.reply_text(thanks.get(lang, thanks["ru"]))
@@ -2134,9 +2134,9 @@ async def admin_announce_nav(update: Update, context: ContextTypes.DEFAULT_TYPE)
     users = cur.fetchall()
     cur.close()
     conn.close()
-    msg_ru = "🌟 Salveris обновился!\n\nВ меню появилась новая кнопка — ℹ️ Знакомство с Salveris.\n\nТам коротко описано для чего каждый раздел и что находится в настройках. Если ещё не разобрался(лась) как всё устроено — загляни туда."
-    msg_de = "🌟 Salveris wurde aktualisiert!\n\nIm Menü gibt es eine neue Schaltfläche — ℹ️ Salveris kennenlernen.\n\nDort wird kurz beschrieben, wofür jeder Bereich da ist. Schau gerne rein."
-    msg_en = "🌟 Salveris has been updated!\n\nA new button appeared in the menu — ℹ️ Get to know Salveris.\n\nIt briefly describes what each section is for. Feel free to check it out."
+    msg_ru = "🌟 Alvalori обновился!\n\nВ меню появилась новая кнопка — ℹ️ Знакомство с Alvalori.\n\nТам коротко описано для чего каждый раздел и что находится в настройках. Если ещё не разобрался(лась) как всё устроено — загляни туда."
+    msg_de = "🌟 Alvalori wurde aktualisiert!\n\nIm Menü gibt es eine neue Schaltfläche — ℹ️ Alvalori kennenlernen.\n\nDort wird kurz beschrieben, wofür jeder Bereich da ist. Schau gerne rein."
+    msg_en = "🌟 Alvalori has been updated!\n\nA new button appeared in the menu — ℹ️ Get to know Alvalori.\n\nIt briefly describes what each section is for. Feel free to check it out."
     msgs = {"ru": msg_ru, "de": msg_de, "en": msg_en}
     sent = 0
     failed = []
@@ -2169,9 +2169,9 @@ async def admin_announce_about(update: Update, context: ContextTypes.DEFAULT_TYP
     users = cur.fetchall()
     cur.close()
     conn.close()
-    msg_ru = "👤 В Salveris появился новый раздел — Обо мне.\n\nЧем больше Salveris знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n🔒 Эти данные используются только для твоего анализа. Посмотреть и изменить их можешь только ты.\n\nХочешь попробовать?"
-    msg_de = "👤 In Salveris gibt es einen neuen Bereich — Über mich.\n\nJe mehr Salveris über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n🔒 Diese Daten werden nur für deine Analyse verwendet. Ansehen und ändern kannst nur du.\n\nMöchtest du es ausprobieren?"
-    msg_en = "👤 A new section appeared in Salveris — About me.\n\nThe more Salveris knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n🔒 This data is used only for your analysis. Only you can view and change it.\n\nWant to try?"
+    msg_ru = "👤 В Alvalori появился новый раздел — Обо мне.\n\nЧем больше Alvalori знает о тебе — тем глубже и точнее становится каждый анализ. Не общие слова, а то что актуально именно для тебя прямо сейчас.\n\n🔒 Эти данные используются только для твоего анализа. Посмотреть и изменить их можешь только ты.\n\nХочешь попробовать?"
+    msg_de = "👤 In Alvalori gibt es einen neuen Bereich — Über mich.\n\nJe mehr Alvalori über dich weiß — desto tiefer und präziser wird jede Analyse. Nicht allgemeine Worte, sondern was gerade für dich relevant ist.\n\n🔒 Diese Daten werden nur für deine Analyse verwendet. Ansehen und ändern kannst nur du.\n\nMöchtest du es ausprobieren?"
+    msg_en = "👤 A new section appeared in Alvalori — About me.\n\nThe more Alvalori knows about you — the deeper and more precise each analysis becomes. Not general words, but what is relevant for you right now.\n\n🔒 This data is used only for your analysis. Only you can view and change it.\n\nWant to try?"
     msgs = {"ru": msg_ru, "de": msg_de, "en": msg_en}
     sent = 0
     failed = []
@@ -2257,7 +2257,7 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "about": "👤 Über mich",
     }
 
-    msg = "📊 <b>SALVERIS — Statistik & Finanzen</b>\n"
+    msg = "📊 <b>ALVALORI — Statistik & Finanzen</b>\n"
     msg += f"Stand: {datetime.datetime.now().strftime('%d.%m.%Y %H:%M')}\n\n"
 
     msg += "👥 <b>Benutzer</b>\n"
@@ -2317,7 +2317,7 @@ async def admin_send_monthly(update: Update, context: ContextTypes.DEFAULT_TYPE)
             lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
             g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
             month_sys = f"""{lf}
-Ты ассистент Salveris. Сегодня 1-е число — начало нового месяца.
+Ты ассистент Alvalori. Сегодня 1-е число — начало нового месяца.
 Имя: {name}. {g}.
 Модель мышления: {ctx["mi"]}
 Личный месяц: {ctx["month_text"]}
@@ -2549,9 +2549,9 @@ async def send_feedback_request(context):
     for row in users_list:
         uid, name, lang = row
         feedback_msg = {
-            "ru": f"Привет, {name}! Ты попробовал(а) Salveris. Чтобы он становился лучше — мне важно твоё мнение. Буду признательна если найдёшь 2 минуты и ответишь на 3 вопроса 🙏",
-            "de": f"Hallo, {name}! Du hast Salveris ausprobiert. Damit er besser wird — ist mir deine Meinung wichtig. Ich wäre dankbar wenn du 2 Minuten findest und 3 Fragen beantwortest 🙏",
-            "en": f"Hi, {name}! You've tried Salveris. To make it better — your opinion matters to me. I'd be grateful if you find 2 minutes to answer 3 questions 🙏"
+            "ru": f"Привет, {name}! Ты попробовал(а) Alvalori. Чтобы он становился лучше — мне важно твоё мнение. Буду признательна если найдёшь 2 минуты и ответишь на 3 вопроса 🙏",
+            "de": f"Hallo, {name}! Du hast Alvalori ausprobiert. Damit er besser wird — ist mir deine Meinung wichtig. Ich wäre dankbar wenn du 2 Minuten findest und 3 Fragen beantwortest 🙏",
+            "en": f"Hi, {name}! You've tried Alvalori. To make it better — your opinion matters to me. I'd be grateful if you find 2 minutes to answer 3 questions 🙏"
         }
         btns = InlineKeyboardMarkup([[
             InlineKeyboardButton("✅ Да" if lang=="ru" else ("✅ Ja" if lang=="de" else "✅ Yes"), callback_data="feedback_yes"),
@@ -2590,7 +2590,7 @@ async def send_birthday_messages(context):
                 lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
                 g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
                 bday_sys = f"""{lf}
-Ты ассистент Salveris. День рождения {name}.
+Ты ассистент Alvalori. День рождения {name}.
 Модель мышления: {ctx["mi"]}
 
 Напиши ровно 3 предложения по шаблону — меняй только качества:
@@ -2652,7 +2652,7 @@ async def send_monthly_overview(context):
                           "en": ["January","February","March","April","May","June","July","August","September","October","November","December"]}
             month_name = month_names.get(lang, month_names["ru"])[today.month - 1]
             month_sys = f"""{lf}
-Ты ассистент Salveris. Пишешь обзор на этот месяц для {name}.
+Ты ассистент Alvalori. Пишешь обзор на этот месяц для {name}.
 {g}. День рождения: {day}.
 
 МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
@@ -2725,7 +2725,7 @@ async def send_daily_messages(context):
                 lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
                 g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
                 remind_sys = f"""{lf}
-Ты ассистент Salveris. Имя: {name}. {g}.
+Ты ассистент Alvalori. Имя: {name}. {g}.
 Личный месяц: {ctx["month_text"][:150]}
 
 Напиши одно предложение — название этого периода в 2-3 словах. Только название, без пояснений. Например: "период внутреннего переосмысления" или "время новых контактов". Без кавычек."""
@@ -2788,7 +2788,7 @@ async def send_daily_messages(context):
                     lf = {"ru": "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.", "de": "ANTWORTE NUR AUF DEUTSCH.", "en": "RESPOND ONLY IN ENGLISH."}.get(lang, "ПИШИ ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.")
                     g = "женские окончания" if (gender or "f") == "f" else "мужские окончания"
                     bday_sys = f"""{lf}
-Ты ассистент Salveris. День рождения {name}.
+Ты ассистент Alvalori. День рождения {name}.
 Модель мышления: {ctx["mi"]}
 
 Напиши ровно 3 предложения по шаблону — меняй только качества:
@@ -2831,7 +2831,7 @@ async def send_daily_messages(context):
             if user_obj.get("about_personal"): about_parts.append("Личное: " + user_obj["about_personal"])
             about_block = ("\n\nКОНТЕКСТ ЖИЗНИ:\n" + "\n".join(about_parts) + "\n\nВАЖНО: этот контекст — фон для понимания человека, не повестка дня. Каждый день опирайся прежде всего на энергию дня, месяца и года — не зацикливайся на проблемах из контекста.") if about_parts else ""
 
-            sys_intro = {"ru": f"Ты ассистент Salveris. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.", "de": f"Du bist Salveris-Assistent. Du schreibst eine Morgennachricht für {name}. Heute ist {ctx['today']}.", "en": f"You are Salveris assistant. You are writing a morning message for {name}. Today is {ctx['today']}."}
+            sys_intro = {"ru": f"Ты ассистент Alvalori. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.", "de": f"Du bist Alvalori-Assistent. Du schreibst eine Morgennachricht für {name}. Heute ist {ctx['today']}.", "en": f"You are Alvalori assistant. You are writing a morning message for {name}. Today is {ctx['today']}."}
             sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
             lang_warning = {"ru": "", "de": "WICHTIG: Die Kontextdaten unten sind auf Russisch — das ist normal. Deine Antwort muss VOLLSTÄNDIG AUF DEUTSCH sein.", "en": "IMPORTANT: The context data below is in Russian — that is normal. Your response must be ENTIRELY IN ENGLISH."}
             sys1 = f"""{lf}
@@ -2898,9 +2898,9 @@ GENERAL DAY ENERGY: {ud_base}
                     if 24 <= hours_since_end < 48:
                         gender = gender if True else "f"
                         churn_msg = {
-                            "ru": name + ", твой пробный период завершился.\n\nБуду признательна если поделишься — что остановило от подписки? Это поможет сделать Salveris лучше 🙏",
-                            "de": name + ", dein Testzeitraum ist abgelaufen.\n\nIch wäre dankbar wenn du teilst — was hat dich vom Abonnement abgehalten? Das hilft Salveris besser zu machen 🙏",
-                            "en": name + ", your trial period has ended.\n\nI'd be grateful if you share — what stopped you from subscribing? This will help make Salveris better 🙏",
+                            "ru": name + ", твой пробный период завершился.\n\nБуду признательна если поделишься — что остановило от подписки? Это поможет сделать Alvalori лучше 🙏",
+                            "de": name + ", dein Testzeitraum ist abgelaufen.\n\nIch wäre dankbar wenn du teilst — was hat dich vom Abonnement abgehalten? Das hilft Alvalori besser zu machen 🙏",
+                            "en": name + ", your trial period has ended.\n\nI'd be grateful if you share — what stopped you from subscribing? This will help make Alvalori better 🙏",
                         }
                         btns = InlineKeyboardMarkup([[
                             InlineKeyboardButton("✅ Поделиться" if lang=="ru" else ("✅ Teilen" if lang=="de" else "✅ Share"), callback_data="churn_share"),
@@ -2957,9 +2957,9 @@ GENERAL DAY ENERGY: {ud_base}
                     if remind_date == today_date:
                         gender_val = gender if True else "f"
                         remind_msg = {
-                            "ru": name + ", ты просил" + ("а" if gender_val=="f" else "") + " напомнить о Salveris 🌟\n\nГотов" + ("а" if gender_val=="f" else "") + " попробовать снова?",
-                            "de": name + ", du hast gebeten, dich an Salveris zu erinnern 🌟\n\nBereit es nochmal zu versuchen?",
-                            "en": name + ", you asked me to remind you about Salveris 🌟\n\nReady to try again?",
+                            "ru": name + ", ты просил" + ("а" if gender_val=="f" else "") + " напомнить о Alvalori 🌟\n\nГотов" + ("а" if gender_val=="f" else "") + " попробовать снова?",
+                            "de": name + ", du hast gebeten, dich an Alvalori zu erinnern 🌟\n\nBereit es nochmal zu versuchen?",
+                            "en": name + ", you asked me to remind you about Alvalori 🌟\n\nReady to try again?",
                         }
                         btns_r = InlineKeyboardMarkup([[
                             InlineKeyboardButton("💳 Оформить подписку" if lang=="ru" else ("💳 Abonnieren" if lang=="de" else "💳 Subscribe"), callback_data="btn_pay"),
