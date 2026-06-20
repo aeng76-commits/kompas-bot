@@ -1733,6 +1733,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user.get("about_relations"): about_parts.append("Отношения: " + user["about_relations"])
         if user.get("about_personal"): about_parts.append("Личное: " + user["about_personal"])
         about_block = ("\n\nКОНТЕКСТ ЖИЗНИ:\n" + "\n".join(about_parts) + "\n\nВАЖНО: этот контекст — фон для понимания человека, не повестка дня. Опирайся прежде всего на энергию периода — не зацикливайся на проблемах из контекста.") if about_parts else ""
+        lang_warn = {"ru": "", "de": "WICHTIG: Kontextdaten sind auf Russisch — antworte VOLLSTÄNDIG AUF DEUTSCH.", "en": "IMPORTANT: Context data is in Russian — respond ENTIRELY IN ENGLISH."}
+        system_name = {"ru": "Ты ассистент Внутренний Компас.", "de": "Du bist der Assistent Innerer Kompass.", "en": "You are the Inner Compass assistant."}
         context_block = f"""Имя: {user.get('name','')}. {g}.
 Модель мышления: {model_name}. {model_profile}
 Риски: {model_risks}
