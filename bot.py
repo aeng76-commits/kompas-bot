@@ -1598,30 +1598,26 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data.startswith("pay_"):
         plan = data.replace("pay_", "")
-        prices = {"1m": 1500, "6m": 7800, "12m": 15900}
-        descriptions = {
-            "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
-            "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
-            "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
+        price_ids = {
+            "1m": "price_1TkebY9kCF24Nx79gDiqhWSY",
+            "6m": "price_1Tkf619kCF24Nx79YcuLevaY",
+            "12m": "price_1Tkf8K9kCF24Nx79iuT7L9Cc"
         }
-        days = {"1m": 30, "6m": 180, "12m": 365}
+        descriptions = {
+            "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 84€", "12m": "12 месяцев — 162€"},
+            "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 84€", "12m": "12 Monate — 162€"},
+            "en": {"1m": "1 month — 15€", "6m": "6 months — 84€", "12m": "12 months — 162€"}
+        }
         label = descriptions[lang][plan]
         try:
             stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
-                line_items=[{
-                    "price_data": {
-                        "currency": "eur",
-                        "product_data": {"name": f"Alvalori — {label}"},
-                        "unit_amount": prices[plan],
-                    },
-                    "quantity": 1,
-                }],
-                mode="payment",
+                line_items=[{"price": price_ids[plan], "quantity": 1}],
+                mode="subscription",
                 success_url=f"https://t.me/innercompass_ai_bot?start=paid_{user_id}_{plan}",
                 cancel_url=f"https://t.me/innercompass_ai_bot",
-                metadata={"user_id": str(user_id), "plan": plan, "days": str(days[plan])}
+                metadata={"user_id": str(user_id), "plan": plan}
             )
             pay_msg = {"ru": f"Тариф: {label}\n\nНажми кнопку для оплаты картой через Stripe:", "de": f"Tarif: {label}\n\nKlicke auf die Schaltfläche zur Kartenzahlung über Stripe:", "en": f"Plan: {label}\n\nClick the button to pay by card via Stripe:"}
             btns = [
