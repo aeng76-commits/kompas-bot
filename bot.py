@@ -1597,20 +1597,42 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data.startswith("pay_"):
         plan = data.replace("pay_", "")
+        prices = {"1m": 1500, "6m": 7800, "12m": 15900}
         descriptions = {
             "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
             "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
             "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
         }
+        days = {"1m": 30, "6m": 180, "12m": 365}
         label = descriptions[lang][plan]
-        paypal_url = PAYPAL_LINKS[plan]
-        header = {"ru": "Тариф: " + label + "\n\nВыбери способ оплаты:\n\n⚠️ При оплате укажи своё имя и дату рождения в комментарии.", "de": "Tarif: " + label + "\n\nWähle die Zahlungsmethode:\n\n⚠️ Bitte gib bei der Zahlung deinen Namen und dein Geburtsdatum an.", "en": "Plan: " + label + "\n\nChoose payment method:\n\n⚠️ Please include your name and date of birth when paying."}
-        btns = [
-            [InlineKeyboardButton("💳 PayPal", url=paypal_url)],
-            [InlineKeyboardButton("🏦 Банковский перевод (SEPA)" if lang=="ru" else ("🏦 Banküberweisung (SEPA)" if lang=="de" else "🏦 Bank transfer (SEPA)"), callback_data=f"sepa_{plan}")],
-            [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
-        ]
-        await query.edit_message_text(header.get(lang, header["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+        try:
+            stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[{
+                    "price_data": {
+                        "currency": "eur",
+                        "product_data": {"name": f"Alvalori — {label}"},
+                        "unit_amount": prices[plan],
+                    },
+                    "quantity": 1,
+                }],
+                mode="payment",
+                success_url=f"https://t.me/innercompass_ai_bot?start=paid_{user_id}_{plan}",
+                cancel_url=f"https://t.me/innercompass_ai_bot",
+                metadata={"user_id": str(user_id), "plan": plan, "days": str(days[plan])}
+            )
+            pay_msg = {"ru": f"Тариф: {label}\n\nНажми кнопку для оплаты картой через Stripe:", "de": f"Tarif: {label}\n\nKlicke auf die Schaltfläche zur Kartenzahlung über Stripe:", "en": f"Plan: {label}\n\nClick the button to pay by card via Stripe:"}
+            btns = [
+                [InlineKeyboardButton("💳 Оплатить картой" if lang=="ru" else ("💳 Mit Karte bezahlen" if lang=="de" else "💳 Pay by card"), url=session.url)],
+                [InlineKeyboardButton("🏦 SEPA перевод" if lang=="ru" else ("🏦 SEPA Überweisung" if lang=="de" else "🏦 SEPA transfer"), callback_data=f"sepa_{plan}")],
+                [InlineKeyboardButton("🇷🇺 Оплата из России" if lang=="ru" else ("🇷🇺 Zahlung aus Russland" if lang=="de" else "🇷🇺 Payment from Russia"), url="https://t.me/aeng0")],
+                [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
+            ]
+            await query.edit_message_text(pay_msg.get(lang, pay_msg["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+        except Exception as e:
+            print(f"Stripe error: {e}", flush=True)
+            await query.edit_message_text({"ru": "Ошибка создания платежа. Напиши администратору.", "de": "Fehler bei der Zahlungserstellung. Schreibe dem Administrator.", "en": "Payment error. Contact administrator."}.get(lang, "Payment error."), reply_markup=get_upgrade_keyboard(lang))
 
     elif data.startswith("sepa_"):
         plan = data.replace("sepa_", "")
