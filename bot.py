@@ -3045,6 +3045,58 @@ if __name__ == "__main__":
         async def health(request):
             return web.Response(text="ok")
 
+        async def stripe_webhook(request):
+            payload = await request.read()
+            sig_header = request.headers.get("Stripe-Signature", "")
+            webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+            try:
+                if webhook_secret:
+                    event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+                else:
+                    import json
+                    event = json.loads(payload)
+            except Exception as e:
+                print(f"Stripe webhook error: {e}", flush=True)
+                return web.Response(status=400)
+            if event["type"] in ("customer.subscription.created", "invoice.payment_succeeded"):
+                try:
+                    if event["type"] == "customer.subscription.created":
+                        obj = event["data"]["object"]
+                        metadata = obj.get("metadata", {})
+                    else:
+                        obj = event["data"]["object"]
+                        sub_id = obj.get("subscription")
+                        stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+                        sub = stripe.Subscription.retrieve(sub_id)
+                        metadata = sub.get("metadata", {})
+                    user_id = int(metadata.get("user_id", 0))
+                    plan = metadata.get("plan", "1m")
+                    days = {"1m": 30, "6m": 180, "12m": 365}.get(plan, 30)
+                    if user_id:
+                        import datetime
+                        paid_until = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=days)
+                        save_user(user_id, paid_until=paid_until)
+                        user = get_user(user_id)
+                        lang = user.get("lang", "ru") if user else "ru"
+                        success_msg = {"ru": f"✅ Оплата прошла! Доступ открыт на {days} дней.", "de": f"✅ Zahlung erfolgreich! Zugang für {days} Tage.", "en": f"✅ Payment successful! Access for {days} days."}
+                        await app.bot.send_message(user_id, success_msg.get(lang, success_msg["ru"]))
+                        print(f"✅ Access granted: user {user_id}, plan {plan}", flush=True)
+                except Exception as e:
+                    print(f"Webhook processing error: {e}", flush=True)
+            elif event["type"] == "customer.subscription.deleted":
+                try:
+                    obj = event["data"]["object"]
+                    metadata = obj.get("metadata", {})
+                    user_id = int(metadata.get("user_id", 0))
+                    if user_id:
+                        user = get_user(user_id)
+                        lang = user.get("lang", "ru") if user else "ru"
+                        end_msg = {"ru": "Подписка завершилась. Для продления — раздел Подписка.", "de": "Abonnement abgelaufen. Zur Verlängerung — Bereich Abonnement.", "en": "Subscription ended. To renew — Subscription section."}
+                        await app.bot.send_message(user_id, end_msg.get(lang, end_msg["ru"]))
+                except Exception as e:
+                    print(f"Webhook deletion error: {e}", flush=True)
+            return web.Response(text="ok")
+
         async def run():
             await app.initialize()
             await app.bot.delete_webhook(drop_pending_updates=True)
