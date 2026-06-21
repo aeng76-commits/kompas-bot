@@ -1582,9 +1582,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(minor_pay_msg.get(lang, minor_pay_msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]]))
             return
         descriptions = {
-            "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
-            "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
-            "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
+            "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 84€", "12m": "12 месяцев — 162€"},
+            "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 84€", "12m": "12 Monate — 162€"},
+            "en": {"1m": "1 month — 15€", "6m": "6 months — 84€", "12m": "12 months — 162€"}
         }
         header = {"ru": "Выбери тариф:", "de": "Wähle einen Tarif:", "en": "Choose a plan:"}
         btns = [
