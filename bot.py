@@ -165,9 +165,9 @@ def increment_usage(user_id, section):
     save_user(user_id, daily_usage=usage)
 
 RULES = {
-    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Твои имя и дата рождения сохраняются и используются только для твоего анализа. Имя и дату рождения можно изменить по 1 разу самостоятельно, после этого только через администратора.\n4. Твои данные никому не передаются.\n5. Подписка не продлевается автоматически. Для продления напиши администратору.",
-    "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung für Entscheidungen liegt bei dir.\n3. Dein Name und Geburtsdatum werden gespeichert und nur für deine Analyse verwendet. Name und Geburtsdatum können je einmal selbst geändert werden, danach nur durch den Administrator.\n4. Deine Daten werden nicht weitergegeben.\n5. Das Abonnement verlängert sich nicht automatisch. Für eine Verlängerung schreibe dem Administrator.",
-    "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your name and date of birth are stored and used only for your analysis. Name and date of birth can each be changed once yourself, after that only through the administrator.\n4. Your data is not shared with anyone.\n5. Subscription does not renew automatically. To renew contact the administrator."
+    "ru": "Прежде чем начать, ознакомься с правилами:\n\n1. Анализ не заменяет врача, психолога, юриста или финансового консультанта.\n2. Ответственность за решения остаётся за тобой.\n3. Твои имя и дата рождения сохраняются и используются только для твоего анализа. Имя и дату рождения можно изменить по 1 разу самостоятельно, после этого только через администратора.\n4. Твои данные никому не передаются.\n5. Подписка продлевается автоматически. Отменить можно в любой момент — напиши администратору.",
+    "de": "Bevor wir beginnen, bitte lies die Regeln:\n\n1. Die Analyse ersetzt keinen Arzt, Psychologen oder Rechtsberater.\n2. Die Verantwortung für Entscheidungen liegt bei dir.\n3. Dein Name und Geburtsdatum werden gespeichert und nur für deine Analyse verwendet. Name und Geburtsdatum können je einmal selbst geändert werden, danach nur durch den Administrator.\n4. Deine Daten werden nicht weitergegeben.\n5. Das Abonnement verlängert sich automatisch. Du kannst jederzeit kündigen — schreibe dem Administrator.",
+    "en": "Before we start, please read the rules:\n\n1. The analysis does not replace a doctor, psychologist or legal advisor.\n2. Responsibility for decisions remains with you.\n3. Your name and date of birth are stored and used only for your analysis. Name and date of birth can each be changed once yourself, after that only through the administrator.\n4. Your data is not shared with anyone.\n5. Subscription renews automatically. You can cancel at any time — contact the administrator."
 }
 
 PAYPAL_LINKS = {
@@ -1032,7 +1032,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             tokens = {"me": 3000, "year": 3000, "month": 2500, "day": 2000}
             for p in prompts:
                 try:
-                    resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 2000), system=p, messages=[{"role": "user", "content": "Напиши"}])
+                    import asyncio
+                    resp = await asyncio.to_thread(lambda: client.messages.create(model="claude-sonnet-4-6", max_tokens=tokens.get(section, 2000), system=p, messages=[{"role": "user", "content": "Напиши"}]))
                     txt = clean_text(resp.content[0].text)
                     await context.bot.send_message(user_id, txt, parse_mode="HTML")
                 except Exception as e:
@@ -1445,9 +1446,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(info_text.get(lang, info_text["ru"]), reply_markup=btns, parse_mode="HTML")
 
     elif data == "btn_help":
-        help_ru = "❓ Помощь\n\n🆓 Пробный доступ\n72 часа бесплатно — все разделы открыты. Просто перестань пользоваться — ничего отменять не нужно.\n\n💳 Платная подписка\nПодписка не продлевается автоматически. Для продления напиши администратору заранее.\n\n✏️ Изменить имя или дату рождения\nНастройки → Изменить имя / Изменить дату рождения. Каждое можно изменить 1 раз самостоятельно.\n\n💬 Остались вопросы?\nНапиши администратору"
-        help_de = "❓ Hilfe\n\n🆓 Testzugang\n72 Stunden kostenlos — alle Bereiche verfügbar. Keine Kündigung notwendig.\n\n💳 Bezahltes Abonnement\nDas Abonnement verlängert sich nicht automatisch. Für eine Verlängerung schreibe dem Administrator rechtzeitig.\n\n✏️ Name oder Geburtsdatum ändern\nEinstellungen → Name ändern / Geburtsdatum ändern. Jeweils einmal selbst möglich.\n\n💬 Noch Fragen?\nSchreibe dem Administrator @aeng0"
-        help_en = "❓ Help\n\n🆓 Trial access\n72 hours free — all sections available. Just stop using it — no cancellation needed.\n\n💳 Paid subscription\nThe subscription does not renew automatically. To renew contact the administrator in advance.\n\n✏️ Change name or date of birth\nSettings → Change name / Change date of birth. Each can be changed once.\n\n💬 Still have questions?\nWrite to the administrator @aeng0"
+        help_ru = "❓ Помощь\n\n🆓 Пробный доступ\n72 часа бесплатно — все разделы открыты. Просто перестань пользоваться — ничего отменять не нужно.\n\n💳 Платная подписка\nПодписка продлевается автоматически. Отменить можно в любой момент — напиши администратору.\n\n✏️ Изменить имя или дату рождения\nНастройки → Изменить имя / Изменить дату рождения. Каждое можно изменить 1 раз самостоятельно.\n\n💬 Остались вопросы?\nНапиши администратору"
+        help_de = "❓ Hilfe\n\n🆓 Testzugang\n72 Stunden kostenlos — alle Bereiche verfügbar. Keine Kündigung notwendig.\n\n💳 Bezahltes Abonnement\nDas Abonnement verlängert sich automatisch. Du kannst jederzeit kündigen — schreibe dem Administrator.\n\n✏️ Name oder Geburtsdatum ändern\nEinstellungen → Name ändern / Geburtsdatum ändern. Jeweils einmal selbst möglich.\n\n💬 Noch Fragen?\nSchreibe dem Administrator @aeng0"
+        help_en = "❓ Help\n\n🆓 Trial access\n72 hours free — all sections available. Just stop using it — no cancellation needed.\n\n💳 Paid subscription\nSubscription renews automatically. You can cancel at any time — contact the administrator.\n\n✏️ Change name or date of birth\nSettings → Change name / Change date of birth. Each can be changed once.\n\n💬 Still have questions?\nWrite to the administrator @aeng0"
         help_text = {"ru": help_ru, "de": help_de, "en": help_en}
         btns = InlineKeyboardMarkup([[
             InlineKeyboardButton("✍️ Написать администратору" if lang=="ru" else ("✍️ Administrator schreiben" if lang=="de" else "✍️ Contact administrator"), url="https://t.me/aeng0"),
@@ -1615,8 +1616,8 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 payment_method_types=["card"],
                 line_items=[{"price": price_ids[plan], "quantity": 1}],
                 mode="subscription",
-                success_url=f"https://t.me/innercompass_ai_bot?start=paid_{user_id}_{plan}",
-                cancel_url=f"https://t.me/innercompass_ai_bot",
+                success_url=f"https://t.me/alvalori_bot?start=paid_{user_id}_{plan}",
+                cancel_url=f"https://t.me/alvalori_bot",
                 metadata={"user_id": str(user_id), "plan": plan}
             )
             pay_msg = {"ru": f"Тариф: {label}\n\nНажми кнопку для оплаты картой через Stripe:", "de": f"Tarif: {label}\n\nKlicke auf die Schaltfläche zur Kartenzahlung über Stripe:", "en": f"Plan: {label}\n\nClick the button to pay by card via Stripe:"}
@@ -2024,7 +2025,7 @@ async def my_ref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     count = cur.fetchone()[0]
     cur.close()
     conn.close()
-    link = f"https://t.me/innercompass_ai_bot?start=ref_{name}"
+    link = f"https://t.me/alvalori_bot?start=ref_{name}"
     msgs = {
         "ru": f"Твоя реферальная ссылка:\n{link}\n\nПо ней зарегистрировалось: {count} чел.",
         "de": f"Dein Empfehlungslink:\n{link}\n\nRegistriert über deinen Link: {count} Personen.",
@@ -2067,7 +2068,7 @@ async def admin_makeref(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cur.close()
     conn.close()
     if row:
-        link = "https://t.me/innercompass_ai_bot?start=refid_" + str(row[0])
+        link = "https://t.me/alvalori_bot?start=refid_" + str(row[0])
         await update.message.reply_text("Реферальная ссылка для " + name + ":\n" + link)
     else:
         await update.message.reply_text("Пользователь " + name + " не найден в базе.")
@@ -2921,13 +2922,7 @@ GENERAL DAY ENERGY: {ud_base}
                     "en": f"⏱ You have {trial_hours_left} hrs of free access left."
                 }
                 await context.bot.send_message(uid, hours_msg.get(lang, hours_msg["ru"]))
-            await show_menu(context, uid, lang)
-        except Exception as e:
-            print(f"Daily msg error {uid}: {e}", flush=True)
-            try:
-                await context.bot.send_message(ADMIN_ID, "Не доставлено: " + str(name) + " (" + str(uid) + ")")
-            except:
-                pass
+
             # Опрос через 24ч после окончания платной подписки
             try:
                 paid_until_val = paid_until
@@ -2951,6 +2946,8 @@ GENERAL DAY ENERGY: {ud_base}
             except Exception as e:
                 print(f"Paid churn survey error {uid}: {e}", flush=True)
 
+            await show_menu(context, uid, lang)
+
             # Напоминание тем кто попросил
             try:
                 if remind_at:
@@ -2972,7 +2969,14 @@ GENERAL DAY ENERGY: {ud_base}
             except Exception as e:
                 print(f"Remind error {uid}: {e}", flush=True)
 
-            await asyncio.sleep(1)
+        except Exception as e:
+            print(f"Daily msg error {uid}: {e}", flush=True)
+            try:
+                await context.bot.send_message(ADMIN_ID, "Не доставлено: " + str(name) + " (" + str(uid) + ")")
+            except:
+                pass
+
+        await asyncio.sleep(1)
 
 if __name__ == "__main__":
     import os
