@@ -1,3 +1,4 @@
+import stripe
 import re
 # -*- coding: utf-8 -*-
 import os, datetime, re, json
