@@ -1626,7 +1626,6 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pay_msg = {"ru": f"Тариф: {label}\n\nНажми кнопку для оплаты картой через Stripe:", "de": f"Tarif: {label}\n\nKlicke auf die Schaltfläche zur Kartenzahlung über Stripe:", "en": f"Plan: {label}\n\nClick the button to pay by card via Stripe:"}
             btns = [
                 [InlineKeyboardButton("💳 Оплатить картой" if lang=="ru" else ("💳 Mit Karte bezahlen" if lang=="de" else "💳 Pay by card"), url=session.url)],
-                [InlineKeyboardButton("🏦 SEPA перевод" if lang=="ru" else ("🏦 SEPA Überweisung" if lang=="de" else "🏦 SEPA transfer"), callback_data=f"sepa_{plan}")],
                 [InlineKeyboardButton("🇷🇺 Оплата из России" if lang=="ru" else ("🇷🇺 Zahlung aus Russland" if lang=="de" else "🇷🇺 Payment from Russia"), url="https://t.me/aeng0")],
                 [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
             ]
@@ -1635,25 +1634,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"Stripe error: {e}", flush=True)
             await query.edit_message_text({"ru": "Ошибка создания платежа. Напиши администратору.", "de": "Fehler bei der Zahlungserstellung. Schreibe dem Administrator.", "en": "Payment error. Contact administrator."}.get(lang, "Payment error."), reply_markup=get_upgrade_keyboard(lang))
 
-    elif data.startswith("sepa_"):
-        plan = data.replace("sepa_", "")
-        descriptions = {
-            "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 78€", "12m": "12 месяцев — 159€"},
-            "de": {"1m": "1 Monat — 15€", "6m": "6 Monate — 78€", "12m": "12 Monate — 159€"},
-            "en": {"1m": "1 month — 15€", "6m": "6 months — 78€", "12m": "12 months — 159€"}
-        }
-        label = descriptions[lang][plan]
-        sepa_text = {
-            "ru": "Банковский перевод (SEPA)\n\nСумма: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nПолучатель: Alexandra Engel\nНазначение: Внутренний Компас " + label + "\n\n⚠️ В комментарии к переводу укажи своё имя и дату рождения.\n\nПосле оплаты напиши администратору для активации доступа.",
-            "de": "Banküberweisung (SEPA)\n\nBetrag: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nEmpfänger: Alexandra Engel\nVerwendungszweck: Innerer Kompass " + label + "\n\n⚠️ Bitte gib in der Überweisung deinen Namen und dein Geburtsdatum an.\n\nNach der Zahlung schreibe dem Administrator zur Aktivierung.",
-            "en": "Bank transfer (SEPA)\n\nAmount: " + label + "\nIBAN: DE28 5002 4024 4782 1216 01\nBank: C24 Bank\nRecipient: Alexandra Engel\nReference: Inner Compass " + label + "\n\n⚠️ Please include your name and date of birth in the transfer note.\n\nAfter payment write to the administrator for activation."
-        }
-        btns = [
-            [InlineKeyboardButton("💬 Написать администратору" if lang=="ru" else ("💬 Admin schreiben" if lang=="de" else "💬 Contact admin"), url="https://t.me/aeng0")],
-            [InlineKeyboardButton("◀️ Назад" if lang=="ru" else ("◀️ Zurück" if lang=="de" else "◀️ Back"), callback_data=f"pay_{plan}")],
-            [InlineKeyboardButton("🏠 Меню" if lang=="ru" else ("🏠 Menü" if lang=="de" else "🏠 Menu"), callback_data="btn_menu_home")],
-        ]
-        await query.edit_message_text(sepa_text.get(lang, sepa_text["ru"]), reply_markup=InlineKeyboardMarkup(btns))
+
 
 
 async def gender_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
