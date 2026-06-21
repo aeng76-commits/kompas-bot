@@ -3111,6 +3111,7 @@ if __name__ == "__main__":
             print(f"Webhook set: {WEBHOOK_URL}/webhook", flush=True)
             server = web.Application()
             server.router.add_post("/webhook", handle)
+            server.router.add_post("/stripe-webhook", stripe_webhook)
             server.router.add_get("/health", health)
             runner = web.AppRunner(server)
             await runner.setup()
