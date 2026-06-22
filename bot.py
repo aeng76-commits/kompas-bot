@@ -1621,9 +1621,9 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data.startswith("pay_"):
         plan = data.replace("pay_", "")
         price_ids = {
-            "1m": "price_1TkebY9kCF24Nx79gDiqhWSY",
-            "6m": "price_1Tkf619kCF24Nx79YcuLevaY",
-            "12m": "price_1Tkf8K9kCF24Nx79iuT7L9Cc"
+            "1m": "price_1TlCHp8xIqd4ykush9BOGMGe",
+            "6m": "price_1TlCHp8xIqd4ykusli9sZyEb",
+            "12m": "price_1TlCHp8xIqd4ykusd0fCdojN"
         }
         descriptions = {
             "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 84€", "12m": "12 месяцев — 162€"},
