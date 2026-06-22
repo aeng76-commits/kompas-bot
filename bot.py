@@ -790,13 +790,14 @@ def get_system_prompt(lang, user):
 ПИШИ ТОЛЬКО НА {'русском' if lang == 'ru' else ('немецком' if lang == 'de' else 'английском')} ЯЗЫКЕ. НИКАКИХ СЛОВ НА ДРУГИХ ЯЗЫКАХ."""
 
 def get_universal_day(date):
-    """Вычисляет общий день для даты и возвращает число и описание"""
+    """Вычисляет общий день для даты. Возвращает (итог, промежуточное, has_zero)"""
     digits = [int(d) for d in date.strftime('%d%m%Y')]
     total = sum(digits)
+    intermediate = total  # например 21
     while total > 9:
         total = sum(int(d) for d in str(total))
     has_zero = '0' in date.strftime('%d')  # 10, 20, 30
-    return total, has_zero
+    return total, intermediate, has_zero
 
 UNIVERSAL_DAY_TIPS = {
     1: {
@@ -2901,16 +2902,19 @@ async def send_daily_messages(context):
             await context.bot.send_message(uid, risk_text, parse_mode="HTML")
 
             # Совет дня
-            ud_num, has_zero = get_universal_day(dt2.datetime.now(dt2.timezone.utc))
+            ud_num, ud_intermediate, has_zero = get_universal_day(dt2.datetime.now(dt2.timezone.utc))
             ud_base = UNIVERSAL_DAY_TIPS.get(ud_num, {}).get(lang, "")
             ud_zero = UNIVERSAL_DAY_TIPS.get(0, {}).get(lang, "") if has_zero else ""
+            ud_components_label = {"ru": f"Составляющие общего дня: {ud_intermediate} → {ud_num}", "de": f"Bestandteile des allgemeinen Tages: {ud_intermediate} → {ud_num}", "en": f"Components of the universal day: {ud_intermediate} → {ud_num}"}
+            ud_components = ud_components_label.get(lang, ud_components_label["ru"])
             sys_tip = {"ru": f"Напиши один короткий практический совет — 1-2 предложения. Начни с тега <b>📋 Совет дня</b>. Как скорректировать действия личного дня с учётом общего фона. ПРАВИЛА: никаких чисел периодов, максимум 2 предложения. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe einen kurzen praktischen Tipp — 1-2 Sätze. Beginne mit dem Tag <b>📋 Tipp des Tages</b>. Wie die Aktivitäten des persönlichen Tages im Einklang mit dem allgemeinen Hintergrund angepasst werden können. REGELN: keine Periodenzahlen, maximal 2 Sätze. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write one short practical tip — 1-2 sentences. Start with the tag <b>📋 Daily Tip</b>. How to adjust the activities of the personal day considering the general background. RULES: no period numbers, maximum 2 sentences. YOU. {g}. No markdown asterisks."}
             sys3 = f"""{lf}
 {sys_intro.get(lang, sys_intro["ru"])}
 
-PERSONAL DAY: {ctx['day_text']}
-GENERAL DAY ENERGY: {ud_base}
-{"SPECIAL CONDITION: " + ud_zero if ud_zero else ""}
+ЛИЧНЫЙ ДЕНЬ (влияет на личные дела и решения): {ctx['day_full']}
+ОБЩИЙ ДЕНЬ {ud_components} (влияет на внешние события, документы, бизнес, госдела): {ud_base}
+{"ОСОБОЕ УСЛОВИЕ: " + ud_zero if ud_zero else ""}
+ВАЖНО: если энергии личного и общего дня противоречат (например личный день 1=начало, общий день 9=завершение) — укажи это в совете и объясни как действовать.
 
 {sys_tip.get(lang, sys_tip["ru"])}
 
