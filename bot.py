@@ -290,16 +290,21 @@ def build_profile_context(user, lang="ru"):
             return d.get(lang, d.get("ru", ""))
         return d or ""
     # Тексты для каждой составной цифры
+    labels = {
+        "ru": ("Итоговая энергия дня", "Составные энергии", "Энергия"),
+        "de": ("Hauptenergie des Tages", "Zusammengesetzte Energien", "Energie"),
+        "en": ("Main energy of the day", "Component energies", "Energy"),
+    }
+    lbl_main, lbl_comp, lbl_e = labels.get(lang, labels["ru"])
     def day_components_text():
         parts = []
         for d in day_digits:
             t = get_text(D.DAYS.get(d, ""))
             if t:
-                parts.append(f"Энергия {d}: {t}")
+                parts.append(f"{lbl_e} {d}: {t}")
         return "\n".join(parts)
-    # Итоговый текст дня
     day_main_text = get_text(D.DAYS.get(day_result, ""))
-    day_full = f"Итоговая энергия дня: {day_result}\n{day_main_text}\n\nСоставные энергии:\n{day_components_text()}"
+    day_full = f"{lbl_main}: {day_result}\n{day_main_text}\n\n{lbl_comp}:\n{day_components_text()}"
     return {
         "mi": mi,
         "year_text": get_text(D.YEARS.get(py, "")),
