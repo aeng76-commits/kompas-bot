@@ -2835,32 +2835,39 @@ async def send_daily_messages(context):
             about_block = ("\n\nКОНТЕКСТ ЖИЗНИ:\n" + "\n".join(about_parts) + "\n\nВАЖНО: этот контекст — фон для понимания человека, не повестка дня. Каждый день опирайся прежде всего на энергию дня, месяца и года — не зацикливайся на проблемах из контекста.") if about_parts else ""
 
             sys_intro = {"ru": f"Ты ассистент Alvalori. Пишешь утреннее сообщение для {name}. Сегодня {ctx['today']}.", "de": f"Du bist Alvalori-Assistent. Du schreibst eine Morgennachricht für {name}. Heute ist {ctx['today']}.", "en": f"You are Alvalori assistant. You are writing a morning message for {name}. Today is {ctx['today']}."}
-            sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
+            model_strengths = mi.get("strengths", "") if isinstance(mi, dict) else ""
+            model_chaos = mi.get("chaos", "") if isinstance(mi, dict) else ""
+            model_formula = mi.get("formula", "") if isinstance(mi, dict) else ""
+            sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Каждая рекомендация — конкретное действие именно для этого дня с учётом всех данных. Формат: 1. 2. 3. — каждый пункт одно чёткое предложение. ЗАПРЕЩЕНО использовать фразы: прислушайся к себе, будь внимателен, найди баланс, позаботься о себе, доверяй процессу, просто действуй. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Jede Empfehlung ist eine konkrete Handlung genau für diesen Tag. Format: 1. 2. 3. VERBOTEN: höre auf dich selbst, finde Balance, kümmere dich um dich. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Each recommendation is a concrete action specifically for this day. Format: 1. 2. 3. FORBIDDEN phrases: listen to yourself, find balance, take care of yourself, trust the process. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
             lang_warning = {"ru": "", "de": "WICHTIG: Die Kontextdaten unten sind auf Russisch — das ist normal. Deine Antwort muss VOLLSTÄNDIG AUF DEUTSCH sein.", "en": "IMPORTANT: The context data below is in Russian — that is normal. Your response must be ENTIRELY IN ENGLISH."}
             sys1 = f"""{lf}
 {lang_warning.get(lang, "")}
 {sys_intro.get(lang, sys_intro["ru"])}
 
-THINKING MODEL: {model_name}
-{model_profile}
-PERSONAL YEAR: {ctx['year_text'][:200]}
-PERSONAL MONTH: {ctx['month_text'][:150]}
-PERSONAL DAY: {ctx['day_text']}{about_block}
+МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
+Профиль: {model_profile}
+Сильные стороны: {model_strengths}
+В стрессе: {model_chaos}
+Формула: {model_formula}
+ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
+ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
+ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
 
 {sys_rec.get(lang, sys_rec["ru"])}
 
 {lf}"""
 
-            sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Учитывай модель мышления, все три периода и данные о человеке. Формат: 1. 2. 3. — каждый пункт одно чёткое простое предложение, мягко и конкретно. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Berücksichtige das Denkmodell, alle drei Perioden und die Angaben zur Person. Format: 1. 2. 3. — jeder Punkt ein klarer einfacher Satz. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Consider the thinking model, all three periods and personal data. Format: 1. 2. 3. — each point one clear simple sentence. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
+            sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Каждый риск — конкретная ловушка именно этого дня для этого человека. Мягко и точно, без морализаторства. Формат: 1. 2. 3. ЗАПРЕЩЕНО использовать фразы: будь осторожен, не забывай, обрати внимание. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Jedes Risiko ist eine konkrete Falle genau dieses Tages. Sanft und präzise. Format: 1. 2. 3. VERBOTEN: sei vorsichtig, vergiss nicht, achte darauf. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Each risk is a concrete trap of this specific day for this person. Gentle and precise. Format: 1. 2. 3. FORBIDDEN phrases: be careful, dont forget, pay attention. YOU. {g}. No markdown asterisks."}
             sys2 = f"""{lf}
 {lang_warning.get(lang, "")}
 {sys_intro.get(lang, sys_intro["ru"])}
 
-THINKING MODEL: {model_name}
-MODEL RISKS: {model_risks}
-PERSONAL YEAR: {ctx['year_text'][:200]}
-PERSONAL MONTH: {ctx['month_text'][:150]}
-PERSONAL DAY: {ctx['day_text']}{about_block}
+МОДЕЛЬ МЫШЛЕНИЯ: {model_name}
+Риски модели: {model_risks}
+В стрессе: {model_chaos}
+ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
+ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
+ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
 
 {sys_risk.get(lang, sys_risk["ru"])}
 
