@@ -276,8 +276,9 @@ def build_profile_context(user, lang="ru"):
     py = D.get_year(user["day"], user["month"], now.year)
     pm = D.get_month(py, now.month)
     pd = D.get_day(pm, now.day)
+    # Составные цифры личного дня по точной формуле
+    day_digits, day_result = D.get_day_components(user["day"], now.day)
     mi_raw = D.MODELS.get(m, {})
-    # Если данные многоязычные — берём нужный язык
     def get_field(d, field):
         v = d.get(field, "")
         if isinstance(v, dict):
@@ -288,11 +289,25 @@ def build_profile_context(user, lang="ru"):
         if isinstance(d, dict):
             return d.get(lang, d.get("ru", ""))
         return d or ""
+    # Тексты для каждой составной цифры
+    def day_components_text():
+        parts = []
+        for d in day_digits:
+            t = get_text(D.DAYS.get(d, ""))
+            if t:
+                parts.append(f"Энергия {d}: {t}")
+        return "\n".join(parts)
+    # Итоговый текст дня
+    day_main_text = get_text(D.DAYS.get(day_result, ""))
+    day_full = f"Итоговая энергия дня: {day_result}\n{day_main_text}\n\nСоставные энергии:\n{day_components_text()}"
     return {
         "mi": mi,
         "year_text": get_text(D.YEARS.get(py, "")),
         "month_text": get_text(D.MONTHS.get(pm, "")),
         "day_text": get_text(D.DAYS.get(pd, "")),
+        "day_full": day_full,
+        "day_result": day_result,
+        "day_digits": day_digits,
         "today": now.strftime("%d.%m.%Y"),
     }
 
@@ -319,7 +334,7 @@ def get_profile_prompt(lang, user, section):
 {ctx['month_text'][:400]}
 
 ЛИЧНЫЙ ДЕНЬ (фокус сегодня):
-{ctx['day_text'][:200]}
+{ctx['day_full']}
 === КОНЕЦ ==="""
 
     sections = {
@@ -2851,7 +2866,7 @@ async def send_daily_messages(context):
 Формула: {model_formula}
 ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
 ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
-ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
+ЛИЧНЫЙ ДЕНЬ: {ctx['day_full']}{about_block}
 
 {sys_rec.get(lang, sys_rec["ru"])}
 
@@ -2867,7 +2882,7 @@ async def send_daily_messages(context):
 В стрессе: {model_chaos}
 ЛИЧНЫЙ ГОД: {ctx['year_text'][:200]}
 ЛИЧНЫЙ МЕСЯЦ: {ctx['month_text'][:150]}
-ЛИЧНЫЙ ДЕНЬ: {ctx['day_text']}{about_block}
+ЛИЧНЫЙ ДЕНЬ: {ctx['day_full']}{about_block}
 
 {sys_risk.get(lang, sys_risk["ru"])}
 
