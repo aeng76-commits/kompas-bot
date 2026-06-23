@@ -2861,7 +2861,28 @@ async def send_daily_messages(context):
             model_strengths = mi.get("strengths", "") if isinstance(mi, dict) else ""
             model_chaos = mi.get("chaos", "") if isinstance(mi, dict) else ""
             model_formula = mi.get("formula", "") if isinstance(mi, dict) else ""
-            sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Каждая рекомендация — конкретное действие именно для этого дня с учётом всех данных. Формат: 1. 2. 3. — каждый пункт одно чёткое предложение. ЗАПРЕЩЕНО: называть числа (не пиши 'энергия шести', 'день семи', 'восьмёрка' и т.п.) — описывай качество дня словами без цифр. ЗАПРЕЩЕНО использовать фразы: прислушайся к себе, будь внимателен, найди баланс, позаботься о себе, доверяй процессу, просто действуй. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Jede Empfehlung ist eine konkrete Handlung genau für diesen Tag. Format: 1. 2. 3. VERBOTEN: Zahlen oder Energienummern nennen (nicht 'Sechs-Energie', 'Sieben-Tag' usw.) — beschreibe die Qualität des Tages ohne Ziffern. VERBOTEN: höre auf dich selbst, finde Balance. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Each recommendation is a concrete action specifically for this day. Format: 1. 2. 3. FORBIDDEN: mention numbers or energy numbers (not 'six energy', 'day of seven' etc.) — describe the quality of the day in words without digits. FORBIDDEN phrases: listen to yourself, find balance, take care of yourself. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
+            sys_rec = {"ru": f"""Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>.
+
+ЛОГИКА: Личный день задаёт главную тему дня. Составляющие личного дня — дополнительные оттенки. Личный месяц и год — фон. Модель мышления — как человек это проживает.
+
+Каждая рекомендация = конкретное действие которое человек может сделать СЕГОДНЯ чтобы использовать энергию дня максимально эффективно. Не общие советы — а точные действия под этот конкретный день и этого конкретного человека.
+
+Формат: 1. 2. 3. — каждый пункт 1-2 предложения.
+ЗАПРЕЩЕНО: называть числа и энергии по номерам. ЗАПРЕЩЕНО: прислушайся к себе, найди баланс, позаботься о себе, доверяй процессу. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.""", "de": f"""Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>.
+
+LOGIK: Der persönliche Tag gibt das Hauptthema vor. Die Bestandteile sind zusätzliche Nuancen. Monat und Jahr bilden den Hintergrund. Das Denkmodell zeigt wie der Mensch das erlebt.
+
+Jede Empfehlung = eine konkrete Handlung die {name} HEUTE tun kann um die Energie des Tages maximal zu nutzen. Keine allgemeinen Ratschläge — präzise Aktionen für diesen Tag und diesen Menschen.
+
+Format: 1. 2. 3. — jeder Punkt 1-2 Sätze.
+VERBOTEN: Zahlen oder Energienummern nennen. VERBOTEN: höre auf dich, finde Balance. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.""", "en": f"""Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>.
+
+LOGIC: The personal day sets the main theme. Components are additional nuances. Month and year are the background. The thinking model shows how this person experiences it.
+
+Each recommendation = a concrete action {name} can take TODAY to use the day's energy most effectively. Not general advice — precise actions for this specific day and this specific person.
+
+Format: 1. 2. 3. — each point 1-2 sentences.
+FORBIDDEN: mention numbers or energy numbers. FORBIDDEN: listen to yourself, find balance. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."""}
             lang_warning = {"ru": "", "de": "WICHTIG: Die Kontextdaten unten sind auf Russisch — das ist normal. Deine Antwort muss VOLLSTÄNDIG AUF DEUTSCH sein.", "en": "IMPORTANT: The context data below is in Russian — that is normal. Your response must be ENTIRELY IN ENGLISH."}
             sys1 = f"""{lf}
 {lang_warning.get(lang, "")}
@@ -2880,7 +2901,28 @@ async def send_daily_messages(context):
 
 {lf}"""
 
-            sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Каждый риск — конкретная ловушка именно этого дня для этого человека. Мягко и точно, без морализаторства. Формат: 1. 2. 3. ЗАПРЕЩЕНО: называть числа (не пиши 'энергия шести', 'день семи', 'восьмёрка' и т.п.) — описывай качество дня словами. ЗАПРЕЩЕНО использовать фразы: будь осторожен, не забывай, обрати внимание. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Jedes Risiko ist eine konkrete Falle genau dieses Tages. Sanft und präzise. Format: 1. 2. 3. VERBOTEN: Zahlen oder Energienummern nennen (nicht 'Sechser-Tag', 'Sieben-Energie' usw.). VERBOTEN: sei vorsichtig, vergiss nicht. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Each risk is a concrete trap of this specific day for this person. Gentle and precise. Format: 1. 2. 3. FORBIDDEN: mention numbers or energy numbers (not 'six-day', 'seven energy' etc.). FORBIDDEN phrases: be careful, dont forget, pay attention. YOU. {g}. No markdown asterisks."}
+            sys_risk = {"ru": f"""Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>.
+
+ЛОГИКА: Риски — это конкретные ловушки которые возникают когда энергия этого дня используется неосознанно. Учитывай: что может пойти не так именно сегодня с учётом личного дня, его составляющих, и модели мышления этого человека.
+
+Каждый риск = конкретная ситуация или паттерн поведения который может возникнуть СЕГОДНЯ. Не абстрактные предупреждения — а точные ловушки под этот день и этого человека.
+
+Формат: 1. 2. 3. — каждый пункт 1-2 предложения. Мягко, без морализаторства.
+ЗАПРЕЩЕНО: называть числа и энергии по номерам. ЗАПРЕЩЕНО: будь осторожен, не забывай, обрати внимание. ТЫ. {g}. Без markdown звёздочек.""", "de": f"""Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>.
+
+LOGIK: Risiken sind konkrete Fallen die entstehen wenn die Energie dieses Tages unbewusst genutzt wird. Berücksichtige: was heute schiefgehen kann angesichts des persönlichen Tages, seiner Bestandteile und des Denkmodells.
+
+Jedes Risiko = eine konkrete Situation oder ein Verhaltensmuster das HEUTE entstehen kann. Keine abstrakten Warnungen — präzise Fallen für diesen Tag und diesen Menschen.
+
+Format: 1. 2. 3. — jeder Punkt 1-2 Sätze. Sanft, ohne Moralisieren.
+VERBOTEN: Zahlen oder Energienummern nennen. VERBOTEN: sei vorsichtig, vergiss nicht. DU. {g}. Ohne Markdown-Sterne.""", "en": f"""Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>.
+
+LOGIC: Risks are concrete traps that arise when today's energy is used unconsciously. Consider: what could go wrong today given the personal day, its components, and this person's thinking model.
+
+Each risk = a concrete situation or behavior pattern that may arise TODAY. Not abstract warnings — precise traps for this day and this person.
+
+Format: 1. 2. 3. — each point 1-2 sentences. Gentle, without moralizing.
+FORBIDDEN: mention numbers or energy numbers. FORBIDDEN: be careful, dont forget. YOU. {g}. No markdown asterisks."""}
             sys2 = f"""{lf}
 {lang_warning.get(lang, "")}
 {sys_intro.get(lang, sys_intro["ru"])}
@@ -2909,7 +2951,19 @@ async def send_daily_messages(context):
             ud_zero = UNIVERSAL_DAY_TIPS.get(0, {}).get(lang, "") if has_zero else ""
             ud_components_label = {"ru": f"Составляющие общего дня: {ud_intermediate} → {ud_num}", "de": f"Bestandteile des allgemeinen Tages: {ud_intermediate} → {ud_num}", "en": f"Components of the universal day: {ud_intermediate} → {ud_num}"}
             ud_components = ud_components_label.get(lang, ud_components_label["ru"])
-            sys_tip = {"ru": f"Напиши один короткий практический совет — 1-2 предложения. Начни с тега <b>📋 Совет дня</b>. Как скорректировать действия личного дня с учётом общего фона. ПРАВИЛА: никаких чисел периодов, максимум 2 предложения. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe einen kurzen praktischen Tipp — 1-2 Sätze. Beginne mit dem Tag <b>📋 Tipp des Tages</b>. Wie die Aktivitäten des persönlichen Tages im Einklang mit dem allgemeinen Hintergrund angepasst werden können. REGELN: keine Periodenzahlen, maximal 2 Sätze. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write one short practical tip — 1-2 sentences. Start with the tag <b>📋 Daily Tip</b>. How to adjust the activities of the personal day considering the general background. RULES: no period numbers, maximum 2 sentences. YOU. {g}. No markdown asterisks."}
+            sys_tip = {"ru": f"""Напиши один практический совет — 2-3 предложения. Начни с тега <b>📋 Совет дня</b>.
+
+ЛОГИКА: Личный день влияет на личные дела и внутренние решения. Общий день влияет на внешние события, деловые вопросы, взаимодействие с миром. Если энергии совпадают — усиль главное действие дня. Если противоречат — объясни как действовать в обоих направлениях одновременно.
+
+Совет должен быть практичным: что именно делать сегодня чтобы использовать оба потока энергии. ЗАПРЕЩЕНО: называть числа. ТЫ. {g}. Без markdown звёздочек.""", "de": f"""Schreibe einen praktischen Tipp — 2-3 Sätze. Beginne mit dem Tag <b>📋 Tipp des Tages</b>.
+
+LOGIK: Der persönliche Tag beeinflusst persönliche Angelegenheiten. Der allgemeine Tag beeinflusst externe Ereignisse und Geschäftliches. Wenn die Energien übereinstimmen — verstärke die Hauptaktion. Wenn sie sich widersprechen — erkläre wie man in beiden Richtungen gleichzeitig handelt.
+
+Der Tipp soll praktisch sein: was genau heute zu tun ist um beide Energieströme zu nutzen. VERBOTEN: Zahlen nennen. DU. {g}. Ohne Markdown-Sterne.""", "en": f"""Write one practical tip — 2-3 sentences. Start with the tag <b>📋 Daily Tip</b>.
+
+LOGIC: The personal day influences personal matters and inner decisions. The universal day influences external events, business matters, interaction with the world. If energies align — amplify the main action. If they contradict — explain how to act in both directions simultaneously.
+
+The tip should be practical: what exactly to do today to use both energy streams. FORBIDDEN: mention numbers. YOU. {g}. No markdown asterisks."""}
             sys3 = f"""{lf}
 {sys_intro.get(lang, sys_intro["ru"])}
 
