@@ -276,8 +276,8 @@ def build_profile_context(user, lang="ru"):
     py = D.get_year(user["day"], user["month"], now.year)
     pm = D.get_month(py, now.month)
     pd = D.get_day(pm, now.day)
-    # Составные цифры личного дня по точной формуле
-    day_digits, day_result = D.get_day_components(user["day"], now.day)
+    # Составные цифры личного дня: день+месяц рождения + текущая дата
+    day_intermediate, day_result = D.get_day_components(user["day"], user["month"], now)
     mi_raw = D.MODELS.get(m, {})
     def get_field(d, field):
         v = d.get(field, "")
@@ -291,20 +291,22 @@ def build_profile_context(user, lang="ru"):
         return d or ""
     # Тексты для каждой составной цифры
     labels = {
-        "ru": ("Итоговая энергия дня", "Составные энергии", "Энергия"),
-        "de": ("Hauptenergie des Tages", "Zusammengesetzte Energien", "Energie"),
-        "en": ("Main energy of the day", "Component energies", "Energy"),
+        "ru": ("Итоговая энергия личного дня", "Составляющие"),
+        "de": ("Hauptenergie des persönlichen Tages", "Bestandteile"),
+        "en": ("Main energy of personal day", "Components"),
     }
-    lbl_main, lbl_comp, lbl_e = labels.get(lang, labels["ru"])
+    lbl_main, lbl_comp = labels.get(lang, labels["ru"])
+    # Тексты составляющих (цифры из промежуточного числа)
+    comp_digits = [int(d) for d in str(day_intermediate)] if day_intermediate > 9 else [day_intermediate]
     def day_components_text():
         parts = []
-        for d in day_digits:
+        for d in comp_digits:
             t = get_text(D.DAYS.get(d, ""))
             if t:
-                parts.append(f"{lbl_e} {d}: {t}")
+                parts.append(t)
         return "\n".join(parts)
     day_main_text = get_text(D.DAYS.get(day_result, ""))
-    day_full = f"{lbl_main}: {day_result}\n{day_main_text}\n\n{lbl_comp}:\n{day_components_text()}"
+    day_full = f"{lbl_main} ({day_intermediate}→{day_result}):\n{day_main_text}\n\n{lbl_comp} ({day_intermediate}):\n{day_components_text()}"
     return {
         "mi": mi,
         "year_text": get_text(D.YEARS.get(py, "")),
@@ -2859,7 +2861,7 @@ async def send_daily_messages(context):
             model_strengths = mi.get("strengths", "") if isinstance(mi, dict) else ""
             model_chaos = mi.get("chaos", "") if isinstance(mi, dict) else ""
             model_formula = mi.get("formula", "") if isinstance(mi, dict) else ""
-            sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Каждая рекомендация — конкретное действие именно для этого дня с учётом всех данных. Формат: 1. 2. 3. — каждый пункт одно чёткое предложение. ЗАПРЕЩЕНО использовать фразы: прислушайся к себе, будь внимателен, найди баланс, позаботься о себе, доверяй процессу, просто действуй. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Jede Empfehlung ist eine konkrete Handlung genau für diesen Tag. Format: 1. 2. 3. VERBOTEN: höre auf dich selbst, finde Balance, kümmere dich um dich. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Each recommendation is a concrete action specifically for this day. Format: 1. 2. 3. FORBIDDEN phrases: listen to yourself, find balance, take care of yourself, trust the process. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
+            sys_rec = {"ru": f"Напиши ровно 3 рекомендации на сегодня для {name}. Начни с тега <b>🌿 Рекомендации на сегодня</b>. Каждая рекомендация — конкретное действие именно для этого дня с учётом всех данных. Формат: 1. 2. 3. — каждый пункт одно чёткое предложение. ЗАПРЕЩЕНО: называть числа (не пиши 'энергия шести', 'день семи', 'восьмёрка' и т.п.) — описывай качество дня словами без цифр. ЗАПРЕЩЕНО использовать фразы: прислушайся к себе, будь внимателен, найди баланс, позаботься о себе, доверяй процессу, просто действуй. ЗАПРЕЩЕНО: поучительный тон. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Empfehlungen für heute für {name}. Beginne mit dem Tag <b>🌿 Empfehlungen für heute</b>. Jede Empfehlung ist eine konkrete Handlung genau für diesen Tag. Format: 1. 2. 3. VERBOTEN: Zahlen oder Energienummern nennen (nicht 'Sechs-Energie', 'Sieben-Tag' usw.) — beschreibe die Qualität des Tages ohne Ziffern. VERBOTEN: höre auf dich selbst, finde Balance. VERBOTEN: belehrender Ton. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 recommendations for today for {name}. Start with the tag <b>🌿 Recommendations for Today</b>. Each recommendation is a concrete action specifically for this day. Format: 1. 2. 3. FORBIDDEN: mention numbers or energy numbers (not 'six energy', 'day of seven' etc.) — describe the quality of the day in words without digits. FORBIDDEN phrases: listen to yourself, find balance, take care of yourself. FORBIDDEN: preachy tone. YOU. {g}. No markdown asterisks."}
             lang_warning = {"ru": "", "de": "WICHTIG: Die Kontextdaten unten sind auf Russisch — das ist normal. Deine Antwort muss VOLLSTÄNDIG AUF DEUTSCH sein.", "en": "IMPORTANT: The context data below is in Russian — that is normal. Your response must be ENTIRELY IN ENGLISH."}
             sys1 = f"""{lf}
 {lang_warning.get(lang, "")}
@@ -2878,7 +2880,7 @@ async def send_daily_messages(context):
 
 {lf}"""
 
-            sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Каждый риск — конкретная ловушка именно этого дня для этого человека. Мягко и точно, без морализаторства. Формат: 1. 2. 3. ЗАПРЕЩЕНО использовать фразы: будь осторожен, не забывай, обрати внимание. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Jedes Risiko ist eine konkrete Falle genau dieses Tages. Sanft und präzise. Format: 1. 2. 3. VERBOTEN: sei vorsichtig, vergiss nicht, achte darauf. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Each risk is a concrete trap of this specific day for this person. Gentle and precise. Format: 1. 2. 3. FORBIDDEN phrases: be careful, dont forget, pay attention. YOU. {g}. No markdown asterisks."}
+            sys_risk = {"ru": f"Напиши ровно 3 риска на сегодня для {name}. Начни с тега <b>🔺 Риски на сегодня</b>. Каждый риск — конкретная ловушка именно этого дня для этого человека. Мягко и точно, без морализаторства. Формат: 1. 2. 3. ЗАПРЕЩЕНО: называть числа (не пиши 'энергия шести', 'день семи', 'восьмёрка' и т.п.) — описывай качество дня словами. ЗАПРЕЩЕНО использовать фразы: будь осторожен, не забывай, обрати внимание. ТЫ. {g}. Без markdown звёздочек.", "de": f"Schreibe genau 3 Risiken für heute für {name}. Beginne mit dem Tag <b>🔺 Risiken für heute</b>. Jedes Risiko ist eine konkrete Falle genau dieses Tages. Sanft und präzise. Format: 1. 2. 3. VERBOTEN: Zahlen oder Energienummern nennen (nicht 'Sechser-Tag', 'Sieben-Energie' usw.). VERBOTEN: sei vorsichtig, vergiss nicht. DU. {g}. Ohne Markdown-Sterne.", "en": f"Write exactly 3 risks for today for {name}. Start with the tag <b>🔺 Risks for Today</b>. Each risk is a concrete trap of this specific day for this person. Gentle and precise. Format: 1. 2. 3. FORBIDDEN: mention numbers or energy numbers (not 'six-day', 'seven energy' etc.). FORBIDDEN phrases: be careful, dont forget, pay attention. YOU. {g}. No markdown asterisks."}
             sys2 = f"""{lf}
 {lang_warning.get(lang, "")}
 {sys_intro.get(lang, sys_intro["ru"])}

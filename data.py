@@ -337,22 +337,14 @@ def get_year(birth_day, birth_month, current_year):
 def get_month(personal_year, current_month):
     return reduce(personal_year + reduce(current_month))
 
-def get_day_components(birth_day, current_day):
-    """Возвращает (составные цифры, итоговая цифра) по методу из документа."""
-    # Для рождённых 1-9: дублируем цифру рождения
-    if birth_day <= 9:
-        bd_str = str(birth_day) + str(birth_day)
-    else:
-        bd_str = str(birth_day)
-    cd_str = str(current_day).zfill(2)
-    # Складываем поцифрово
-    digits = []
-    for i in range(max(len(bd_str), len(cd_str))):
-        b = int(bd_str[i]) if i < len(bd_str) else 0
-        c = int(cd_str[i]) if i < len(cd_str) else 0
-        digits.append(reduce(b + c))
-    result = reduce(sum(digits))
-    return digits, result
+def get_day_components(birth_day, birth_month, current_date):
+    """Личный день: день+месяц рождения + текущая дата поцифрово. Возвращает (промежуточное, итог)."""
+    date_str = str(birth_day).zfill(2) + str(birth_month).zfill(2) + current_date.strftime('%d%m%Y')
+    total = sum(int(d) for d in date_str)
+    intermediate = total
+    while total > 9:
+        total = sum(int(d) for d in str(total))
+    return intermediate, total
 
 def get_day(personal_month, current_day):
     return reduce(personal_month + reduce(current_day))
