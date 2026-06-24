@@ -1611,7 +1611,7 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             }
             await query.edit_message_text(minor_pay_msg.get(lang, minor_pay_msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]]))
             return
-        if user and is_paid(user):
+        if user and is_paid(user) and user.get("stripe_customer_id"):
             paid_until_str = user.get("paid_until")
             if paid_until_str:
                 paid_until_fmt = paid_until_str.replace(tzinfo=None).strftime("%d.%m.%Y")
