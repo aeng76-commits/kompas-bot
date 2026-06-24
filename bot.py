@@ -1596,6 +1596,12 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(msg)
         return
 
+    elif data == "btn_manage_subscription":
+        portal_url = "https://billing.stripe.com/p/login/eVq3cpfbB7ww26aakwcMM00"
+        btn_text = {"ru": "🔗 Открыть портал управления подпиской", "de": "🔗 Abonnement-Portal öffnen", "en": "🔗 Open subscription portal"}
+        msg = {"ru": "Нажми кнопку ниже чтобы управлять своей подпиской — там можно отменить или посмотреть историю платежей.", "de": "Klicke auf den Button um dein Abonnement zu verwalten — dort kannst du kündigen oder die Zahlungshistorie einsehen.", "en": "Click the button below to manage your subscription — you can cancel or view payment history."}
+        await query.edit_message_text(msg.get(lang, msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(btn_text.get(lang, btn_text["ru"]), url=portal_url)], [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]]))
+
     elif data == "btn_pay":
         if user and user.get("is_minor"):
             minor_pay_msg = {
@@ -1604,6 +1610,33 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "en": "This feature is available from age 18 🌟"
             }
             await query.edit_message_text(minor_pay_msg.get(lang, minor_pay_msg["ru"]), reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]]))
+            return
+        if user and is_paid(user):
+            paid_until_str = user.get("paid_until")
+            if paid_until_str:
+                paid_until_fmt = paid_until_str.replace(tzinfo=None).strftime("%d.%m.%Y")
+            else:
+                paid_until_fmt = "—"
+            active_msg = {
+                "ru": f"✅ Твоя подписка активна до {paid_until_fmt}.
+
+Через портал ты можешь отменить подписку или посмотреть историю платежей.",
+                "de": f"✅ Dein Abonnement ist aktiv bis {paid_until_fmt}.
+
+Über das Portal kannst du das Abonnement kündigen oder die Zahlungshistorie einsehen.",
+                "en": f"✅ Your subscription is active until {paid_until_fmt}.
+
+Through the portal you can cancel your subscription or view payment history."
+            }
+            manage_btn = {
+                "ru": "⚙️ Управление подпиской",
+                "de": "⚙️ Abonnement verwalten",
+                "en": "⚙️ Manage subscription"
+            }
+            await query.edit_message_text(active_msg.get(lang, active_msg["ru"]), reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(manage_btn.get(lang, manage_btn["ru"]), callback_data="btn_manage_subscription")],
+                [InlineKeyboardButton("◀️ Меню" if lang=="ru" else ("◀️ Menü" if lang=="de" else "◀️ Menu"), callback_data="btn_menu")]
+            ]))
             return
         descriptions = {
             "ru": {"1m": "1 месяц — 15€", "6m": "6 месяцев — 84€", "12m": "12 месяцев — 162€"},
