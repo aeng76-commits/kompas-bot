@@ -1618,13 +1618,13 @@ async def menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 paid_until_fmt = "—"
             active_msg = {
-                "ru": f"✅ Твоя подписка активна до {paid_until_fmt}.
+                "ru": "✅ Твоя подписка активна до " + paid_until_fmt + ".
 
 Через портал ты можешь отменить подписку или посмотреть историю платежей.",
-                "de": f"✅ Dein Abonnement ist aktiv bis {paid_until_fmt}.
+                "de": "✅ Dein Abonnement ist aktiv bis " + paid_until_fmt + ".
 
 Über das Portal kannst du das Abonnement kündigen oder die Zahlungshistorie einsehen.",
-                "en": f"✅ Your subscription is active until {paid_until_fmt}.
+                "en": "✅ Your subscription is active until " + paid_until_fmt + ".
 
 Through the portal you can cancel your subscription or view payment history."
             }
