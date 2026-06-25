@@ -3239,7 +3239,7 @@ if __name__ == "__main__":
 
             async def keepalive():
                 import aiohttp as aiohttp_client
-                url = os.environ.get("WEBHOOK_URL", "").replace("/webhook", "/health")
+                url = f"http://127.0.0.1:{PORT}/health"
                 while True:
                     await asyncio.sleep(600)
                     try:
