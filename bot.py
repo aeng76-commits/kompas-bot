@@ -2358,7 +2358,7 @@ async def admin_send_monthly(update: Update, context: ContextTypes.DEFAULT_TYPE)
     sent = 0
     errors = 0
     for row in users_list:
-        uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
+        uid, name, day, month, year, lang, gender, trial_started_at, paid_until, remind_at, *_ = row
         if not day:
             continue
         user_obj = {"name": name, "day": day, "month": month, "year": year, "lang": lang, "gender": gender or "f"}
@@ -3089,7 +3089,8 @@ The tip should be practical: what exactly to do today to use both energy streams
             except:
                 pass
 
-        await asyncio.sleep(1)
+        import asyncio as _asyncio
+        await _asyncio.sleep(1)
 
 if __name__ == "__main__":
     import os
