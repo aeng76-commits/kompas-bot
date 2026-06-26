@@ -3063,6 +3063,7 @@ The tip should be practical: what exactly to do today to use both energy streams
 
             # Напоминание тем кто попросил
             try:
+                remind_at = remind_at if 'remind_at' in dir() else None
                 if remind_at:
                     today_date = dt2.date.today()
                     remind_date = remind_at
