@@ -314,7 +314,6 @@ def build_profile_context(user, lang="ru"):
         "day_text": get_text(D.DAYS.get(pd, "")),
         "day_full": day_full,
         "day_result": day_result,
-        "day_digits": day_digits,
         "today": now.strftime("%d.%m.%Y"),
     }
 
