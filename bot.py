@@ -3238,19 +3238,6 @@ if __name__ == "__main__":
             await site.start()
             print(f"Server started on port {PORT}", flush=True)
 
-            async def keepalive():
-                import aiohttp as aiohttp_client
-                url = f"http://127.0.0.1:{PORT}/health"
-                while True:
-                    await asyncio.sleep(600)
-                    try:
-                        async with aiohttp_client.ClientSession() as session:
-                            await session.get(url, timeout=aiohttp_client.ClientTimeout(total=10))
-                        print("Keepalive ping OK", flush=True)
-                    except Exception as e:
-                        print(f"Keepalive error: {e}", flush=True)
-
-            asyncio.ensure_future(keepalive())
             await asyncio.Event().wait()
 
         asyncio.run(run())
