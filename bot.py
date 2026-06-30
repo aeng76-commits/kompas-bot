@@ -79,6 +79,7 @@ def init_db():
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS session_data JSONB DEFAULT '[]'")
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS compass_data JSONB DEFAULT '{}'")
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS data_changes INT DEFAULT 0")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT")
         conn.commit()
     except:
         conn.rollback()
@@ -89,13 +90,13 @@ def init_db():
 def get_user(user_id):
     conn = get_db()
     cur = conn.cursor()
-    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor,about_work,about_finance,about_relations,about_personal,remind_at,name_changes,date_changes FROM users WHERE user_id=%s", (user_id,))
+    cur.execute("SELECT user_id,name,birth_day,birth_month,birth_year,lang,agreed,trial_started_at,paid_until,gender,daily_usage,data_changes,referred_by,username,is_minor,about_work,about_finance,about_relations,about_personal,remind_at,name_changes,date_changes,stripe_customer_id FROM users WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
     if not row:
         return None
-    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor","about_work","about_finance","about_relations","about_personal","remind_at","name_changes","date_changes"]
+    keys = ["user_id","name","day","month","year","lang","agreed","trial_started_at","paid_until","gender","daily_usage","data_changes","referred_by","username","is_minor","about_work","about_finance","about_relations","about_personal","remind_at","name_changes","date_changes","stripe_customer_id"]
     return dict(zip(keys, row))
 
 def save_user(user_id, **kwargs):
@@ -104,7 +105,7 @@ def save_user(user_id, **kwargs):
     cur.execute("INSERT INTO users(user_id) VALUES(%s) ON CONFLICT(user_id) DO NOTHING", (user_id,))
     col_map = {"name":"name","gender":"gender","lang":"lang","birth_day":"birth_day","birth_month":"birth_month",
                "birth_year":"birth_year","agreed":"agreed","trial_started_at":"trial_started_at",
-               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username","is_minor":"is_minor","about_work":"about_work","about_finance":"about_finance","about_relations":"about_relations","about_personal":"about_personal","name_changes":"name_changes","date_changes":"date_changes"}
+               "paid_until":"paid_until","daily_usage":"daily_usage","referred_by":"referred_by","username":"username","is_minor":"is_minor","about_work":"about_work","about_finance":"about_finance","about_relations":"about_relations","about_personal":"about_personal","name_changes":"name_changes","date_changes":"date_changes","stripe_customer_id":"stripe_customer_id"}
     for k, v in kwargs.items():
         col = col_map.get(k, k)
         if col == "daily_usage" and isinstance(v, dict):
@@ -2811,18 +2812,31 @@ async def send_daily_messages(context):
                 print(f"Remind error {{uid}}: {{e}}", flush=True)
 
     # Проверка окончания подписки за 24 часа
+    conn_sub = get_db()
+    cur_sub = conn_sub.cursor()
+    cur_sub.execute("SELECT user_id, stripe_customer_id FROM users WHERE stripe_customer_id IS NOT NULL")
+    stripe_user_ids = set(r[0] for r in cur_sub.fetchall())
+    cur_sub.close()
+    conn_sub.close()
     for row in users_list:
         uid, name, day, month, year, lang, gender, trial_started_at, paid_until, *_ = row
         if paid_until:
             hours_left = (paid_until.replace(tzinfo=None) - today).total_seconds() / 3600
             if 23 <= hours_left <= 25:
-                expire_msg = {
-                    "ru": f"⏰ Через 24 часа твой доступ закроется.\n\nЧтобы продолжить — напиши администратору заранее.",
-                    "de": f"⏰ In 24 Stunden wird dein Zugang geschlossen.\n\nUm fortzufahren — schreibe dem Administrator rechtzeitig.",
-                    "en": f"⏰ In 24 hours your access will close.\n\nTo continue — contact the administrator in advance."
-                }
+                if uid in stripe_user_ids:
+                    expire_msg = {
+                        "ru": "🔔 Напоминаем: завтра спишется оплата за следующий период подписки.",
+                        "de": "🔔 Erinnerung: morgen wird die Zahlung für die nächste Abo-Periode abgebucht.",
+                        "en": "🔔 Reminder: tomorrow your subscription will renew automatically."
+                    }
+                else:
+                    expire_msg = {
+                        "ru": "⏰ Через 24 часа твой доступ закроется.\n\nЧтобы продолжить — напиши администратору заранее.",
+                        "de": "⏰ In 24 Stunden wird dein Zugang geschlossen.\n\nUm fortzufahren — schreibe dem Administrator rechtzeitig.",
+                        "en": "⏰ In 24 hours your access will close.\n\nTo continue — contact the administrator in advance."
+                    }
                 try:
-                    await context.bot.send_message(uid, expire_msg.get(lang, expire_msg["ru"]), reply_markup=get_upgrade_keyboard(lang))
+                    await context.bot.send_message(uid, expire_msg.get(lang, expire_msg["ru"]), reply_markup=get_upgrade_keyboard(lang) if uid not in stripe_user_ids else None)
                 except:
                     pass
 
@@ -3086,7 +3100,7 @@ The tip should be practical: what exactly to do today to use both energy streams
         except Exception as e:
             print(f"Daily msg error {uid}: {e}", flush=True)
             try:
-                await context.bot.send_message(ADMIN_ID, "Не доставлено: " + str(name) + " (" + str(uid) + ")")
+                await context.bot.send_message(ADMIN_ID, "Не доставлено: " + str(name) + " (" + str(uid) + ") — " + str(e))
             except:
                 pass
 
@@ -3194,7 +3208,11 @@ if __name__ == "__main__":
                     if user_id:
                         import datetime
                         paid_until = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=days)
-                        save_user(user_id, paid_until=paid_until)
+                        customer_id = obj.get("customer")
+                        if customer_id:
+                            save_user(user_id, paid_until=paid_until, stripe_customer_id=customer_id)
+                        else:
+                            save_user(user_id, paid_until=paid_until)
                         user = get_user(user_id)
                         lang = user.get("lang", "ru") if user else "ru"
                         success_msg = {"ru": f"✅ Оплата прошла! Доступ открыт на {days} дней.", "de": f"✅ Zahlung erfolgreich! Zugang für {days} Tage.", "en": f"✅ Payment successful! Access for {days} days."}
